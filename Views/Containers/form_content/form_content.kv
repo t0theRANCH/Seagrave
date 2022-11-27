@@ -1,0 +1,19 @@
+<FormContent>:
+    orientation: 'vertical'
+    padding: "10dp"
+    spacing: "10dp"
+    id:container
+    adaptive_height:True
+
+    TwoLineListItem:
+        text: 'Start New Form'
+        id: add_form
+        on_release: root.list_new_forms()
+    TwoLineListItem:
+        text: 'Finish Incomplete Form'
+        id: finish_form
+        on_release: root.list_incomplete_forms()
+    TwoLineListItem:
+        text: 'View Complete Form'
+        id: view_form
+        on_release: root.list_complete_forms()

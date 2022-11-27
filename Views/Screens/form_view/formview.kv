@@ -1,0 +1,15 @@
+<FormView>:
+    id:form_view
+    name: 'form_view'
+
+    ScrollView:
+        MDList:
+            id: formview
+            spacing: "18dp"
+    AnchorLayout:
+        anchor_y: 'bottom'
+        anchor_x: 'right'
+        MDFloatingActionButtonSpeedDial:
+            id: speed_dial
+            label_text_color: 0,0,0,1
+            callback: root.select_speed_dial_button

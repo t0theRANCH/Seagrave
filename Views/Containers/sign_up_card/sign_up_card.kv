@@ -1,0 +1,81 @@
+<SignUpCard>:
+    adaptive_height: True
+    orientation: "vertical"
+    md_bg_color: 0,0,0,1
+
+    MDLabel:
+        id: register
+        text: "Sign Up"
+        color: app.theme_cls.accent_color
+        font_size: dp(32)
+        pos_hint: {'center_x': 0.65}
+        size_hint: 1, 0.2
+        font_name: 'assets/BankGothicBold.ttf'
+    MDBoxLayout:
+        orientation: 'vertical'
+        size_hint_y: 0.4
+        MDLabel:
+            text: 'E-mail'
+            font_name: 'assets/BankGothicBold.ttf'
+            font_size: dp(16)
+            pos_hint: {'right': 1.15}
+        MDTextField:
+            id: email
+            hint_text: "@seagravebuildings.com"
+            helper_text: ''
+            input_type: 'text'
+            keyboard_suggestions: False
+            helper_text_mode: 'on_error'
+            icon_right: "account"
+            multiline: False
+            size_hint_x: 0.7
+            font_size: dp(16)
+            pos_hint: {"center_x": 0.5}
+        MDLabel:
+            text: 'Password'
+            font_name: 'assets/BankGothicBold.ttf'
+            font_size: dp(16)
+            pos_hint: {'right': 1.15}
+        MDTextField:
+            id: password
+            hint_text: "Password"
+            helper_text: ''
+            helper_text_mode: 'on_error'
+            icon_right: "eye-off"
+            multiline: False
+            size_hint_x: 0.7
+            font_size: dp(16)
+            pos_hint: {"center_x": 0.5}
+            password: True
+    MDBoxLayout:
+        size_hint: 1, 0.4
+        orientation: 'vertical'
+
+        MDFillRoundFlatButton:
+            text: "Register"
+            font_size: dp(24)
+            size_hint_x: 0.7
+            pos_hint: {'center_x': 0.5}
+            on_release: root.register()
+        MDBoxLayout:
+            size_hint_x: 0.7
+            pos_hint: {"center_x": 0.5}
+
+            MDLabel:
+                text: 'Already Registered?'
+                font_size: dp(12)
+                pos_hint: {'center_x': 0.4}
+            MDTextButton:
+                text: "Enter Confirmation Code"
+                font_size: dp(12)
+                pos_hint: {'center_y': 0.5}
+                on_release: root.enter_confirmation_code()
+
+        AnchorLayout:
+            anchor_x: 'right'
+            anchor_y: 'bottom'
+            pos_hint: {'right': 0.9, 'top': 0.5}
+
+            MDFloatingActionButton:
+                icon: "arrow-left-circle"
+                on_release: root.back()

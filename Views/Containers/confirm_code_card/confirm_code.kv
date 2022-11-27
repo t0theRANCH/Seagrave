@@ -1,0 +1,69 @@
+<ConfirmCodeCard>:
+    adaptive_height: True
+    orientation: "vertical"
+    md_bg_color: 0,0,0,1
+
+    MDBoxLayout:
+        orientation: 'vertical'
+        size_hint: 1, 0.4
+        pos_hint: {'center_x': 0.5}
+        MDLabel:
+            id: confirm_code
+            text: "Confirm Account"
+            color: app.theme_cls.accent_color
+            font_size: dp(32)
+            pos_hint: {'center_x': 0.55}
+            font_name: 'assets/BankGothicBold.ttf'
+
+        MDLabel:
+            id: instructions
+            text: ''
+            color: app.theme_cls.accent_color
+            font_size: dp(18)
+            size_hint_x: 0.9
+            pos_hint: {'center_x': 0.5}
+            font_name: 'assets/BankGothicBold.ttf'
+
+    NumberInput:
+        id: number_container
+        size_hint: 0.7, 0.2
+        orientation: 'horizontal'
+        pos_hint: {'center_x': 0.55}
+
+    MDBoxLayout:
+        orientation: 'vertical'
+        size_hint: 0.9, 0.3
+        pos_hint: {'center_x': 0.5}
+        MDFillRoundFlatButton:
+            text: "Confirm"
+            font_size: dp(24)
+            size_hint_x: 0.7
+            pos_hint: {'center_x': 0.5}
+            on_release: root.confirm()
+
+        MDBoxLayout:
+            size_hint_x: 0.9
+            pos_hint: {"center_x": 0.5}
+
+            MDLabel:
+                text: 'Didn\'t receive the email?'
+                font_size: dp(12)
+                pos_hint: {'center_x': 0.45}
+            MDTextButton:
+                text: "Resend Code"
+                font_size: dp(12)
+                pos_hint: {'center_y': 0.5}
+                on_release: root.resend_code()
+
+    MDBoxLayout:
+        id: spacer
+        orientation: 'vertical'
+        size_hint_y: 0.1
+        AnchorLayout:
+            anchor_x: 'right'
+            anchor_y: 'bottom'
+            pos_hint: {'right': 0.9, 'top': 0.5}
+
+            MDFloatingActionButton:
+                icon: "arrow-left-circle"
+                on_release: root.back()

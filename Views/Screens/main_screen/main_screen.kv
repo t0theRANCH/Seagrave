@@ -1,0 +1,28 @@
+<MainScreen>:
+    main_drag:main_drag
+    main_feed:main_feed
+
+    id: main_drag
+    name: 'main_screen'
+    MDBoxLayout:
+        orientation: "vertical"
+        size_hint: 1,1
+        MDTopAppBar:
+            id:toolbar
+            title: ""
+            left_action_items: [["menu", lambda x: main_drag.controller.open_close()]]
+        ScrollView:
+            MDList:
+                id: main_feed
+                spacing: "18dp"
+        MDBoxLayout:
+            orientation: 'horizontal'
+            size_hint: 1, 0.4
+            padding: 50,0,50,100
+            AnchorLayout:
+                anchor_x: 'right'
+                anchor_y: 'bottom'
+                MDFloatingActionButtonSpeedDial:
+                    id: speed_dial
+                    label_text_color: 0,0,0,1
+                    callback: root.controller.select_speed_dial_button

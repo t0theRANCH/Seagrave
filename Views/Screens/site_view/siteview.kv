@@ -1,0 +1,20 @@
+<SiteView>:
+    id: site_view
+    name: 'site_view'
+
+    MDSliverAppbar:
+        id: top_appbar
+        background_color: app.theme_cls.primary_color
+        max_height: "600dp"
+
+        MDSliverAppbarHeader:
+            MDRelativeLayout:
+                FitImage:
+                    id: header_image
+
+        MDSliverAppbarContent:
+            id: content
+            orientation: 'vertical'
+            padding: "12dp"
+            spacing: "12dp"
+            adaptive_height: True

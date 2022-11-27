@@ -1,0 +1,25 @@
+{
+  "sites": {
+    "new": {}
+  },
+  "equipment": {
+    "new": {}
+  },
+  "forms": {
+    "0": {
+      "title": "Toolbox Talk",
+      "location": "GFL - Pickering",
+      "given_by": "",
+      "crew_attending": "",
+      "topics": "",
+      "concerns": "",
+      "response": "",
+      "date": "09/10/2022",
+      "name": "Safety Talk Report Form",
+      "site_id": "1",
+      "separator": "Toolbox Talk",
+      "row_text": "Safety Talk Report Form 09/10/2022  GFL - Pickering : Toolbox Talk",
+      "index": "0"
+    }
+  }
+}

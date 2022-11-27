@@ -1,0 +1,14 @@
+<CheckBoxOption>:
+    id:cbo
+    pos_hint: {"center_x": 0.5, "center_y": 0.5}
+    cols:2
+    MDCheckbox:
+        id:cb
+        active:False
+        size:dp(24), dp(24)
+        on_state:
+            if self.state == 'down': cbo.option = True
+            else: cbo.option = False
+    MDLabel:
+        text:''
+        id:label

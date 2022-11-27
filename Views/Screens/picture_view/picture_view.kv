@@ -1,0 +1,25 @@
+<PictureView>:
+    name: "picture_view"
+    id: picture_view
+    heros_to: [hero_to]
+
+    MDBoxLayout:
+        id: layout
+        orientation: 'vertical'
+        ScatterLayout:
+            id: scatter
+            scale_min: .3
+            scale_max: 10
+            width: root.width
+            do_rotation: False
+            auto_bring_to_front: False
+            MDHeroTo:
+                id: hero_to
+                size_hint: 1, 1
+        AnchorLayout:
+            anchor_x: 'right'
+            anchor_y: 'bottom'
+            MDFloatingActionButtonSpeedDial:
+                id: speed_dial
+                label_text_color: 0,0,0,1
+                callback: root.controller.select_speed_dial_button

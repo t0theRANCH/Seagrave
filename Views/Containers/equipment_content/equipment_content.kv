@@ -1,0 +1,19 @@
+<EquipmentContent>:
+    orientation: 'vertical'
+    padding: "10dp"
+    spacing: "10dp"
+    id:container
+    adaptive_height:True
+
+    TwoLineListItem:
+        text: 'Add Equipment'
+        id: add_equipment
+        on_release: root.add_equipment()
+    TwoLineListItem:
+        text: 'View Equipment'
+        id: view_equipment
+        on_release: root.view_equipment()
+    TwoLineListItem:
+        text: 'Move Equipment Here'
+        id: move_equipment
+        on_release: root.move_equipment()

@@ -1,0 +1,23 @@
+<AddressContent>:
+    orientation: 'horizontal'
+    padding: "10dp"
+    spacing: "10dp"
+    id:container
+    adaptive_height:True
+    size_hint_x: 1
+    md_bg_color: app.theme_cls.primary_color
+
+
+    MDLabel:
+        text: ''
+        font_size: "18dp"
+        halign: 'left'
+        id: address
+
+    MDIconButton:
+        icon: 'directions'
+        icon_size: "56dp"
+        id: directions
+        on_release: root.get_directions()
+
+

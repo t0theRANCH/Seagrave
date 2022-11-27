@@ -1,0 +1,21 @@
+<SegmentedControlRow>:
+    orientation: 'horizontal'
+    size_hint_x: 0.25
+    MDSegmentedControl:
+        size_hint_x: 1
+        on_active: root.on_active(*args)
+        MDSegmentedControlItem:
+            text: 'Pass'
+            color: 'green'
+            font_size: "12dp"
+            size_hint_x: 0.3
+        MDSegmentedControlItem:
+            text: 'Needs Maintenance'
+            color: 'yellow'
+            font_size: "12dp"
+            size_hint_x: 0.3
+        MDSegmentedControlItem:
+            text: 'Fail'
+            color: 'red'
+            font_size: "12dp"
+            size_hint_x: 0.3

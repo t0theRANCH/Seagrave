@@ -1,0 +1,33 @@
+<MultiSelectPopupContent>:
+    orientation: 'vertical'
+    size_hint_y: None
+    height: "400dp"
+    BoxLayout:
+        orientation: 'vertical'
+        pos_hint: {'center_y': 1}
+        BoxLayout:
+            id: top_content
+            orientation: 'horizontal'
+            MDTextField:
+                id: add_new
+                hint_text: ""
+                input_type: 'text'
+                keyboard_suggestions: True
+                font_size: 32
+                normal_color: app.theme_cls.primary_dark
+            MDRectangleFlatButton:
+                text: "Add"
+                id: add_button
+                font_size: 24
+                text_color: app.theme_cls.accent_color
+                md_bg_color: app.theme_cls.primary_color
+                on_release: root.add_button()
+    BoxLayout:
+        size_hint_y: 3
+        ScrollView:
+            MDSelectionList:
+                id: selection_list
+                on_selected: root.on_selected(*args)
+                on_unselected: root.on_unselected(*args)
+                on_selected_mode: root.on_selected_mode(*args)
+                selected_mode:True

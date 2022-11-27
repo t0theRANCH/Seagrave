@@ -1,0 +1,43 @@
+{
+  "Crew Attending": [
+    "Max",
+    "Mitchell",
+    "Kaleb",
+    "Tyson",
+    "Andrew"
+  ],
+  "Workers": [
+    "Max",
+    "Mitchell",
+    "Kaleb",
+    "Tyson",
+    "Andrew"
+  ],
+  "Tasks": [
+    "Digging",
+    "Tamping",
+    "Running conduit/hose",
+    "Building forms",
+    "Installing forms",
+    "Tying Rebar",
+    "Setting Anchor Bolts",
+    "Finishing",
+    "Drilling Anchor Bolts",
+    "Organizing Materials",
+    "Bolting Connections",
+    "Rigging & Hoisting",
+    "Making a Custom Opening",
+    "Insulating Wall",
+    "Insulating Firewall",
+    "Cutting Sheets",
+    "Cutting Trim",
+    "Hanging Wall Sheets",
+    "Roofing",
+    "Hanging Trim",
+    "Hanging Gutter",
+    "Install Energy Saver Tarp, Wall",
+    "Install Energy Saver Tarp, Roof",
+    "Banding Energy Saver Tarp"
+  ],
+  "Hazards": ["Farts"]
+}

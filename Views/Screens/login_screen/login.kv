@@ -1,0 +1,25 @@
+<LoginScreen>:
+    name: "login"
+    id: login_screen
+
+    MDFloatLayout:
+        orientation: 'vertical'
+        size_hint: 1,1
+
+        Image:
+            id: logo
+            opacity: 0
+            pos_hint: {'center_x': 0.5, 'center_y': 0.85}
+            size_hint: 1, 0.25
+            allow_stretch: True
+            halign: 'center'
+            valign: 'top'
+            source: "assets/seagrave_buildings.png"
+
+
+        MDFloatLayout:
+            id: card_container
+            size_hint: 1, 0.7
+            orientation: "vertical"
+
+

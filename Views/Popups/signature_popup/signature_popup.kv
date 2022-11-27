@@ -1,0 +1,15 @@
+<SignaturePopupContent>:
+    orientation:'vertical'
+    size_hint_y: None
+    height: "300dp"
+    Label:
+        id:signature
+        text:"Sign Below"
+    SignatureField:
+        id:sign
+        canvas:
+            Color:
+                rgb: (1, 1, 1, 1)
+            Rectangle:
+                pos: self.pos
+                size: self.size

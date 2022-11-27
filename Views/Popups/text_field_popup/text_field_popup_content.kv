@@ -1,0 +1,25 @@
+<TextFieldPopupContent>:
+    orientation: 'vertical'
+    spacing: "12dp"
+    size_hint_y: None
+    height: "120dp"
+
+    BoxLayout:
+        orientation: 'horizontal'
+        MDTextField:
+            id:text_field
+            input_type: 'text'
+            keyboard_suggestions: True
+        MDIconButton:
+            icon: "arrow-down-drop-circle-outline"
+            id: open_menu
+            on_release: root.menu.open()
+    BoxLayout:
+        orientation: 'horizontal'
+        spacing: "36dp"
+        MDCheckbox:
+            size_hint_x: 0.1
+            id: save
+        MDLabel:
+            size_hint_x: 0.8
+            text: 'Save this entry'

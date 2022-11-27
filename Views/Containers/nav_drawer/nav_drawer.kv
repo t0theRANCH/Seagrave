@@ -1,0 +1,49 @@
+<NavDrawer>:
+    id: nav
+    type: 'standard'
+    MDBoxLayout:
+        orientation: "vertical"
+        padding: "8dp"
+        spacing: "8dp"
+        AnchorLayout:
+            anchor_x: "left"
+            size_hint_y: None
+            height: avatar.height
+            Image:
+                id: avatar
+                size_hint: None, None
+                size: "56dp", "56dp"
+                source: "assets/sbs.png"
+        MDLabel:
+            text: "Seagrave Building Systems"
+            font_style: "Button"
+            adaptive_height: True
+        MDLabel:
+            text: ""
+            id:employee_name
+            font_style: "Caption"
+            adaptive_height: True
+        MDLabel:
+            text: ""
+            id:employee_email
+            font_style: "Caption"
+            adaptive_height: True
+        ScrollView:
+            MDList:
+                id:menu_items
+                OneLineListItem:
+                    text: "Sites"
+                    id:sites
+                    on_release: nav.change_feed('sites')
+                OneLineListItem:
+                    text: "Equipment"
+                    id:equipment
+                    on_release: nav.change_feed('equipment', deletable=True)
+                OneLineListItem:
+                    text: "Forms"
+                    id:forms
+                    on_release: nav.change_feed('today', deletable=True)
+                OneLineListItem:
+                    id: danger_zone
+                    text: "Danger Zone"
+                    on_release: nav.danger_zone()

@@ -1,0 +1,79 @@
+<RiskPopupContent>:
+    id:pop
+    height: "400dp"
+    size_hint_y: None
+    auto_dismiss: False
+    title: ''
+    BoxLayout:
+        id:layout
+        orientation:'vertical'
+        spacing: 25
+        MDLabel:
+            font_size: "12dp"
+            text:
+                "Severity:\n1. Imminent Danger - causing deaths, widespread occupational illness, loss of facilities\n" \
+                "2. Serious - severe injury / illness, property and / or equipment damage\n" \
+                "3. Minor - non-serious injury, illness, or damage\n" \
+                "4. Not Applicable\n" \
+                "Probability:\nA. Probable - likely to occur immediately or soon\n" \
+                "B. Reasonably Probable - likely to occur eventually\n" \
+                "C. Remote - could occur at some point\n" \
+                "D. Extremely Remote - unlikely to occur"
+        GridLayout:
+            id:gridlayout
+            spacing: 20
+            cols:4
+            MDLabel:
+                text: "1"
+                halign: 'right'
+            MDCheckbox:
+                on_active: pop.risk = '1'
+                group: 'risk'
+                active:True
+                id:1
+            MDCheckbox:
+                on_active: pop.priority = 'A'
+                group: 'priority'
+                active:True
+                id:A
+            MDLabel:
+                text: "A"
+            MDLabel:
+                text: "2"
+                halign: 'right'
+            MDCheckbox:
+                on_active: pop.risk = '2'
+                group: 'risk'
+                id:2
+            MDCheckbox:
+                on_active: pop.priority = 'B'
+                group: 'priority'
+                id:B
+            MDLabel:
+                text: "B"
+            MDLabel:
+                text: "3"
+                halign: 'right'
+            MDCheckbox:
+                on_active: pop.risk = '3'
+                group: 'risk'
+                id:3
+            MDCheckbox:
+                on_active: pop.priority = 'C'
+                group: 'priority'
+                id:C
+            MDLabel:
+                text: "C"
+            MDLabel:
+                text: "4"
+                halign: 'right'
+            MDCheckbox:
+                on_active: pop.risk = '4'
+                group: 'risk'
+                id:4
+            MDCheckbox:
+                on_active: pop.priority = 'D'
+                group: 'priority'
+                id:D
+            MDLabel:
+                text: "D"

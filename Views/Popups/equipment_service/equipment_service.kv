@@ -1,0 +1,39 @@
+<EquipmentServicePopupContent>:
+    id:pop
+    size_hint_y: None
+    orientation:'vertical'
+    height: "400dp"
+    EditableLabel:
+        id: unit_num_field
+        label_text: "Unit #"
+        text: root.unit_num
+    MDBoxLayout:
+        EditableLabel:
+            id: last_inspection_field
+            label_text: "Last Inspection"
+            text: root.last_inspection
+        EditableLabel:
+            id: last_service_field
+            label_text: "Last Service"
+            text: root.last_service
+
+    EditableLabel:
+        id: mileage_field
+        label_text: "Mileage (hours)"
+        text: root.mileage
+    MDBoxLayout:
+        MDLabel:
+            id: mileage_until_inspection_field
+            text: root.mileage_until_inspection
+        MDLabel:
+            id: mileage_until_service_field
+            text: root.mileage_until_service
+    BoxLayout:
+        id:layout
+        orientation:'horizontal'
+        MDLabel:
+            id:label
+        MDIconButton:
+            icon: "arrow-down-drop-circle-outline"
+            id: open_menu
+            on_release: root.menu.open()

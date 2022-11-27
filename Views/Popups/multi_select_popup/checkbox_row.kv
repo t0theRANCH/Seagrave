@@ -1,0 +1,30 @@
+<CheckboxRow>:
+    orientation: 'horizontal'
+    MDCheckbox:
+        id:p
+        group: 'group'
+        active:True
+        size:dp(24), dp(24)
+        color_active: 'green'
+        color_inactive: 'green'
+        on_active:
+            root.result = 'P'
+            root.on_checkbox_active(*args)
+    MDCheckbox:
+        id:m
+        group: 'group'
+        color_active: 'yellow'
+        color_inactive: 'yellow'
+        on_active:
+            root.result = 'M'
+            root.on_checkbox_active(*args)
+        size:dp(24), dp(24)
+    MDCheckbox:
+        id:r
+        group: 'group'
+        color_active: 'red'
+        color_inactive: 'red'
+        size:dp(24), dp(24)
+        on_active:
+            root.result = 'R'
+            root.on_checkbox_active(*args)
