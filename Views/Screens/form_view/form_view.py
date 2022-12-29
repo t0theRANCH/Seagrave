@@ -133,7 +133,7 @@ class FormView(MDScreen):
         self.controller.pops = []
 
     def open_final_signature_popup(self):
-        signature_popup = SignaturePopup(screen_manager=self, content_cls=SignaturePopupContent(), type='custom',
+        signature_popup = SignaturePopup(content_cls=SignaturePopupContent(), type='custom',
                                          controller=self.controller, model=self.model)
         signature_popup.open()
 

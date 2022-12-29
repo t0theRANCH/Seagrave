@@ -13,6 +13,7 @@ from Views.Containers.reset_password_card.reset_password_card import ResetPasswo
 from Views.Containers.create_new_password_card.create_new_password_card import CreateNewPasswordCard
 
 from typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
     from Model.main_model import MainModel
     from Controller.login_screen_controller import LoginScreenController
@@ -58,12 +59,12 @@ class LoginScreen(MDScreen):
         self.current_card = card_to
 
     def logo_fade_in_start(self, *args):
-        logo_animation = Animation(opacity=0.1, duration=2)
+        logo_animation = Animation(opacity=0.1, duration=1)
         logo_animation.bind(on_complete=self.logo_fade_in_finish)
         logo_animation.start(self.ids.logo)
 
     def logo_fade_in_finish(self, *args):
-        logo_animation = Animation(opacity=1, duration=1)
+        logo_animation = Animation(opacity=1, duration=2)
         logo_animation.start(self.ids.logo)
 
     def card_in_animation(self, animation=None, widget=None, enter=False):

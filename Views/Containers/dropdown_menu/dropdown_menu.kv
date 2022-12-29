@@ -1,0 +1,37 @@
+<DropdownMenu>
+    caller: text_field
+    height: text_field.height
+    size_hint_y: None
+    MDTextField:
+        id:text_field
+        text: root.text
+        hint_text: root.hint_text
+        input_type: 'text'
+        mode: "rectangle"
+        multiline: False
+        keyboard_suggestions: True
+    MDIconButton:
+        icon: "chevron-down"
+        id: open_menu
+        pos_hint: {"center_y": .5}
+        pos: text_field.width - self.width + dp(8), 0
+        on_release: root.menu.open()
+
+<EditableDropdownMenu>
+    arrow: open_menu
+    height: text_field.height
+    size_hint_y: None
+    MDTextField:
+        id:text_field
+        text: root.text
+        hint_text: root.hint_text
+        input_type: 'text'
+        mode: "rectangle"
+        multiline: False
+        keyboard_suggestions: True
+    MDIconButton:
+        icon: "chevron-down"
+        id: open_menu
+        pos_hint: {"center_y": .5}
+        pos: text_field.width - self.width + dp(8), 0
+        on_release: root.menu.open()

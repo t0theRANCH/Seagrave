@@ -2,10 +2,11 @@ from os.path import join, dirname
 
 from kivy.animation import Animation
 from kivy.lang import Builder
+from kivy.properties import ObjectProperty, StringProperty, BooleanProperty
 
 from Views.Popups.confirm_delete.confirm_delete import ConfirmDelete
 from kivymd.uix.boxlayout import MDBoxLayout
-from kivymd.uix.button import MDFlatButton
+from kivymd.uix.button import MDFlatButton, MDRaisedButton
 from kivymd.uix.dialog import MDDialog
 
 from typing import TYPE_CHECKING
@@ -22,16 +23,16 @@ if TYPE_CHECKING:
 class MultiSelectPopup(MDDialog):
     def __init__(self, title, model: 'MainModel', controller: 'FormViewController', ind, db,
                  selections=None, selected=None, signatures=False, **kwargs):
-        self.buttons = [MDFlatButton(text='Select All', on_press=self.select_all,
-                                     md_bg_color=(0.49, 0.545, 0.376, 1)),
-                        MDFlatButton(text='Submit', on_press=self.submit_button)]
+        self.buttons = [MDFlatButton(text='Cancel', on_press=self.dismiss),
+                        MDRaisedButton(text='Submit', on_press=self.submit_button)]
         super().__init__(**kwargs)
         self.model = model
         self.controller = controller
         self.size_hint_x = 1
-        self.content_cls.delete_button = MDFlatButton(text='Delete', on_press=self.content_cls.delete_fields,
+        self.content_cls.delete_button = MDFlatButton(text='Delete', on_press=self.content_cls.confirm_delete_fields,
                                                       md_bg_color=(0.545, 0.431, 0.376, 1))
         self.content_cls.popup = self
+        self.content_cls.ids.select_all.popup = self
         self.title = title
         self.id = ind
         self.db = db
@@ -49,8 +50,7 @@ class MultiSelectPopup(MDDialog):
 
     def submit_button(self, obj):
         self.content_cls.submit_button()
-        screen = self.screen_manager.get_screen('form_view')
-        for m in screen.multi:
+        for m in self.model.multi:
             if m.title == self.title and not self.content_cls.equipment:
                 m.add_button_text(self.selected)
 
@@ -80,26 +80,31 @@ class SegmentedControlRow(MDBoxLayout):
 
 
 class MultiSelectPopupContent(MDBoxLayout):
-    def __init__(self, popup: 'MultiSelectPopup' = None, equipment=False, selections=None, field_ids=None, **kwargs):
+    popup = ObjectProperty(None)
+
+    def __init__(self, equipment=False, selections=None, field_ids=None, **kwargs):
         super().__init__(**kwargs)
-        self.popup = popup
         self.fields = None
         self.equipment = equipment
         if self.equipment:
             self.field_ids = field_ids
-            self.selection_colors = {"P": 'green', "M": 'yellow', "R": 'red'}
             self.selections = {} if selections is None else dict(selections)
+            self.selection_colors = {"P": 'green', "M": 'yellow', "R": 'red'}
             self.result = 'P'
-            self.ids.top_content.remove_widget(self.ids.add_new)
-            self.ids.top_content.remove_widget(self.ids.add_button)
-            self.ids.top_content.add_widget(CheckBoxRow(selection_list=self))
-            # self.ids.top_content.add_widget(SegmentedControlRow(selection_list=self))
-
         else:
             self.selections = [] if selections is None else list(selections)
         self.ids.selection_list.selected_mode = True
         self.pre_selected = None
         self.delete_button = None
+
+    def on_popup(self, instance, value):
+        if self.equipment:
+            self.ids.top_content.remove_widget(self.ids.add_new)
+            self.ids.top_content.remove_widget(self.ids.add_button)
+            # self.ids.top_content.add_widget(CheckBoxRow(selection_list=self))
+            segmented_control = SegmentedControlRow(selection_list=self)
+            segmented_control.ids.segmented_control.ids.segment_panel.width = value.width * 0.45
+            self.ids.top_content.add_widget(segmented_control)
 
     def on_checkbox_active(self, *args):
         self.ids.selection_list.overlay_color = self.selection_colors[self.result]
@@ -159,29 +164,47 @@ class MultiSelectPopupContent(MDBoxLayout):
             return
         self.selections.append(instance_selection_item.instance_item.text)
         self.show_or_hide_delete_button(self.if_selection())
+        if len(instance_selection_list.children) == len(self.selections):
+            self.toggle_select_all_button(True)
 
     def on_unselected(self, instance_selection_list, instance_selection_item: 'SelectionItem'):
         if self.equipment:
             self.selections[instance_selection_item.instance_item.text] = 'NA'
             instance_selection_item.overlay_color = [0, 0, 0, 0.2]
             return
-        if self.selections:
+        if self.selections and instance_selection_item.instance_item.text in self.selections:
             self.selections.remove(instance_selection_item.instance_item.text)
+            if self.ids.select_all.parent.selected:
+                self.toggle_select_all_button(False)
         self.show_or_hide_delete_button(self.if_selection())
 
-    def on_selected_mode(self, instance_selection_list, mode):
+    def toggle_select_all_button(self, option):
+        self.ids.select_all.parent.selected = option
+        if option:
+            Animation(scale=1, d=0.2).start(self.ids.select_all.parent.instance_icon)
+            self.ids.select_all.parent._instance_overlay_color.rgba = (0, 0, 0, 0.2)
+            return
+        Animation(scale=0, d=0.2).start(self.ids.select_all.parent.instance_icon)
+        self.ids.select_all.parent._instance_overlay_color.rgba = (0, 0, 0, 0)
+
+    @staticmethod
+    def on_selected_mode(instance_selection_list, mode):
         if not mode:
-            self.ids.selection_list.selected_mode = True
+            instance_selection_list.selected_mode = True
 
     def select_all(self):
-        self.ids.selection_list.unselected_all()
+        self.deselect_all()
         self.ids.selection_list.selected_all()
 
+    def deselect_all(self):
+        self.ids.selection_list.unselected_all()
+
     def show_or_hide_delete_button(self, list_items):
+        if [list_item for list_item in list_items if list_item.instance_item.undeletable] or not list_items:
+            self.hide_delete_button()
+            return
         if [list_item for list_item in list_items if not list_item.instance_item.undeletable]:
             self.show_delete_button()
-        else:
-            self.hide_delete_button()
 
     def show_delete_button(self):
         for b in self.popup.buttons:
@@ -197,10 +220,11 @@ class MultiSelectPopupContent(MDBoxLayout):
 
     def add_button(self):
         if self.ids.add_new.text and self.popup.db:
-            self.update_fields(self.popup.model.add_form_option, self.popup)
+            self.update_fields(self.popup.model.add_form_option, [self.popup, self.ids.add_new.text])
             i = SelectableListItem(text=str(self.ids.add_new.text), popup=self.popup)
             self.ids.selection_list.add_widget(i)
             self.ids.add_new.text = ''
+            self.toggle_select_all_button(False)
             return
         if not self.ids.add_new.text:
             Snackbar(text='Entry cannot be empty').open()
@@ -208,12 +232,20 @@ class MultiSelectPopupContent(MDBoxLayout):
         if not self.popup.db:
             Snackbar(text='Items cannot be added to this list from here').open()
 
-    def delete_fields(self, obj):
+    def confirm_delete_fields(self, obj):
         popup = ConfirmDelete(item=[list_item.instance_item.text
                                     for list_item in self.ids.selection_list.get_selected_list_items()],
                               feed=self.popup.title, button=None, form_option=True, popup=self.popup,
                               model=self.popup.model)
         popup.open()
+
+    def delete_field(self, value):
+        widget_list = [x for x in self.ids.selection_list.children if x.selected]
+        for list_item in widget_list:
+            self.update_fields(func=self.popup.model.delete_form_option,
+                               param=[self.popup, list_item.instance_item.text])
+            self.ids.selection_list.remove_widget(list_item)
+        self.show_or_hide_delete_button([x for x in self.ids.selection_list.children if x.selected])
 
     def update_fields(self, func, param):
         options, multi_option_fields = func(param)
@@ -227,12 +259,15 @@ class MultiSelectPopupContent(MDBoxLayout):
 
 
 class SelectableListItem(TwoLineAvatarIconListItem):
-    def __init__(self, text, popup: 'MultiSelectPopup', undeletable=False, **kwargs):
+    text = StringProperty()
+    popup = ObjectProperty()
+    undeletable = BooleanProperty(False)
+
+    def __init__(self, **kwargs):
         super(SelectableListItem, self).__init__(**kwargs)
-        self.text = text
         self.id = ''
-        self.undeletable = undeletable
-        self.popup = popup
+
+    def on_popup(self, instance, value):
         if self.popup.model.is_undeletable(title=self.popup.title, text=self.text):
             self.undeletable = True
 

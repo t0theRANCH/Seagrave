@@ -11,13 +11,12 @@ from Forms.interactivecheckbox import InteractiveCheckBox
 
 
 class Forms:
-    def __init__(self, name, forms, separator, location, file_directory):
+    def __init__(self, name, forms, separator, location):
         self.date = datetime.datetime.now()
         self.date_time_string = self.date.strftime('%y_%m%d%_h%m')
         self.date_time = self.date.strftime('%y-%m-%d %h:%m')
         self.name = name
         self.separator = separator
-        self.file_directory = file_directory
         self.file_name = f"database/forms/{self.name.lower().replace(' ', '_')}_{location}_{self.date_time.replace(' ', '-')}_{separator}"
         self.forms = forms
         self.form_list = self.populate_form_list()
@@ -55,9 +54,9 @@ class Forms:
         incident_explanation = fields["incident_explanation"]
 
         crew = ["Worker's Name (Print)"] + fields['workers']
-        signatures = [Image(f"{self.file_directory}/database/{fields['signatures'][x]}", 2 * inch, 0.5 * inch)
+        signatures = [Image(f"database/{fields['signatures'][x]}", 2 * inch, 0.5 * inch)
                       for x in fields['workers']]
-        initial = [Image(f"{self.file_directory}/database/{fields['initials'][x]}", 0.5 * inch, 0.5 * inch)
+        initial = [Image(f"database/{fields['initials'][x]}", 0.5 * inch, 0.5 * inch)
                    for x in fields['workers']]
         signatures.insert(0, "Signature")
         initial.insert(0, "Initial")
@@ -230,7 +229,7 @@ class Forms:
                                  ('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black)]))
         flowables.append(t13)
         flowables.append(Spacer(1, 12))
-        a = Image(f"{self.file_directory}/database/{signature}", 2 * inch, 0.5 * inch)
+        a = Image(f"database/{signature}", 2 * inch, 0.5 * inch)
         foreman = [["Foreperson's Name and Signature (Sign upon reviewing completed card): ", a]]
         t14 = Table(foreman, hAlign='LEFT')
         t14.setStyle(TableStyle([('LINEBELOW', (-1, 0), (-1, 0), 1, colors.black),
@@ -247,13 +246,13 @@ class Forms:
         signatures = [fields['signatures'][x] for x in fields['workers']]
         initials = [fields['initials'][x] for x in fields['workers']]
         for s in (signatures + initials):
-            os.remove(f"{self.file_directory}/database/{s}")
-        os.remove(f"{self.file_directory}/database/{self.name}_{self.separator}_screenshot.png")
+            os.remove(f"database/{s}")
+        os.remove(f"database/{self.name}_{self.separator}_screenshot.png")
 
     def safety_talk(self, fields, signature):
         company = 'Seagrave Building Systems'
         conc_resp = [['Concerns', 'Response/Follow-Up']]
-        a = Image(f"{self.file_directory}/database/{signature}", 2 * inch, 0.5 * inch)
+        a = Image(f"{os.getcwd()}/database/{signature}", 2 * inch, 0.5 * inch)
 
         if len(fields['concerns']) >= len(fields['response']):
             n = 'concerns'
@@ -327,7 +326,7 @@ class Forms:
                                 ]))
         flowables.append(t5)
         pdf.build(flowables)
-        os.remove(f"{self.file_directory}/database/{self.name}_{self.separator}_screenshot.png")
+        os.remove(f"database/{self.name}_{self.separator}_screenshot.png")
 
     def equipment_check(self, fields, signature):
         work_required = []
@@ -351,11 +350,11 @@ class Forms:
 
         company = 'Seagrave Building Systems'
         if 'signatures' in fields:
-            repairman_signature = Image(f"{self.file_directory}/database/{fields['signatures']['Repairman']}", 1.5 * inch, 0.5 * inch)
+            repairman_signature = Image(f"database/{fields['signatures']['Repairman']}", 1.5 * inch, 0.5 * inch)
         else:
             repairman_signature = ''
 
-        supervisor_signature = Image(f"{self.file_directory}/database/{signature}", 1.5 * inch, 0.5 * inch)
+        supervisor_signature = Image(f"database/{signature}", 1.5 * inch, 0.5 * inch)
 
         pdf = SimpleDocTemplate(f"{self.file_name}.pdf")
         flowables = []
@@ -506,8 +505,8 @@ class Forms:
         flowables.append(Spacer(1, 12))
         flowables.append(t13)
         pdf.build(flowables)
-        os.remove(f"{self.file_directory}/database/{self.name}_{self.separator}_screenshot.png")
+        os.remove(f"database/{self.name}_{self.separator}_screenshot.png")
         if 'signatures' in fields:
-            os.remove(f"{self.file_directory}/database/{self.name}_{self.separator}_Repairman_Sign.png")
+            os.remove(f"database/{self.name}_{self.separator}_Repairman_Sign.png")
 
 

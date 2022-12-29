@@ -13,6 +13,9 @@ def manifest_template(project_directory: str):
         return f"{template_directory}/AndroidManifest.tmpl.xml"
     return None
 
+def xml_template(project_directory: str):
+    return f"{project_directory}/.buildozer/android/platform/build-armeabi-v7a/build/bootstrap_builds/sdl2/src/main/res"
+
 
 def check_for_existing_file_provider(file: str):
     with open(file) as f:
@@ -76,14 +79,20 @@ def main():
         file_provider = 'file_provider.xml'
         insert_provider(manifest, file_provider)
     file_paths_dir = manifest.replace("templates/AndroidManifest.tmpl.xml", "src/main/res")
-    if not is_xml_dir(file_paths_dir):
-        mkdir(f"{file_paths_dir}/xml")
-    if file_paths_xml_exists(f"{file_paths_dir}/xml"):
-        print("file_paths.xml already exists")
-        deploy_project()
-        return
-    file_paths_xml = f"{file_paths_dir}/xml/file_paths.xml"
-    add_file_paths_xml(file_paths_xml)
+    for d in [file_paths_dir]:
+        if not is_xml_dir(d):
+            mkdir(f"{d}/xml")
+        if file_paths_xml_exists(f"{d}/xml"):
+            print("file_paths.xml already exists")
+            #deploy_project()
+            continue
+        file_paths_xml = f"{d}/xml/file_paths.xml"
+        add_file_paths_xml(file_paths_xml)
+    # remove res_initial directory from file_paths_dir
+    res_initial = manifest.replace("templates/AndroidManifest.tmpl.xml", "src")
+    if "res_initial" in listdir(res_initial):
+        subprocess.Popen(['rm', '-rf', f"{res_initial}/res_initial"])
+
     #deploy_project()
 
 

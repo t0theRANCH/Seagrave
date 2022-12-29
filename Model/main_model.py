@@ -162,8 +162,8 @@ class MainModel(EventDispatcher):
     def delete_signatures(self, signature_type: str, selections: list):
         self.forms_model.delete_signatures(signature_type, selections)
 
-    def add_form_option(self, popup: Union['TextFieldPopup', 'MultiSelectPopup']):
-        return self.forms_model.add_form_option(popup)
+    def add_form_option(self, param: list):
+        return self.forms_model.add_form_option(param[0])
 
     def delete_form_option(self, params: list):
         return self.forms_model.delete_form_option(params)

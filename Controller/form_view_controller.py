@@ -217,9 +217,11 @@ class FormViewController(EventDispatcher):
         if third_field == 'type':
             third_field = 'machine'
         for s in self.model.single:
-            self.fill_in_details(s, third_field, third_item[0])
-            self.fill_in_details(s, 'mileage', mileage[0])
-            if site[0]:
+            third_item = third_item[0] if third_item else None
+            mileage = mileage[0] if mileage else None
+            self.fill_in_details(s, third_field, third_item)
+            self.fill_in_details(s, 'mileage', mileage)
+            if site and site[0]:
                 self.fill_in_details(s, 'location', f"{site[0]['customer']} - {site[0]['city']}")
 
     @staticmethod

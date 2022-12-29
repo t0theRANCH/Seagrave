@@ -7,6 +7,8 @@ from Views.Popups.equipment_service.equipment_service import EquipmentServicePop
 from kivymd.uix.screen import MDScreen
 from Views.Screens.root_screen.window_manager import WindowManager
 from Views.Containers.nav_drawer.nav_drawer import NavDrawer
+from Views.Containers.editable_label.editable_label import EditableLabel
+from Views.Containers.dropdown_menu.dropdown_menu import DropdownMenu
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:

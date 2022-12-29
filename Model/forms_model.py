@@ -84,7 +84,7 @@ class FormsModel:
         options, params = self.compile_entry_to_change(popup, text_field)
         self.update_forms(db_id=popup.db[0], new_entry=params)
         popup.content_cls.add_list_item(text_field)
-        response = Requests.upload(path='database/forms.json', id_token=self.main_model.id_token)
+        response = Requests.upload(path='database/forms/forms.json', id_token=self.main_model.id_token)
         self.main_model.iterate_register(response)
         return options, widgets
 
@@ -127,7 +127,7 @@ class FormsModel:
             fields, widgets = self.get_multi_widgets(popup, selection)
         if 'TextField' in str(type(popup)):
             fields, widgets = self.get_single_widgets(popup)
-        response = Requests.upload(path='database/forms.json', id_token=self.main_model.id_token)
+        response = Requests.upload(path='database/forms/forms.json', id_token=self.main_model.id_token)
         self.main_model.iterate_register(response)
         return fields, widgets
 
@@ -191,6 +191,7 @@ class FormsModel:
                 if not self.main_model.form_view_fields[minimum]:
                     return False, minimum
                 self.main_model.form_view_fields['separator'] = self.main_model.form_view_fields[minimum]
+                return True, None
 
     def check_for_duplicates(self, form_type, separator):
         if form_type != 'forms':
@@ -240,20 +241,19 @@ class FormsModel:
             name=form,
             forms=[x for x in self.main_model.forms if x not in ['Add Site', 'Add Equipment']],
             separator=self.main_model.form_view_fields[separator],
-            location=self.main_model.form_view_fields['location'],
-            file_directory=getcwd()
+            location=self.main_model.form_view_fields['location']
         )
 
         func = form.handle_form_selection()
         func(fields=self.main_model.form_view_fields, signature=signature)
         self.remove_form_from_db(file_name=form.file_name, form=form, separator=separator)
         Requests.upload(path=f"{form.file_name}.pdf", id_token=self.main_model.id_token)
-        # os.remove(f"{os.getcwd()}/database/forms/{form.file_name}.pdf")
+        remove(f"{getcwd()}/database/forms/{form.file_name}.pdf")
 
     def remove_form_from_db(self, file_name, form, separator):
         for x in [x for x in ['signatures', 'initials'] if x in self.main_model.form_view_fields]:
             self.main_model.form_view_fields.pop(x)
-        fields = {"name": form, "site": self.main_model.current_site_id,
+        fields = {"name": form.name, "site": self.main_model.current_site_id,
                   'location': self.main_model.form_view_fields['location'],
                   'date': self.main_model.form_view_fields['date'],
                   'separator': self.main_model.form_view_fields[separator],

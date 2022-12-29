@@ -80,3 +80,5 @@ class MainScreenController(EventDispatcher):
     def switch_to_site_view(self, site_id):
         self.main_controller.site_view_controller.switch_to_site_view(site_id)
 
+    def switch_to_form_view(self, form_id):
+        self.main_controller.form_view_controller.switch_to_form_view(form_id)

@@ -255,7 +255,7 @@ class MultiOptionButton(BaseListItem):
 
     def on_release(self):
         selected = self.model.form_view_fields[self.id] or None
-        pops = MultiSelectPopup(title=self.title, screen_manager=self.got_root, ind=self.id, db=self.db,
+        pops = MultiSelectPopup(title=self.title, ind=self.id, db=self.db,
                                 selections=self.selections, type='custom', selected=selected, signatures=self.signature,
                                 content_cls=MultiSelectPopupContent(field_ids=self.field_ids, equipment=self.equipment),
                                 model=self.model, controller=self.controller)

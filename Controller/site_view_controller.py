@@ -70,12 +70,9 @@ class SiteViewController(EventDispatcher):
                                 if self.model.blueprints[x]['site'] == self.model.current_site}
 
     def set_banner_image(self):
-        if header_image := self.model.get_banner_image():
-            header_image = RotatedImage(image_path='assets/20220926_162254.jpg', site=self.view.location)
-            header_image.rotate()
-            header_image_path = header_image.image_out_path
-        else:
-            header_image_path = 'assets/sbs-icon-transparent.png'
+        header_image = RotatedImage(image_path='assets/20220926_162254.jpg', site=self.view.location)
+        header_image.rotate()
+        header_image_path = header_image.image_out_path
         self.view.ids.header_image.source = header_image_path
 
     def change_feed(self, title, deletable=False):

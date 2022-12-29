@@ -1,11 +1,12 @@
 from os.path import join, dirname
+from os import getcwd
 
 from kivy.graphics import Color, Ellipse, Line
 from kivy.lang import Builder
 from kivy.uix.stencilview import StencilView
 
 from kivymd.uix.boxlayout import MDBoxLayout
-from kivymd.uix.button import MDFlatButton
+from kivymd.uix.button import MDFlatButton, MDRaisedButton
 from kivymd.uix.dialog import MDDialog
 
 from typing import TYPE_CHECKING
@@ -17,7 +18,7 @@ if TYPE_CHECKING:
 class SignaturePopup(MDDialog):
     def __init__(self, model: 'MainModel', controller: 'FormViewController', sign_type='sign', signature=None, **kwargs):
         self.buttons = [MDFlatButton(text='Cancel', on_press=self.dismiss),
-                        MDFlatButton(text='Done', on_press=self.save_screenshot)]
+                        MDRaisedButton(text='Done', on_press=self.save_screenshot)]
         self.auto_dismiss = False
         super(SignaturePopup, self).__init__(**kwargs)
         self.content_cls.popup = self
@@ -58,11 +59,12 @@ class SignatureField(StencilView):
 
     def save_screenshot(self):
         root = self.parent.parent.parent.parent
-        full_path_prefix = f"database/{root.controller.form}_{root.model.form_view_fields[root.controller.separator]}"
         file_prefix = f"{root.controller.form}_{root.model.form_view_fields[root.controller.separator]}"
+        full_path_prefix = f"database/{file_prefix}"
         if not self.signature_field:
-            self.export_to_png(f"{full_path_prefix}_screenshot.png")
+            self.export_to_png(f"{getcwd()}/{full_path_prefix}_screenshot.png")
             root.controller.fill_form(f"{file_prefix}_screenshot.png")
+
         else:
             self.export_to_png(f"{full_path_prefix}_{self.signature_field}_{root.sign_type}.png")
             root.filled = True

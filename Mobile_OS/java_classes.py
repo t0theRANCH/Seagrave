@@ -1,6 +1,12 @@
 from jnius import autoclass
 
 
+class JavaClass:
+    def __new__(cls, *args, **kwargs):
+        instance = autoclass(kwargs.get('name'))
+        return super().__new__(instance(args)) if args else super().__new__(instance)
+
+
 def FileInputStream():
     return autoclass('java.io.FileInputStream')
 
@@ -10,7 +16,8 @@ def FileOutputStream():
 
 
 def Intent():
-    return autoclass('android.content.Intent')
+    instance = autoclass('android.content.Intent')
+    return instance()
 
 
 def Settings():

@@ -5,22 +5,17 @@
     height: "400dp"
     EditableLabel:
         id: unit_num_field
-        label_text: "Unit #"
-        text: root.unit_num
+        hint_text: "Unit #"
     MDBoxLayout:
         EditableLabel:
             id: last_inspection_field
-            label_text: "Last Inspection"
-            text: root.last_inspection
+            hint_text: "Last Inspection"
         EditableLabel:
             id: last_service_field
-            label_text: "Last Service"
-            text: root.last_service
-
+            hint_text: "Last Service"
     EditableLabel:
         id: mileage_field
-        label_text: "Mileage (hours)"
-        text: root.mileage
+        hint_text: "Mileage (hours)"
     MDBoxLayout:
         MDLabel:
             id: mileage_until_inspection_field
@@ -28,12 +23,6 @@
         MDLabel:
             id: mileage_until_service_field
             text: root.mileage_until_service
-    BoxLayout:
-        id:layout
-        orientation:'horizontal'
-        MDLabel:
-            id:label
-        MDIconButton:
-            icon: "arrow-down-drop-circle-outline"
-            id: open_menu
-            on_release: root.menu.open()
+    DropdownMenu:
+        id: dropdown
+

@@ -2,7 +2,7 @@ from os.path import join, dirname
 
 from kivy.lang import Builder
 
-from kivymd.uix.button import MDFlatButton
+from kivymd.uix.button import MDFlatButton, MDRaisedButton
 from kivymd.uix.dialog import MDDialog
 
 from typing import TYPE_CHECKING
@@ -14,7 +14,7 @@ class SavePassword(MDDialog):
     def __init__(self, controller: 'LoginScreenController', **kwargs):
         self.controller = controller
         self.buttons = [MDFlatButton(text='Don\'t Save', on_press=self.no),
-                        MDFlatButton(text='Save Password', on_press=self.yes)]
+                        MDRaisedButton(text='Save Password', on_press=self.yes)]
         super().__init__(**kwargs)
 
     def yes(self, obj):

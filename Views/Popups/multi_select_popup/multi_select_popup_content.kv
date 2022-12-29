@@ -4,26 +4,38 @@
     height: "400dp"
     BoxLayout:
         orientation: 'vertical'
-        pos_hint: {'center_y': 1}
+        spacing: "10dp"
         BoxLayout:
             id: top_content
             orientation: 'horizontal'
+            pos_hint: {'center_y': 0}
             MDTextField:
                 id: add_new
                 hint_text: ""
                 input_type: 'text'
                 keyboard_suggestions: True
-                font_size: 32
+                font_size: 16
                 normal_color: app.theme_cls.primary_dark
+                pos_hint: {'center_y': 1}
             MDRectangleFlatButton:
                 text: "Add"
                 id: add_button
-                font_size: 24
+                font_size: 16
                 text_color: app.theme_cls.accent_color
                 md_bg_color: app.theme_cls.primary_color
                 on_release: root.add_button()
+                pos_hint: {'center_y': 1}
+        MDSelectionList:
+            id: select_all_list
+            on_selected: root.select_all()
+            on_unselected: root.deselect_all()
+            on_selected_mode: root.on_selected_mode(*args)
+            selected_mode:True
+            SelectableListItem:
+                id: select_all
+                text: "Select All"
     BoxLayout:
-        size_hint_y: 3
+        size_hint_y: 2
         ScrollView:
             MDSelectionList:
                 id: selection_list

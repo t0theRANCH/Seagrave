@@ -2,7 +2,7 @@ from os.path import join, dirname
 
 from kivy.lang import Builder
 
-from kivymd.uix.button import MDFlatButton
+from kivymd.uix.button import MDFlatButton, MDRaisedButton
 from kivymd.uix.dialog import MDDialog
 
 from typing import TYPE_CHECKING, Union, Callable
@@ -29,41 +29,15 @@ class ConfirmDelete(MDDialog):
         self.form_option = form_option
         self.popup = popup
         self.buttons = [MDFlatButton(text="Cancel", on_release=self.dismiss),
-                        MDFlatButton(text="Delete", on_release=self.delete_item)]
+                        MDRaisedButton(text="Delete", on_release=self.delete_item)]
         super().__init__(**kwargs)
 
     def delete_item(self, obj):
         if not self.form_option:
             self.model.select_delete_item(self.button)
         else:
-            self.delete_field()
+            self.popup.content_cls.delete_field(self.item)
         self.dismiss()
-
-    def delete_field(self):
-        if self.item_list:
-            widget_list = {x.instance_item.text: x for x in self.popup.content_cls.ids.selection_list.children}
-            for list_item in self.item_list:
-                self.update_fields(func=self.model.delete_form_option,
-                                   param=[self.popup, list_item])
-                if list_item in widget_list:
-                    self.popup.content_cls.ids.selection_list.remove_widget(widget_list[list_item])
-        else:
-            self.update_fields(func=self.model.delete_form_option, param=[self.popup, self.item])
-        self.popup.dismiss()
-
-    def update_fields(self, func: Callable, param: list):
-        options, option_fields = func(param)
-        widget = next((o for o in option_fields if self.popup.id == o.id), None)
-        if self.item_list:
-            widget.selections = options
-        else:
-            widget.pre_select = options
-            if self.item == self.popup.selected:
-                self.popup.content_cls.ids.text_field.text = ''
-                self.popup.selected = None
-                self.model.form_view_fields[self.popup.id] = ''
-                widget.un_select()
-                widget.remove_button_text()
 
 
 Builder.load_file(join(dirname(__file__), "confirm_delete.kv"))

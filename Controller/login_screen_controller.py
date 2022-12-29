@@ -34,6 +34,7 @@ class LoginScreenController(EventDispatcher):
         user, password = self.model.check_for_user_info()
         self.enter_user_data(user, password)
 
+
     def set_phone(self):
         self.model.phone = Android() if platform == 'android' else None
 

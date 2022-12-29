@@ -1,5 +1,5 @@
 import json
-from os import getcwd
+from os import getcwd, listdir
 from jnius import autoclass, cast
 from android import activity
 from android.storage import primary_external_storage_path
@@ -147,6 +147,7 @@ class Android(EventDispatcher):
         intent.setAction(intent_actions[action])
         if grant_uri_read_permission:
             intent.setFlags(intent.FLAG_GRANT_READ_URI_PERMISSION)
+            intent.setFlags(intent.FLAG_GRANT_WRITE_URI_PERMISSION)
             intent.setFlags(intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
         if action_openable:
             intent.addCategory(intent.CATEGORY_OPENABLE)
@@ -197,13 +198,16 @@ class Android(EventDispatcher):
         activity.unbind(on_activity_result=self.access_file_tree_result)
 
     def open_pdf(self, database, file_name):
-        file_provider = FileProvider()
+        # file_provider = FileProvider()
         intent = self.create_intent(action='view', grant_uri_read_permission=True)
-        file = File()
-        share_file = file(f"{getcwd()}/database/{database}/{file_name}")
-        uri = file_provider.getUriForFile(self.context.getApplicationContext(), f"{self.package_name}.fileprovider",
-                                         share_file)
-        intent.setDataAndType(uri, "application/pdf")
+        # file = File()
+        # share_file = file(f"{self.file_directory}/app/database/{database}/{file_name}")
+        # uri = file_provider.getUriForFile(self.context.getApplicationContext(), f"{self.package_name}.fileprovider",
+        #                                  share_file)
+        # construct url name from s3 url and file name
+        uri_path = 'https://buildmedia.readthedocs.org/media/pdf/pyjnius/latest/pyjnius.pdf'
+        uri = Uri()
+        intent.setDataAndType(uri.parse(uri_path), "application/pdf")
         self.start_intent(intent)
 
     def get_directions(self, address, city):

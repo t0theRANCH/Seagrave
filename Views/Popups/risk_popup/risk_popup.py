@@ -3,7 +3,7 @@ from os.path import join, dirname
 from kivy.lang import Builder
 
 from kivymd.uix.boxlayout import MDBoxLayout
-from kivymd.uix.button import MDFlatButton
+from kivymd.uix.button import MDFlatButton, MDRaisedButton
 from kivymd.uix.dialog import MDDialog
 
 from typing import TYPE_CHECKING
@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 class RiskPopup(MDDialog):
     def __init__(self, **kwargs):
         self.buttons = [MDFlatButton(text='Cancel', on_press=self.dismiss),
-                        MDFlatButton(text='Done', on_press=self.submit)]
+                        MDRaisedButton(text='Done', on_press=self.submit)]
         super().__init__(**kwargs)
         self.content_cls.popup = self
 
