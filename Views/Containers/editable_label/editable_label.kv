@@ -1,0 +1,17 @@
+<EditableLabel>:
+    size_hint_y: None
+    height: text_field.height
+
+    MDTextField:
+        id: text_field
+        hint_text: root.hint_text
+        text: root.text
+        mode: "rectangle"
+        multiline: False
+        keyboard_suggestions: True
+
+    MDIconButton:
+        icon: "pencil"
+        pos_hint: {"center_y": .5}
+        pos: text_field.width - self.width + dp(8), 0
+        on_release: root.edit_text()
