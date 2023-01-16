@@ -6,6 +6,7 @@ from kivy.lang import Builder
 from kivymd.uix.boxlayout import MDBoxLayout
 
 from typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
     from Controller.site_view_controller import SiteViewController
 
@@ -33,9 +34,9 @@ class TimeClockContent(MDBoxLayout):
 
     def get_total_hours(self):
         total_hours = 0
-        for day in self.time_clock_data['week']:
-            punch_in = datetime.strptime(day['in'], '%m/%d%y %H:%M')
-            punch_out = datetime.strptime(day['out'], '%m/%d%y %H:%M')
+        for day, data in self.time_clock_data['week'].items():
+            punch_in = datetime.strptime(data['in'], '%m/%d/%y %H:%M')
+            punch_out = datetime.strptime(data['out'], '%m/%d/%y %H:%M')
             hours = punch_out - punch_in
             total_hours += (hours.seconds // 3600)
         return total_hours
@@ -50,10 +51,10 @@ class TimeClockContent(MDBoxLayout):
         self.status = 'out' if self.status == 'in' else 'in'
 
     def punch_clock(self):
-        self.controller.model.punch_clock(current_datetime=datetime.now().strftime("%m/%d/%y %H:%M"),
-                                          current_day=self.get_current_day(),
-                                          action=self.status
-                                          )
+        self.controller.punch_clock(current_datetime=datetime.now().strftime("%m/%d/%y %H:%M"),
+                                    current_day=self.get_current_day(),
+                                    action=self.status
+                                    )
         self.set_status()
         self.set_punch_button_text()
 

@@ -473,9 +473,9 @@ class Forms:
         failure = InteractiveCheckBox(name='not_passed', tooltip='Fail')
         passed = [[ffc, "Equipment Passed", failure, "Equipment Not Passed"]]
         t10 = Table(passed, hAlign='LEFT', colWidths=[0.25 * inch, 1.6 * inch, 0.25 * inch, 1.6 * inch])
-        t10.setStyle(TableStyle([('ALIGN', (1, 0), (1, 0), 'LEFT'),
+        t10.setStyle([('ALIGN', (1, 0), (1, 0), 'LEFT'),
                                  ('ALIGN', (-1, 0), (-1, 0), 'LEFT')
-                                 ]))
+                                 ])
         flowables.append(Spacer(1, 12))
         flowables.append(t10)
         flowables.append(Spacer(1, 12))

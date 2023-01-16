@@ -4,6 +4,7 @@ from jnius import autoclass, cast
 from android import activity
 from android.storage import primary_external_storage_path
 from android.permissions import request_permissions, Permission
+from android.runnable import run_on_ui_thread
 from kivy._event import EventDispatcher
 from kivy.clock import Clock
 from kivy.properties import ObjectProperty
@@ -28,6 +29,7 @@ from Mobile_OS.java_classes import (
 )
 
 from typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
     from Controller.main_controller import MainController
 
@@ -51,6 +53,7 @@ class Android(EventDispatcher):
         self.prefs = self.get_shared_prefs()
         self.package_name = self.context.getPackageName()
         self.file_directory = self.context.getFilesDir().toString()
+        self.instance_item = None
 
     def get_activity(self):
         self.PythonActivity = autoclass('org.kivy.android.PythonActivity')
@@ -135,7 +138,8 @@ class Android(EventDispatcher):
     def get_prefs_entry(self, key):
         return self.prefs.getString(key, None)
 
-    def create_intent(self, action, grant_uri_read_permission=False, action_openable=False):
+    @staticmethod
+    def create_intent(action, grant_uri_read_permission=False, action_openable=False):
         intent = Intent()
         settings = Settings()
         intent_actions = {
@@ -153,9 +157,13 @@ class Android(EventDispatcher):
             intent.addCategory(intent.CATEGORY_OPENABLE)
         return intent
 
-    def open_file_picker(self):
+    def open_file_picker(self, instance_item):
+        self.instance_item = instance_item
         intent = self.create_intent(action='open_document', grant_uri_read_permission=True, action_openable=True)
-        intent.setType('application/pdf')
+        if not instance_item:
+            intent.setType("image/*")
+        else:
+            intent.setType('application/pdf')
         self.start_intent(intent, result_code=5, result=self.access_file_tree_result)
 
     def get_file_name_from_uri(self, uri):
@@ -183,18 +191,17 @@ class Android(EventDispatcher):
             file_input_stream.close()
             file_output_stream.close()
 
+    @run_on_ui_thread
     def access_file_tree_result(self, request_code, result_code, intent):
         name = self.get_file_name_from_uri(intent.data)
-        dest_path = f"{getcwd()}/database/blueprints/{name}"
+        image_type = 'blueprints' if name.split('.')[-1] == 'pdf' else 'pictures'
+        dest_path = f"{getcwd()}/database/{image_type}/{name}"
         self.write_file_content(uri=intent.data, path=dest_path)
-        result = self.main_controller.model.select_image_to_upload(path=dest_path, file_type='blueprints')
+        result = self.main_controller.model.select_image_to_upload(path=dest_path, file_type=image_type,
+                                                                   blueprint_type=self.instance_item.text)
+        self.instance_item = None
         if not result:
             Snackbar(text='Blueprints must be a PDF')
-        #site_view = self.screen_manager.get_screen('site_view')
-        #site_id = site_view.site_id
-        #refresh_blueprint_data(site_id=site_id, screen_manager=self.screen_manager)
-        #switch_to_site_view(screen_manager=self.screen_manager, site_id=site_id)
-        #site_view.refresh_blueprint_panel()
         activity.unbind(on_activity_result=self.access_file_tree_result)
 
     def open_pdf(self, database, file_name):
@@ -226,4 +233,3 @@ class Android(EventDispatcher):
             if result:
                 activity.bind(on_activity_result=result)
             self.currentActivity.startActivityForResult(intent, result_code)
-

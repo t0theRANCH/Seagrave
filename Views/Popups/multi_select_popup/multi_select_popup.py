@@ -21,8 +21,10 @@ if TYPE_CHECKING:
 
 
 class MultiSelectPopup(MDDialog):
+    signatures = BooleanProperty(False)
+
     def __init__(self, title, model: 'MainModel', controller: 'FormViewController', ind, db,
-                 selections=None, selected=None, signatures=False, **kwargs):
+                 selections=None, selected=None, **kwargs):
         self.buttons = [MDFlatButton(text='Cancel', on_press=self.dismiss),
                         MDRaisedButton(text='Submit', on_press=self.submit_button)]
         super().__init__(**kwargs)
@@ -36,7 +38,6 @@ class MultiSelectPopup(MDDialog):
         self.title = title
         self.id = ind
         self.db = db
-        self.signatures = signatures
         self.selections = selections
         if self.content_cls.equipment:
             self.selected = {} if selected is None else selected

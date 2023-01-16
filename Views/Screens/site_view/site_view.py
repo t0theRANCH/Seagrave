@@ -42,7 +42,6 @@ class SiteView(MDScreen):
         self.complete_forms = None
         self.equipment = None
         self.pictures = None
-        self.popup: Union[MDDialog, None] = None
 
     def on_pre_enter(self, *args):
         self.ids.top_appbar.toolbar_cls = SliverToolbar(headline_text=self.location, view=self)
@@ -96,19 +95,6 @@ class SiteView(MDScreen):
         for c in self.content:
             self.ids.content.remove_widget(c)
         self.content = []
-
-    def danger_zone(self):
-        menu_items = [OneLineIconListItem(IconLeftWidget(icon='note-plus'), text=x, on_release=self.select_danger_zone_item)
-                      for x in ['Mark Site Complete', 'Delete Site']]
-        self.popup = MDDialog(title='Fill Out New Form', items=menu_items, type='simple')
-        self.popup.open()
-
-    def select_danger_zone_item(self, instance_item: OneLineIconListItem):
-        result = {'Mark Site Complete': 'complete', 'Delete Site': 'delete'}
-        self.change_feed(title='sites', deletable=False)
-        self.controller.main_controller.change_screen('main_screen')
-        self.model.delete_site(result[instance_item.text])
-        self.popup.dismiss()
 
 
 Builder.load_file(join(dirname(__file__), "siteview.kv"))

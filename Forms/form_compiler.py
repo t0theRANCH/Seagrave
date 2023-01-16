@@ -66,7 +66,7 @@ class CreateForm:
                                controller=self.controller, model=self.model)
         last_service = SingleOption(ind='last_service', title='Last Service (Mileage)', pre_select=[], mandatory=False,
                                     controller=self.controller, model=self.model)
-        last_inspection = SingleOptionDatePicker(ind='last_inspection', title='Last Inspection', model=self.model,
+        last_inspection = SingleOptionDatePicker(ind='last_inspection', text='Last Inspection', model=self.model,
                                                  mandatory=False, time=False)
         unit_num = SingleOption(ind='unit_num', title='Unit Number', pre_select=[],
                                 controller=self.controller, model=self.model)
@@ -107,6 +107,7 @@ class CreateForm:
 
         given_by = SingleOption(ind='given_by', title='Who gives the talk',
                                 pre_select=self.model.forms[self.form_title]['crew'],
+                                db=[f"{self.form_title}", "crew"],
                                 controller=self.controller, model=self.model)
         crew_attending = MultiOptionButton(text='Crew Attending', ind='crew_attending', title='Crew Attending',
                                            selections=self.model.forms[self.form_title]['crew'],
@@ -148,25 +149,25 @@ class CreateForm:
                                controller=self.controller, model=self.model)
 
         fluid_levels = MultiOptionButton(text='Fluid Levels', ind='fluid_levels', title='Fluid Levels', equipment=True,
-                                         selections=self.model.forms[self.form_title]['Fluid Levels'],
+                                         selection_db=self.model.forms[self.form_title]['Fluid Levels'],
                                          controller=self.controller, model=self.model)
         drivers_compartment = MultiOptionButton(text="Driver's Compartment", ind='drivers_compartment',
                                                 title="Driver's Compartment", equipment=True,
-                                                selections=self.model.forms[self.form_title]["Driver's Compartment"],
+                                                selection_db=self.model.forms[self.form_title]["Driver's Compartment"],
                                                 controller=self.controller, model=self.model)
         body_exterior = MultiOptionButton(text="Body Exterior", ind='body_exterior', title="Body Exterior",
-                                          selections=self.model.forms[self.form_title]["Body Exterior"], equipment=True,
+                                          selection_db=self.model.forms[self.form_title]["Body Exterior"], equipment=True,
                                           controller=self.controller, model=self.model)
         under_the_hood = MultiOptionButton(text="Under The Hood", ind='under_the_hood', title="Under The Hood",
-                                           selections=self.model.forms[self.form_title]["Under The Hood"],
+                                           selection_db=self.model.forms[self.form_title]["Under The Hood"],
                                            equipment=True,
                                            controller=self.controller, model=self.model)
         undercarriage = MultiOptionButton(text="Undercarriage", ind='undercarriage', title="Undercarriage",
-                                          equipment=True, selections=self.model.forms[self.form_title]["Undercarriage"],
+                                          equipment=True, selection_db=self.model.forms[self.form_title]["Undercarriage"],
                                           controller=self.controller, model=self.model)
         brake_tires_wheels = MultiOptionButton(text="Brake, Tires & Wheels", ind='brake_tires_wheels', equipment=True,
                                                title="Brake, Tires & Wheels",
-                                               selections=self.model.forms[self.form_title]["Brake, Tires & Wheels"],
+                                               selection_db=self.model.forms[self.form_title]["Brake, Tires & Wheels"],
                                                controller=self.controller, model=self.model)
 
         return [location, machine, unit_num, mileage, fluid_levels, drivers_compartment, body_exterior, under_the_hood,
@@ -176,9 +177,9 @@ class CreateForm:
         self.controller.view.type = 'forms'
         work = SingleOptionButton(ind="work_to_be_done", pre_select=['Concrete', 'Erecting', 'Cladding'],
                                   controller=self.controller)
-        tasks = MultiOptionButton(ind="tasks", selections=[], title="Tasks", text='Tasks', divide=True,
-                                  db=[f"{self.form_title}"],
-                                  controller=self.controller, model=self.model)
+        task = SingleOption(ind="task", pre_select=[], title="Task", text='Task', divide=True,
+                            db=[f"{self.form_title}"],
+                            controller=self.controller, model=self.model)
         location = SingleOption(ind="location", title="Task Location",
                                 pre_select=[f"{self.model.sites[x]['customer']} - {self.model.sites[x]['city']}"
                                             for x in self.model.sites],
@@ -218,6 +219,6 @@ class CreateForm:
                                             pre_select=[], db=[f"{self.form_title}", "incident_explanation"],
                                             controller=self.controller, model=self.model)
 
-        return [work, tasks, location, muster_point, ppe, items_inspected, hazards, tool_inspection,
+        return [work, task, location, muster_point, ppe, items_inspected, hazards, tool_inspection,
                 warning_ribbon, working_alone, explanation, workers, permit_closed, area_cleaned,
                 hazards_remaining, hazard_explanation, incidents, incident_explanation]

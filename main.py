@@ -4,10 +4,10 @@ from os.path import join, dirname
 
 import kivy
 from kivy import Config, platform
-
 from kivymd.app import MDApp
 from kivy.core.window import Window
 
+from Forms.safety_talk import SafetyTalk
 from Model.main_model import MainModel
 from Controller.main_controller import MainController
 from Controller.login_screen_controller import LoginScreenController
@@ -16,8 +16,6 @@ from Controller.site_view_controller import SiteViewController
 from Controller.form_view_controller import FormViewController
 from Controller.picture_list_view_controller import PictureListViewController
 from Controller.picture_view_controller import PictureViewController
-
-from colors import colors
 
 
 class Hnnnng(MDApp):
@@ -45,7 +43,6 @@ class Hnnnng(MDApp):
 
     def set_theme(self):
         self.theme_cls.theme_style = "Dark"
-        self.colors = colors[self.theme_cls.theme_style]
         self.theme_cls.primary_palette = "BlueGray"
         self.theme_cls.accent_palette = "Gray"
         self.theme_cls.material_style = 'M3'

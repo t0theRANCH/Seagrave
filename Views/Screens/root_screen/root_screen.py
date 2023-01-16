@@ -27,7 +27,8 @@ class RootScreen(MDScreen):
         popup_content = EquipmentServicePopupContent(pre_select=[f"{x['text']}" for x in self.model.site_rows],
                                                      mileage=equipment_info['mileage'],
                                                      last_service=equipment_info['last_service'],
-                                                     unit_num=equipment_info['unit_num'])
+                                                     unit_num=equipment_info['unit_num'],
+                                                     last_inspection=equipment_info['last_inspection'])
         popup = EquipmentService(title=equipment_info['type'], type='custom', controller=controller,
                                  equipment_id=equipment_id,
                                  site_name=site, content_cls=popup_content)

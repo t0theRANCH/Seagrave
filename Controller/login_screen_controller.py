@@ -34,7 +34,6 @@ class LoginScreenController(EventDispatcher):
         user, password = self.model.check_for_user_info()
         self.enter_user_data(user, password)
 
-
     def set_phone(self):
         self.model.phone = Android() if platform == 'android' else None
 
@@ -168,10 +167,10 @@ class LoginScreenController(EventDispatcher):
         self.main_controller.input_data_into_nav_drawer()
 
     def switch_to_main(self):
-        Clock.schedule_interval(self.refresh_auth, 900)
+        Clock.schedule_interval(self.refresh_auth, (30 * 60))
         self.main_controller.change_screen('main_screen')
 
-    def refresh_auth(self):
+    def refresh_auth(self, *args):
         if self.model.refresh_token:
             self.model.db_handler()
         else:

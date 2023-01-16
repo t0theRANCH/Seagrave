@@ -15,15 +15,18 @@ class EditableDropdownMenu(MDRelativeLayout):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+    def on_text(self, instance, value):
+        self.ids.text_field.text = value
+
 
 class DropdownMenu(EditableDropdownMenu):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def on_text(self, instance, value):
-        self.ids.text_field.text = value
-
-
+    def on_touch_down(self, touch):
+        if self.collide_point(*touch.pos):
+            self.menu.open()
+            return True
 
 
 Builder.load_file(join(dirname(__file__), "dropdown_menu.kv"))

@@ -1,4 +1,5 @@
 from reportlab.platypus import Flowable
+from reportlab.lib import colors
 
 
 class InteractiveCheckBox(Flowable):
@@ -18,5 +19,6 @@ class InteractiveCheckBox(Flowable):
                       name=self.name,
                       tooltip=self.tooltip,
                       relative=True,
-                      size=self.size)
+                      size=self.size,
+                      fillColor=colors.white)
         self.canv.restoreState()

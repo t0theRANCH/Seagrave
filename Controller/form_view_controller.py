@@ -30,6 +30,10 @@ class FormViewController(EventDispatcher):
         self.form = ''
         self.pops = []
 
+    def close_speed_dial(self):
+        if self.view.ids.speed_dial.state == "open":
+            self.view.ids.speed_dial.close_stack()
+
     def switch_to_form_view(self, form_id: str):
         form = CreateForm(form_id=form_id, model=self.model, controller=self)
         func = form.populate_form_view()
@@ -65,6 +69,7 @@ class FormViewController(EventDispatcher):
             s.selection = self.model.form_view_fields[s.id]
             if s.selection:
                 s.select()
+                s.add_button_text(s.selection)
         for m in self.model.multi:
             if self.model.form_view_fields[m.id]:
                 if 'Equipment' in form_title:
@@ -74,7 +79,12 @@ class FormViewController(EventDispatcher):
                     if not [self.model.form_view_fields[m.id][x] for x in self.model.form_view_fields[m.id]
                             if self.model.form_view_fields[m.id][x]]:
                         continue
+                else:
+                    m.add_button_text(self.model.form_view_fields[m.id])
                 m.select()
+
+        for c in self.model.checkbox:
+            c.option = self.model.form_view_fields[c.id]
         self.view.get_tree()
 
     def check_equipment_for_failure(self, title: str, grade: str, component: str):
@@ -94,9 +104,9 @@ class FormViewController(EventDispatcher):
 
     def add_saved_hazards(self):
         if 'risk' not in self.model.form_view_fields:
-            self.model.form_view_fields['risk'] = {x: '' for x in self.model.form_view_fields['hazards']}
+            self.model.form_view_fields['risk'] = {x: '' for x in self.model.form_view_fields.get('hazards', '')}
         if 'plan' not in self.model.form_view_fields:
-            self.model.form_view_fields['plan'] = {x: '' for x in self.model.form_view_fields['hazards']}
+            self.model.form_view_fields['plan'] = {x: '' for x in self.model.form_view_fields.get('hazards', '')}
         if 'hazards' in self.model.form_view_fields:
             for m in self.model.multi:
                 if m.id in 'hazards':
@@ -134,9 +144,10 @@ class FormViewController(EventDispatcher):
             self.model.delete_signatures(x, selections)
 
     def add_hazards_as_selections(self):
-        hazards = [x for t in self.model.form_view_fields['tasks']
-                   for x in
-                   self.model.forms['Field Level Hazard Assessment'][self.model.form_view_fields['work_to_be_done']][t]]
+        hazards = list(
+            self.model.forms['Field Level Hazard Assessment'][self.model.form_view_fields['work_to_be_done']][
+                self.model.form_view_fields.get('task', '')])
+
         hazards = list(dict.fromkeys(hazards))
         for m in self.model.multi:
             if m.id == 'hazards':
@@ -165,7 +176,7 @@ class FormViewController(EventDispatcher):
             self.colour_completed_list_items(widgets=self.model.multi, popup_id=popup.id,
                                              selections=[popup.selected[x] for x in popup.selected
                                                          if popup.selected[x]])
-        if popup.title == 'Tasks':
+        if popup.title == 'Task':
             self.add_hazards_as_selections()
         if equipment:
             for x, y in popup.selections.items():
@@ -184,8 +195,6 @@ class FormViewController(EventDispatcher):
         self.unit_num(popup)
 
     def machine(self, popup: 'TextFieldPopup'):
-        if 'machine' in popup.id:
-            return
         equipment = {e: self.model.equipment[e] for e in self.model.equipment
                      if self.model.equipment[e]['type'] == popup.selected}
         if len(equipment) > 1:
@@ -214,19 +223,20 @@ class FormViewController(EventDispatcher):
         mileage = [v['mileage'] for k, v in equipment.items()]
         site = [v['site'] for k, v in equipment.items()]
         third_item = [v[third_field] for k, v in equipment.items()]
+        third_item = third_item[0] if third_item else None
+        mileage = mileage[0] if mileage else None
         if third_field == 'type':
             third_field = 'machine'
         for s in self.model.single:
-            third_item = third_item[0] if third_item else None
-            mileage = mileage[0] if mileage else None
             self.fill_in_details(s, third_field, third_item)
             self.fill_in_details(s, 'mileage', mileage)
             if site and site[0]:
-                self.fill_in_details(s, 'location', f"{site[0]['customer']} - {site[0]['city']}")
+                site_entry = self.model.sites[site[0]]
+                self.fill_in_details(s, 'location', f"{site_entry.get('customer', '')} - {site_entry.get('city', '')}")
 
-    @staticmethod
-    def fill_in_details(widget: 'SingleOption', field_name: str, value: str):
+    def fill_in_details(self, widget: 'SingleOption', field_name: str, value: str):
         if widget.id == field_name and not widget.filled and value:
+            self.model.form_view_fields[field_name] = value
             widget.add_button_text(value)
             widget.select()
 
@@ -239,21 +249,22 @@ class FormViewController(EventDispatcher):
 
     def parse_field_check_response(self, submit):
         done, minimum, forms = self.check_for_minimum_required_fields(submit)
+        if minimum == 'Duplicate Form':
+            toast(text='This form has already been completed today')
+            return False
         if not done:
             self.pops = minimum if isinstance(minimum, list) else [minimum]
             self.view.open_error_popup()
             return False
-        if minimum == 'Duplicate Form':
-            toast(text='This form has already been completed today')
-            return False
-        if done:
-            return True
+        return True
 
-    def save_form(self):
+    def save_form(self, *args):
+        self.close_speed_dial()
         if done := self.parse_field_check_response(submit=False):
             self.remove_widgets()
 
-    def submit_form(self):
+    def submit_form(self, *args):
+        self.close_speed_dial()
         done = self.parse_field_check_response(submit=True)
         if not done:
             return
@@ -263,7 +274,7 @@ class FormViewController(EventDispatcher):
                                         widget_list=self.model.single))
         self.pops.extend(self.check_for_empty_fields(fields={m.id: m.text for m in self.model.multi},
                                                      widget_list=self.model.multi))
-        self.pops.extend(self.check_for_empty_fields(fields={r.id: r.id in self.model.form_view_fields['risk']
+        self.pops.extend(self.check_for_empty_fields(fields={r.id: f"Risk: {r.id}"
                                                              for r in self.model.risk},
                                                      widget_list=self.model.risk))
 
@@ -281,8 +292,8 @@ class FormViewController(EventDispatcher):
 
     @staticmethod
     def check_for_empty_fields(fields, widget_list):
-        empty_fields = [s for s in widget_list if s.mandatory and not s.filled]
-        return {k: v for k, v in fields.items() if k in empty_fields}
+        empty_fields = [s.id for s in widget_list if s.mandatory and not s.filled]
+        return [v for k, v in fields.items() if k in empty_fields]
 
     def fill_signatures(self, signature, name=None, signature_field=False):
         if not signature_field or not name:
@@ -305,7 +316,8 @@ class FormViewController(EventDispatcher):
             self.model.process_db_request(form_type=self.view.type)
         self.remove_widgets()
 
-    def remove_widgets(self):
+    def remove_widgets(self, *args):
+        self.close_speed_dial()
         self.view.get_tree()
         fields = self.model.single + self.model.multi + self.model.checkbox + self.model.signature + \
                  self.model.labels + self.model.risk

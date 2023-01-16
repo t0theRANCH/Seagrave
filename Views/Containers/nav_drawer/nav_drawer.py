@@ -45,7 +45,7 @@ class NavDrawer(MDNavigationDrawer):
 
     def danger_zone(self):
         screen = self.get_current_screen()
-        screen.danger_zone()
+        screen.controller.danger_zone()
         self.open_close()
 
 

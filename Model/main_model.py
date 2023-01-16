@@ -117,7 +117,7 @@ class MainModel(EventDispatcher):
         self.sites_model.update_sites(db_id, new_entry, column)
         
     def update_time_clock(self, db_id: str, new_entry: dict, column: str = None):
-        self.sites_model.update_time_clock(db_id, new_entry, column)
+        self.sites_model.update_time_clock(db_id, new_entry)
         
     def delete_site(self, action):
         self.sites_model.delete_site(action)
@@ -136,8 +136,8 @@ class MainModel(EventDispatcher):
     def get_single_equipment_data(self, equipment_id):
         return self.equipment_model.get_single_equipment_data(equipment_id)
 
-    def move_equipment(self, equipment_id, site_name):
-        self.equipment_model.move_equipment(equipment_id, site_name)
+    def edit_equipment_data(self, equipment_id, site_name, new_data):
+        self.equipment_model.edit_equipment_data(equipment_id, site_name, new_data)
 
     # Forms
 
@@ -154,7 +154,7 @@ class MainModel(EventDispatcher):
         self.forms_model.update_todays_forms(db_id, new_entry, column)
 
     def delete_todays_form(self, database: 'JsonStore', button: 'RVButton', id_token: str):
-        self.forms_model.delete_todays_form(database, button, id_token)
+        return self.forms_model.delete_todays_form(database, button, id_token)
 
     def update_field(self, fields: dict, field_dict: dict):
         self.forms_model.update_field(fields, field_dict)
@@ -194,8 +194,8 @@ class MainModel(EventDispatcher):
     def set_banner_image(self, value):
         self.images_model.set_banner_image(value)
     
-    def select_image_to_upload(self, path, file_type):
-        return self.images_model.select_image_to_upload(path, file_type)
+    def select_image_to_upload(self, path, file_type, blueprint_type=None):
+        return self.images_model.select_image_to_upload(path, file_type, blueprint_type)
 
     # Properties
 

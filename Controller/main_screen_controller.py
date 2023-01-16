@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from Controller.main_controller import MainController
     from Model.main_model import MainModel
-    from kivymd.uix.button.button import MDFloatingBottomButton
 
 
 class MainScreenController(EventDispatcher):
@@ -19,37 +18,38 @@ class MainScreenController(EventDispatcher):
         self.view = MainScreen(name='main_screen', controller=self, model=self.model)
         self.feed = 'sites'
         self.feed_list = ['sites', 'equipment', 'forms', 'today']
-        self.view.ids.speed_dial.data = {"Add New Site": "map-marker-plus", "Add New Equipment": "excavator",
-                                         "Fill Out New Form": "note-plus", "Refresh Database": "database-refresh"}
-        self.speed_dial_methods = {"Add New Site": self.add_site, "Add New Equipment": self.add_equipment,
-                                   "Fill Out New Form": self.add_form, "Refresh Database": self.refresh_auth}
+        self.view.ids.speed_dial.data = {"Add New Site": ["map-marker-plus", "on_release", self.add_site],
+                                         "Add New Equipment": ["excavator", "on_release", self.add_equipment],
+                                         "Fill Out New Form": ["note-plus", "on_release", self.add_form],
+                                         "Refresh Database": ["database-refresh", "on_release", self.refresh_auth]
+                                         }
 
     def input_data_into_view(self):
         self.view.ids.toolbar.title = f"Logged in as {self.model.user['given_name']}"
         self.change_feed(title='sites')
 
-    def select_speed_dial_button(self, instance: 'MDFloatingBottomButton'):
-        for i in self.view.ids.speed_dial.data:
-            if self.view.ids.speed_dial.data[i] == instance.icon:
-                func = self.speed_dial_methods[i]
-                func()
-                self.view.ids.speed_dial.close_stack()
-                return
+    def close_speed_dial(self):
+        if self.view.ids.speed_dial.state == "open":
+            self.view.ids.speed_dial.close_stack()
 
-    def add_site(self):
+    def add_site(self, *args):
+        self.close_speed_dial()
         self.main_controller.form_view_controller.switch_to_form_view(form_id="add_site")
 
-    def add_equipment(self):
+    def add_equipment(self, *args):
+        self.close_speed_dial()
         self.main_controller.form_view_controller.switch_to_form_view(form_id="add_equipment")
 
-    def add_form(self):
+    def add_form(self, *args):
+        self.close_speed_dial()
         self.change_feed(title='forms', deletable=False)
 
     def equipment_service_popup(self, equipment_id):
         equipment_info, site = self.main_controller.equipment_service_popup(equipment_id)
         self.main_controller.view.open_equipment_service_popup(equipment_id, equipment_info, site, self)
 
-    def refresh_auth(self):
+    def refresh_auth(self, *args):
+        self.close_speed_dial()
         self.main_controller.login_controller.refresh_auth()
 
     def open_close(self):

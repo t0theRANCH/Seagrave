@@ -1,1 +1,244 @@
-{"Add Site": {"name": "Add Site", "customer": [], "address": [], "city": []}, "Add Equipment": {"name": "Add Equipment", "customer": [], "address": [], "city": []}, "Safety Talk Report Form": {"name": "Safety Talk Report Form", "titles": ["Toolbox Talk"], "crew": ["Max", "Andrew", "Mitchell", "Kaleb", "Tyson"], "topics": ["Retirement", "Butt Stuff"], "concerns": ["SuperAids"], "response": ["Saran Wrap Underwear"]}, "Equipment and Vehicle Pre-Start Checklist": {"name": "Equipment and Vehicle Pre-Start Checklist", "unit_num": [], "mileage": [], "Fluid Levels": {"Motor Oil": "motor_oil", "Rear End": "rear_end", "Air Filter": "air_filter", "Radiator": "radiator", "Brake Fluid": "brake_fluid", "Oil Change Required?": "oil_change_required", "Power Steering": "power_steering", "Greasing Required": "greasing_required", "Oil Filter Changed?": "oil_filter_changed", "Windshield Washer": "windshield_washer"}, "Driver's Compartment": {"Sun Visors": "suns_visors", "Horns & Switches": "horns_switches", "Steering Power Assist": "steering_power_assist", "Windshield Wipers": "windshield_wipers", "Windshield Defrost": "windshield_defrost", "Windshield": "windshield", "Side Windows": "side_windows", "Beam Indicator": "beam_indicator", "Instrument Lamps": "instrument_lamps", "Pedal Pads": "pedal_pads", "Fire Extinguisher": "fire_extinguisher", "Hazard Warning Kit/Flares": "hazard_warning_kit", "Seats & Seatbelts": "seats_seatbelts", "First Aid Kit": "first_aid_kit", "Air Pressure Gauge": "air_pressure_gauge", "Speedometer": "speedometer", "Survival Kit": "survival_kit", "Cell Phone": "cell_phone", "Compressor Buildups": "compressor_buildups", "Acc. Pedal and Air Throttle": "acc_pedal_air_throttle", "Booster Cable": "booster_cable", "Air Leakage": "air_leakage", "Compressed Air": "compressed_air", "Steering Column Security": "steering_column_security"}, "Body Exterior": {"Head Lamp Operation/Aim": "head_lamp_operation", "Clearance Lamps": "clearance_lamps", "Identification Lamps": "identification_lamps", "Tail Lamps": "tail_lamps", "Stop Lamps": "stop_lamps", "Turn Signal Lamps": "turn_signal_lamps", "Marker Lamps": "marker_lamps", "Hazard Lamps": "hazard_lamps", "Reflex Reflectors": "reflex_reflectors", "Trailer Hitch": "trailer_hitch", "TDG Placards": "tdg_placards", "Fenders/Mud Flaps": "fenders", "Trailer Cord": "trailer_cord", "Paint": "paint", "Air Lines": "air_lines", "Tire Pressure": "tire_pressure", "Headache Rack or Chain": "headache_rack", "Body & Doors": "body_doors", "Glad Hands & Air Systems": "glad_hands", "Reservoirs/Brackets/Straps": "reservoirs_brackets_straps", "Bumpers & Cabs": "bumpers_cabs"}, "Under The Hood": {"Hood": "hood", "Air Compressor Belt": "air_compressor_belt", "Air Compressor": "air_compressor", "Power Steering System": "power_steering_system", "Fuel Pump & System": "fuel_pump_system", "Battery & Wiring": "battery_wiring", "Air Filter": "air_filter", "Fan & Belt": "fan_belt", "Carburetor": "carburetor", "Cooling System": "cooling_system", "Windshield Washer Pump": "windshield_washer_pump", "Distributor": "distributor", "Exhaust System": "exhaust_system", "Windshield Wash Container": "windshield_wash_container"}, "Undercarriage": {"Pin & Bushing Wear": "pin_bushing_wear", "Sprocket": "sprocket", "Springs": "springs", "Link Wear": "link_wear", "Shock Absorbers": "shock_absorbers", "Muffler": "muffler", "Roller Wear": "roller_wear", "Oil Pan": "oil_pan", "Pittman Arm": "pittman_arm", "Idler Wear": "idler_wear", "Drag Link": "drag_link", "Differential": "differential", "Track Wear": "track_wear", "Tie Rod": "tie_rod", "Suspension": "suspension", "Roller Guards": "roller_guards", "Frame Rails": "frame_rails", "Axles": "axles"}, "Brake, Tires & Wheels": {"Brake Components": "brake_components", "Chock Block": "chock_block", "Road Clearance": "road_clearance", "Spring Caging Bolts": "spring_caging_bolts", "Brake Drum Condition": "brake_drum_condition", "Brake Lining Thickness": "brake_lining_thickness", "Disc Brakes": "disc_brakes", "Brake Lines & Hoses": "brake_lines_hoses", "Brake Failure Indicator": "brake_failure_indicator", "Reservoirs & Valves": "reservoirs_valves", "Tire Pressure": "tire_pressure", "Park Brake": "park_brake", "Wheel Bearings": "wheel_bearings", "Vacuum System Reserve": "vacuum_system_reserve", "Emergency Brake": "emergency_brake", "Proportioning Valve": "proportioning_valve", "Pump Operator": "pump_operator", "Brake Operation": "brake_operation", "Brake Camshafts & Travel": "brake_camshafts_travel", "Tire Wear": "tire_wear", "Jack": "jack", "Tire Iron": "tire_iron", "Spare Tire": "spare_tire", "Chains": "chains"}}, "Field Level Hazard Assessment": {"name": "Field Level Hazard Assessment", "muster_point": [], "explanation": [], "hazard_explanation": [], "incident_explanation": [], "Concrete": {"Digging": ["List", "of", "Hazards"], "Tamping": [], "Running conduit/hose": [], "Building forms": [], "Installing forms": [], "Tying Rebar": [], "Setting Anchor Bolts": [], "Finishing": []}, "Erecting": {"Drilling Anchor Bolts": [], "Organizing Materials": [], "Bolting Connections": [], "Rigging & Hoisting": [], "Making a Custom Opening": []}, "Cladding": {"Insulating Wall": [], "Insulating Firewall": [], "Cutting Sheets": [], "Cutting Trim": [], "Hanging Wall Sheets": [], "Roofing": [], "Hanging Trim": [], "Hanging Gutter": [], "Install Energy Saver Tarp, Wall": [], "Install Energy Saver Tarp, Roof": [], "Banding Energy Saver Tarp": []}, "items_inspected": ["Harness", "my ass", "item"], "hazards": ["more", "Gayness"]}}
+{
+  "Add Site": {
+    "name": "Add Site",
+    "customer": [],
+    "address": [],
+    "city": []
+  },
+  "Add Equipment": {
+    "name": "Add Equipment",
+    "customer": [],
+    "address": [],
+    "city": []
+  },
+  "Safety Talk Report Form": {
+    "name": "Safety Talk Report Form",
+    "titles": [
+      "Toolbox Talk"
+    ],
+    "crew": [
+      "Max",
+      "Mitchell",
+      "Kaleb",
+      "Tyson"
+    ],
+    "topics": [
+      "Retirement",
+      "Butt Stuff"
+    ],
+    "concerns": [
+      "SuperAids"
+    ],
+    "response": [
+      "Saran Wrap Underwear"
+    ]
+  },
+  "Equipment and Vehicle Pre-Start Checklist": {
+    "name": "Equipment and Vehicle Pre-Start Checklist",
+    "unit_num": [],
+    "mileage": [],
+    "Fluid Levels": {
+      "Motor Oil": "motor_oil",
+      "Rear End": "rear_end",
+      "Air Filter": "air_filter",
+      "Radiator": "radiator",
+      "Brake Fluid": "brake_fluid",
+      "Oil Change Required?": "oil_change_required",
+      "Power Steering": "power_steering",
+      "Greasing Required": "greasing_required",
+      "Oil Filter Changed?": "oil_filter_changed",
+      "Windshield Washer": "windshield_washer"
+    },
+    "Driver's Compartment": {
+      "Sun Visors": "suns_visors",
+      "Horns & Switches": "horns_switches",
+      "Steering Power Assist": "steering_power_assist",
+      "Windshield Wipers": "windshield_wipers",
+      "Windshield Defrost": "windshield_defrost",
+      "Windshield": "windshield",
+      "Side Windows": "side_windows",
+      "Beam Indicator": "beam_indicator",
+      "Instrument Lamps": "instrument_lamps",
+      "Pedal Pads": "pedal_pads",
+      "Fire Extinguisher": "fire_extinguisher",
+      "Hazard Warning Kit/Flares": "hazard_warning_kit",
+      "Seats & Seatbelts": "seats_seatbelts",
+      "First Aid Kit": "first_aid_kit",
+      "Air Pressure Gauge": "air_pressure_gauge",
+      "Speedometer": "speedometer",
+      "Survival Kit": "survival_kit",
+      "Cell Phone": "cell_phone",
+      "Compressor Buildups": "compressor_buildups",
+      "Acc. Pedal and Air Throttle": "acc_pedal_air_throttle",
+      "Booster Cable": "booster_cable",
+      "Air Leakage": "air_leakage",
+      "Compressed Air": "compressed_air",
+      "Steering Column Security": "steering_column_security"
+    },
+    "Body Exterior": {
+      "Head Lamp Operation/Aim": "head_lamp_operation",
+      "Clearance Lamps": "clearance_lamps",
+      "Identification Lamps": "identification_lamps",
+      "Tail Lamps": "tail_lamps",
+      "Stop Lamps": "stop_lamps",
+      "Turn Signal Lamps": "turn_signal_lamps",
+      "Marker Lamps": "marker_lamps",
+      "Hazard Lamps": "hazard_lamps",
+      "Reflex Reflectors": "reflex_reflectors",
+      "Trailer Hitch": "trailer_hitch",
+      "TDG Placards": "tdg_placards",
+      "Fenders/Mud Flaps": "fenders",
+      "Trailer Cord": "trailer_cord",
+      "Paint": "paint",
+      "Air Lines": "air_lines",
+      "Tire Pressure": "tire_pressure",
+      "Headache Rack or Chain": "headache_rack",
+      "Body & Doors": "body_doors",
+      "Glad Hands & Air Systems": "glad_hands",
+      "Reservoirs/Brackets/Straps": "reservoirs_brackets_straps",
+      "Bumpers & Cabs": "bumpers_cabs"
+    },
+    "Under The Hood": {
+      "Hood": "hood",
+      "Air Compressor Belt": "air_compressor_belt",
+      "Air Compressor": "air_compressor",
+      "Power Steering System": "power_steering_system",
+      "Fuel Pump & System": "fuel_pump_system",
+      "Battery & Wiring": "battery_wiring",
+      "Air Filter": "air_filter",
+      "Fan & Belt": "fan_belt",
+      "Carburetor": "carburetor",
+      "Cooling System": "cooling_system",
+      "Windshield Washer Pump": "windshield_washer_pump",
+      "Distributor": "distributor",
+      "Exhaust System": "exhaust_system",
+      "Windshield Wash Container": "windshield_wash_container"
+    },
+    "Undercarriage": {
+      "Pin & Bushing Wear": "pin_bushing_wear",
+      "Sprocket": "sprocket",
+      "Springs": "springs",
+      "Link Wear": "link_wear",
+      "Shock Absorbers": "shock_absorbers",
+      "Muffler": "muffler",
+      "Roller Wear": "roller_wear",
+      "Oil Pan": "oil_pan",
+      "Pittman Arm": "pittman_arm",
+      "Idler Wear": "idler_wear",
+      "Drag Link": "drag_link",
+      "Differential": "differential",
+      "Track Wear": "track_wear",
+      "Tie Rod": "tie_rod",
+      "Suspension": "suspension",
+      "Roller Guards": "roller_guards",
+      "Frame Rails": "frame_rails",
+      "Axles": "axles"
+    },
+    "Brake, Tires & Wheels": {
+      "Brake Components": "brake_components",
+      "Chock Block": "chock_block",
+      "Road Clearance": "road_clearance",
+      "Spring Caging Bolts": "spring_caging_bolts",
+      "Brake Drum Condition": "brake_drum_condition",
+      "Brake Lining Thickness": "brake_lining_thickness",
+      "Disc Brakes": "disc_brakes",
+      "Brake Lines & Hoses": "brake_lines_hoses",
+      "Brake Failure Indicator": "brake_failure_indicator",
+      "Reservoirs & Valves": "reservoirs_valves",
+      "Tire Pressure": "tire_pressure",
+      "Park Brake": "park_brake",
+      "Wheel Bearings": "wheel_bearings",
+      "Vacuum System Reserve": "vacuum_system_reserve",
+      "Emergency Brake": "emergency_brake",
+      "Proportioning Valve": "proportioning_valve",
+      "Pump Operator": "pump_operator",
+      "Brake Operation": "brake_operation",
+      "Brake Camshafts & Travel": "brake_camshafts_travel",
+      "Tire Wear": "tire_wear",
+      "Jack": "jack",
+      "Tire Iron": "tire_iron",
+      "Spare Tire": "spare_tire",
+      "Chains": "chains"
+    }
+  },
+  "Field Level Hazard Assessment": {
+    "name": "Field Level Hazard Assessment",
+    "muster_point": [],
+    "explanation": [],
+    "hazard_explanation": [],
+    "incident_explanation": [],
+    "Concrete": {
+      "Digging": [
+        "Trench Collapse",
+        "Underground Utility Lines",
+        "Excavation Equipment",
+        "Underground Water"
+      ],
+      "Tamping": [
+        "Trench Collapse",
+        "Underground Utility Lines",
+        "Excavation Equipment",
+        "Underground Water"
+      ],
+      "Running conduit/hose": [
+        "Trench Collapse",
+        "Underground Utility Lines",
+        "Excavation Equipment",
+        "Underground Water"
+      ],
+      "Building forms": [],
+      "Installing forms": [
+        "Trench Collapse",
+        "Underground Utility Lines",
+        "Excavation Equipment",
+        "Underground Water"
+      ],
+      "Tying Rebar": [
+        "Trench Collapse",
+        "Underground Utility Lines",
+        "Excavation Equipment",
+        "Underground Water"
+      ],
+      "Setting Anchor Bolts": [],
+      "Finishing": []
+    },
+    "Erecting": {
+      "Drilling Anchor Bolts": [],
+      "Organizing Materials": [],
+      "Bolting Connections": [],
+      "Rigging & Hoisting": [],
+      "Making a Custom Opening": []
+    },
+    "Cladding": {
+      "Insulating Wall": [],
+      "Insulating Firewall": [],
+      "Cutting Sheets": [],
+      "Cutting Trim": [],
+      "Hanging Wall Sheets": [],
+      "Roofing": [],
+      "Hanging Trim": [],
+      "Hanging Gutter": [],
+      "Install Energy Saver Tarp, Wall": [],
+      "Install Energy Saver Tarp, Roof": [],
+      "Banding Energy Saver Tarp": []
+    },
+    "items_inspected": [
+    ],
+    "hazards": [
+      "Slip/Trip/Fall",
+      "Crush",
+      "Falling Object",
+      "Noise",
+      "Electrical Shock",
+      "Confined Space",
+      "Vibration",
+      "Dust",
+      "Fumes",
+      "Heat",
+      "Repetitive Motion",
+      "Lifting",
+      "Bending",
+      "Fire/Flammable Materials"
+    ]
+  }
+}

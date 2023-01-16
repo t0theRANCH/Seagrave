@@ -97,9 +97,9 @@ class TextFieldPopupContent(MDBoxLayout):
                                 "on_release": lambda x=f"{list_item}": self.call_back(x)})
 
     def add_field(self):
-        if self.ids.text_field.text and self.popup.db and not self.popup.plan_option:
+        if self.ids.dropdown.text and self.popup.db and not self.popup.plan_option:
             self.controller.view.get_tree()
-            self.update_fields(self.model.add_form_option, [self.popup, self.ids.text_field.text])
+            self.update_fields(self.model.add_form_option, [self.popup, self.ids.dropdown.text])
         if not self.popup.db and self.popup.plan_option:
             Snackbar(text='Items cannot be added to this list from here').open()
 
@@ -109,6 +109,12 @@ class TextFieldPopupContent(MDBoxLayout):
         popup.open()
 
     def delete_field(self, value):
+        if not self.popup.db:
+            Snackbar(text='Items cannot be deleted from this list from here').open()
+            return
+        if self.popup.model.is_undeletable(self.popup.title, value):
+            Snackbar(text='This item cannot be deleted').open()
+            return
         self.update_fields(func=self.model.delete_form_option, param=[self.popup, value], delete=True)
 
     def update_fields(self, func: Callable, param: list, delete: bool = False):
@@ -116,7 +122,7 @@ class TextFieldPopupContent(MDBoxLayout):
         widget = next((s for s in single_option_fields if self.popup.id == s.id), None)
         widget.pre_select = options
         if param[1] == self.popup.selected and delete:
-            self.ids.text_field.text = ''
+            self.ids.dropdown.text = ''
             self.popup.selected = None
             self.model.form_view_fields[self.popup.id] = ''
             widget.un_select()

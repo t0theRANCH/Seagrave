@@ -1,10 +1,12 @@
 from kivy._event import EventDispatcher
 from kivy.properties import ObjectProperty
+from kivymd.uix.dialog import MDDialog
+from kivymd.uix.list import OneLineIconListItem, IconLeftWidget
 
 from image_processing import RotatedImage
 from Views.Screens.site_view.site_view import SiteView
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Union
 
 if TYPE_CHECKING:
     from Controller.main_controller import MainController
@@ -18,6 +20,7 @@ class SiteViewController(EventDispatcher):
         super().__init__(**kwargs)
         self.model = model
         self.view = SiteView(name='site_view', controller=self, model=self.model)
+        self.popup: Union[MDDialog, None] = None
 
     def remove_delete_button(self):
         self.view.ids.rail.remove_widget(self.view.ids.delet)
@@ -81,8 +84,22 @@ class SiteViewController(EventDispatcher):
         self.main_controller.main_screen_controller.change_feed(title=title, deletable=deletable)
         self.main_controller.change_screen('main_screen')
 
+    def danger_zone(self):
+        menu_items = [
+            OneLineIconListItem(IconLeftWidget(icon='note-plus'), text=x, on_release=self.select_danger_zone_item)
+            for x in ['Mark Site Complete', 'Delete Site']]
+        self.popup = MDDialog(title='Danger Zone', items=menu_items, type='simple')
+        self.popup.open()
+
+    def select_danger_zone_item(self, instance_item: OneLineIconListItem):
+        result = {'Mark Site Complete': 'complete', 'Delete Site': 'delete'}
+        self.change_feed(title='sites', deletable=False)
+        self.main_controller.change_screen('main_screen')
+        self.model.delete_site(result[instance_item.text])
+        self.popup.dismiss()
+
     def punch_clock(self, current_datetime, current_day, action):
-        self.view.punch_clock(current_datetime=current_datetime, current_day=current_day, action=action)
+        self.model.punch_clock(current_datetime=current_datetime, current_day=current_day, action=action)
 
     def get_directions(self, address, city):
         if phone := self.model.phone:

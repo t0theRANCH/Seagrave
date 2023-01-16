@@ -1,8 +1,10 @@
-from os import remove, getcwd
+from os import remove
 
 from kivy.storage.jsonstore import JsonStore
 
-from Forms.forms import Forms
+from Forms.safety_talk import SafetyTalk
+from Forms.equipment_checklist import EquipmentChecklist
+from Forms.flha import FLHA
 from api_requests import Requests
 
 from typing import TYPE_CHECKING, Union
@@ -16,6 +18,9 @@ if TYPE_CHECKING:
 class FormsModel:
     def __init__(self, main_model: 'MainModel'):
         self.main_model = main_model
+        forms = [x for x in self.main_model.forms if x not in ['Add Site', 'Add Equipment']]
+        form_classes = [SafetyTalk, EquipmentChecklist, FLHA]
+        self.forms = {x[0]: x[1] for x in zip(forms, form_classes)}
 
     def get_site_id(self, location):
         entry = location.split(' - ')
@@ -57,9 +62,9 @@ class FormsModel:
         self.main_model.forms[db_id] = rest
 
     def update_todays_forms(self, db_id: str, new_entry: dict, column: str = None):
-        rest = self.main_model.today['forms'][db_id]
+        rest = self.main_model.today['forms']
         rest.update(new_entry)
-        self.main_model.today['forms'][db_id] = rest
+        self.main_model.today['forms'] = rest
         if column:
             data = {'database': 'today', 'column': column}
             Requests.secure_request('sqlUpdate', id_token=self.main_model.id_token, data=data)
@@ -93,12 +98,12 @@ class FormsModel:
             text_field = popup.content_cls.ids.add_new.text
             widgets = self.main_model.multi
         else:
-            text_field = popup.content_cls.ids.text_field.text
+            text_field = popup.content_cls.ids.dropdown.text
             widgets = self.main_model.single
         return text_field, widgets
 
     def compile_entry_to_change(self, popup, text_field):
-        if 'tasks' in popup.id:
+        if 'task' in popup.id:
             work, options = self.add_task(popup=popup)
             return options, {work: options}
         else:
@@ -106,7 +111,7 @@ class FormsModel:
             options.append(text_field)
             return options, {popup.db[1]: options}
 
-    def add_task(self, popup: 'MultiSelectPopup'):
+    def add_task(self, popup):
         options = {}
         w2b_done = next((s for s in self.main_model.single if 'work_to_be_done' in s.id and s.ids.pre_select.text),
                         None)
@@ -153,7 +158,7 @@ class FormsModel:
     def get_single_widgets(self, popup):
         widgets = self.main_model.single
         fields = [x['text'] for x in popup.content_cls.pre_select]
-        fields.remove(popup.content_cls.ids.text_field.text)
+        fields.remove(popup.content_cls.ids.dropdown.text)
         return fields, widgets
 
     @staticmethod
@@ -237,23 +242,21 @@ class FormsModel:
                 self.main_model.update_equipment(new_entry=equipment_info, db_id=e, column='equipment')
 
     def process_form(self, signature, form, separator):
-        form = Forms(
-            name=form,
-            forms=[x for x in self.main_model.forms if x not in ['Add Site', 'Add Equipment']],
-            separator=self.main_model.form_view_fields[separator],
-            location=self.main_model.form_view_fields['location']
-        )
-
-        func = form.handle_form_selection()
-        func(fields=self.main_model.form_view_fields, signature=signature)
-        self.remove_form_from_db(file_name=form.file_name, form=form, separator=separator)
-        Requests.upload(path=f"{form.file_name}.pdf", id_token=self.main_model.id_token)
-        remove(f"{getcwd()}/database/forms/{form.file_name}.pdf")
+        form_class = self.forms[form]
+        form_instance = form_class()
+        form_instance.separator = self.main_model.form_view_fields[separator]
+        form_instance.fields = self.main_model.form_view_fields
+        form_instance.signature_path = f"database/{signature}"
+        form_instance.make_file()
+        form_instance.print()
+        self.remove_form_from_db(file_name=form_instance.file_name, form=form, separator=separator)
+        Requests.upload(path=f"{form_instance.file_name}.pdf", id_token=self.main_model.id_token)
+        form_instance.remove_file()
 
     def remove_form_from_db(self, file_name, form, separator):
         for x in [x for x in ['signatures', 'initials'] if x in self.main_model.form_view_fields]:
             self.main_model.form_view_fields.pop(x)
-        fields = {"name": form.name, "site": self.main_model.current_site_id,
+        fields = {"name": form, "site": self.main_model.current_site_id,
                   'location': self.main_model.form_view_fields['location'],
                   'date': self.main_model.form_view_fields['date'],
                   'separator': self.main_model.form_view_fields[separator],

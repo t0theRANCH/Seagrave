@@ -6,23 +6,23 @@
     EditableLabel:
         id: unit_num_field
         hint_text: "Unit #"
-    MDBoxLayout:
-        EditableLabel:
-            id: last_inspection_field
-            hint_text: "Last Inspection"
-        EditableLabel:
-            id: last_service_field
-            hint_text: "Last Service"
+        pos_hint: {'center_x': .5, 'center_y': .5}
+    EditableLabel:
+        id: last_inspection_field
+        hint_text: "Last Inspection (Hours)"
+    EditableLabel:
+        id: last_service_field
+        hint_text: "Last Service (Hours)"
     EditableLabel:
         id: mileage_field
-        hint_text: "Mileage (hours)"
+        hint_text: "Mileage (Hours)"
+        pos_hint: {'center_x': .5, 'center_y': .5}
     MDBoxLayout:
         MDLabel:
             id: mileage_until_inspection_field
-            text: root.mileage_until_inspection
         MDLabel:
             id: mileage_until_service_field
-            text: root.mileage_until_service
     DropdownMenu:
         id: dropdown
+        hint_text: "Site"
 

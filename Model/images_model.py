@@ -1,8 +1,10 @@
 from shutil import copy
+from os import remove
 
 from api_requests import Requests
 
 from typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
     from Model.main_model import MainModel
 
@@ -41,29 +43,31 @@ class ImagesModel:
         if self.main_model.current_site:
             site_entry = self.main_model.sites[self.main_model.current_site]
             site_entry['banner_image'] = value
-            self.main_model.update_sites(new_entry=site_entry, db_id=self.main_model.current_site, column='banner_image')
+            self.main_model.update_sites(new_entry=site_entry, db_id=self.main_model.current_site,
+                                         column='banner_image')
 
     @staticmethod
     def check_extension(required_ftype, file_type, extension, possible_file_extensions):
         return file_type is not required_ftype or extension in possible_file_extensions
 
-    def select_image_to_upload(self, path, file_type):
+    def select_image_to_upload(self, path, file_type, blueprint_type):
         extension = path.split('.')[-1]
         file_types = {'blueprints': {'possible_file_extensions': ['pdf']},
                       'pictures': {'possible_file_extensions': ['jpg', 'png']}}
         if not all((self.check_extension(x, file_type, extension, y['possible_file_extensions'])
                     for x, y in file_types.items())):
             return False
-        response = Requests.secure_request(data={"database": file_type, "name": path,
-                                                 "site": self.main_model.current_site},
-                                           name='sqlCreate', id_token=self.main_model.id_token)
+        data = {"database": file_type, "name": path, "site": self.main_model.current_site}
+        if blueprint_type:
+            data['type'] = blueprint_type
+        response = Requests.secure_request(data=data, name='sqlCreate', id_token=self.main_model.id_token)
         self.add_new_image_to_database(response, file_type, path)
         return True
 
     def add_new_image_to_database(self, response, file_type, path):
-        ftypes = ['blueprints', 'pictures']
-        db_ftypes = [self.main_model.blueprints, self.main_model.pictures]
-        db_part = db_ftypes[ftypes.index(file_type)]
+        f_types = ['blueprints', 'pictures']
+        db_f_types = [self.main_model.blueprints, self.main_model.pictures]
+        db_part = db_f_types[f_types.index(file_type)]
         new_id = str(response['body'])
         save_path = f"database/{file_type}"
         db_part.put(new_id, path=f"{save_path}/{path.split('/')[-1]}", site=self.main_model.current_site)

@@ -2,6 +2,7 @@ from os.path import join, dirname
 
 from kivy.lang import Builder
 from kivy.properties import BooleanProperty, StringProperty
+from kivy.uix.behaviors import FocusBehavior
 
 from kivymd.uix.relativelayout import MDRelativeLayout
 
@@ -15,16 +16,16 @@ class EditableLabel(MDRelativeLayout):
         super(EditableLabel, self).__init__(**kwargs)
 
     def on_touch_down(self, touch):
-        if not self.edit:
+        local = self.to_local(*touch.pos)
+        if self.ids.icon.collide_point(local[0], local[1]):
+            self.edit = not self.edit
+            FocusBehavior.ignored_touch.append(touch)
             return True
         if self.collide_point(*touch.pos):
-            return super(EditableLabel, self).on_touch_down(touch)
-
-    def edit_text(self, instance):
-        if self.edit:
-            self.edit = False
-            return
-        self.edit = True
+            if self.edit:
+                self.edit = False
+                FocusBehavior.ignored_touch.append(touch)
+            return True
 
     def on_edit(self, instance, value):
         if self.edit:

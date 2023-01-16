@@ -3,15 +3,19 @@
     "Max",
     "Mitchell",
     "Kaleb",
-    "Tyson",
-    "Andrew"
+    "Tyson"
   ],
   "Workers": [
     "Max",
     "Mitchell",
     "Kaleb",
-    "Tyson",
-    "Andrew"
+    "Tyson"
+  ],
+  "Who gives the talk": [
+    "Max",
+    "Mitchell",
+    "Kaleb",
+    "Tyson"
   ],
   "Tasks": [
     "Digging",
@@ -39,5 +43,7 @@
     "Install Energy Saver Tarp, Roof",
     "Banding Energy Saver Tarp"
   ],
-  "Hazards": ["Farts"]
+  "Hazards": [
+    "Farts"
+  ]
 }

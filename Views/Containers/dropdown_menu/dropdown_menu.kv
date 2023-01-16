@@ -4,18 +4,18 @@
     size_hint_y: None
     MDTextField:
         id:text_field
-        text: root.text
         hint_text: root.hint_text
+        text: root.text
         input_type: 'text'
         mode: "rectangle"
         multiline: False
         keyboard_suggestions: True
+        on_touch_down: root.on_touch_down()
     MDIconButton:
         icon: "chevron-down"
         id: open_menu
         pos_hint: {"center_y": .5}
         pos: text_field.width - self.width + dp(8), 0
-        on_release: root.menu.open()
 
 <EditableDropdownMenu>
     arrow: open_menu
@@ -23,12 +23,13 @@
     size_hint_y: None
     MDTextField:
         id:text_field
-        text: root.text
         hint_text: root.hint_text
+        text: root.text
         input_type: 'text'
         mode: "rectangle"
         multiline: False
         keyboard_suggestions: True
+        on_text: root.text = self.text
     MDIconButton:
         icon: "chevron-down"
         id: open_menu

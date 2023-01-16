@@ -23,19 +23,16 @@ class FormView(MDScreen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.type = 'forms'
-        self.speed_dial_with_save_button = {"Back": "arrow-left-circle", "Save": "content-save", "Submit": "send-check"}
-        self.speed_dial_without_save_button = {"Back": "arrow-left-circle", "Submit": "send-check"}
-        self.speed_dial_methods = {"Back": self.controller.remove_widgets, "Save": self.controller.save_form,
-                                   "Submit": self.controller.submit_form}
+        self.speed_dial_with_save_button = {
+            "Back": ["arrow-left-circle", "on_release", self.controller.remove_widgets],
+            "Save": ["content-save", "on_release", self.controller.save_form],
+            "Submit": ["send-check", "on_release", self.controller.submit_form]
+        }
+        self.speed_dial_without_save_button = {
+            "Back": ["arrow-left-circle", "on_release", self.controller.remove_widgets],
+            "Submit": ["send-check", "on_release", self.controller.submit_form]
+        }
         self.add_save_button()
-
-    def select_speed_dial_button(self, instance: 'MDFloatingBottomButton'):
-        for i in self.speed_dial_with_save_button:
-            if self.speed_dial_with_save_button[i] == instance.icon:
-                func = self.speed_dial_methods[i]
-                func()
-                self.ids.speed_dial.close_stack()
-                return
 
     def add_save_button(self):
         self.ids.speed_dial.data = self.speed_dial_with_save_button
@@ -58,14 +55,17 @@ class FormView(MDScreen):
                           model=self.model),
              SingleOption(ind=f"assigned_to_{value}", title='Assigned To', pre_select=[], controller=self.controller,
                           model=self.model),
-             SingleOptionDatePicker(ind=f"completion_{value}", model=self.model)]
-        if f"work_required_{value}" in self.model.form_view_fields:
-            z[1].text = self.model.form_view_fields[f"work_required_{value}"]
-            z[2].text = self.model.form_view_fields[f"assigned_to_{value}"]
-            z[3].text = self.model.form_view_fields[f"completion_{value}"]
-            for x in z:
+             SingleOptionDatePicker(ind=f"completion_{value}", model=self.model, title='Completion Date')]
+        for x in z:
+            self.ids.formview.add_widget(x)
+            if isinstance(x, MDLabel):
+                continue
+            if x.ind not in self.model.form_view_fields:
+                self.model.form_view_fields[x.ind] = ''
+                continue
+            if self.model.form_view_fields[x.ind]:
                 x.select()
-                self.ids.formview.add_widget(x)
+                x.add_button_text(self.model.form_view_fields[x.ind])
 
     def delete_old_repair_widgets(self, key: str, value: str):
         widgets_to_delete = [x for x in self.model.labels if key in x.text]
@@ -86,15 +86,13 @@ class FormView(MDScreen):
                                          controller=self.controller)
             if s in self.model.today['forms'][form_entry][signature]:
                 sig_option.select()
-            self.view.ids.formview.add_widget(sig_option)
+            self.ids.formview.add_widget(sig_option)
 
     def add_risk_plan_widgets(self, name: str, num: int, button_text: str):
-        button_one = RiskButton(ind=name, screen_manager=self.form_view, title=button_text,
-                                selected=[self.model.form_view_fields['risk'][name]['risk'],
-                                          self.model.form_view_fields['risk'][name]['priority']],
-                                model=self.model, controller=self.controller, view=self.controller.view)
+        button_one = RiskButton(ind=name, view=self, title=button_text,
+                                model=self.model, controller=self.controller)
         button_two = SingleOption(ind=f"Plan - {name}", selection=self.model.form_view_fields['plan'][name],
-                                  title=f"Plans to Eliminate/Control - {name}", pre_select=None, plan_field=True,
+                                  title=f"Plans to Eliminate/Control - {name}", plan_field=True,
                                   controller=self.controller, model=self.model)
 
         if self.model.form_view_fields['risk'][name]['risk']:
@@ -102,8 +100,8 @@ class FormView(MDScreen):
                                                       {self.model.form_view_fields['risk'][name]['priority']}")
         if self.model.form_view_fields['plan'][name]:
             self.select_risk_plan_button(button_two, self.model.form_view_fields['plan'][name])
-        self.form_view.ids.formview.add_widget(button_one, index=(-7 - (num * 2)))
-        self.form_view.ids.formview.add_widget(button_two, index=(-8 - (num * 2)))
+        self.ids.formview.add_widget(button_one, index=(-7 - (num * 2)))
+        self.ids.formview.add_widget(button_two, index=(-8 - (num * 2)))
 
     @staticmethod
     def select_risk_plan_button(button: Union['RiskButton', 'SingleOption'], button_text: str):
@@ -128,7 +126,7 @@ class FormView(MDScreen):
         self.ids.formview.add_widget(sig)
 
     def open_error_popup(self):
-        popup = ErrorPopup(empty_fields=self.pops)
+        popup = ErrorPopup(empty_fields=self.controller.pops)
         popup.open()
         self.controller.pops = []
 
