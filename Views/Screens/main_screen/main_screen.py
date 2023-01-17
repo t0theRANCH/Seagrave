@@ -1,9 +1,9 @@
 from os.path import join, dirname
 
+from kivy.core.window import Window
 from kivy.lang import Builder
 from kivy.properties import ObjectProperty
 
-from Views.Popups.equipment_service.equipment_service import EquipmentServicePopupContent, EquipmentService
 from kivymd.uix.screen import MDScreen
 
 from Views.Buttons.rv_button.rv_button import RVButton
@@ -31,6 +31,7 @@ class MainScreen(MDScreen):
             widget.feed = self.controller.feed
             widget.screen_manager = self.manager
             self.ids.main_feed.add_widget(widget)
+        self.ids.speed_dial._update_pos_buttons(Window, Window.width, Window.height)
 
 
 Builder.load_file(join(dirname(__file__), "main_screen.kv"))

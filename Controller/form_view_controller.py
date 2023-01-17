@@ -2,6 +2,7 @@ from datetime import datetime
 import contextlib
 
 from kivy._event import EventDispatcher
+from kivy.core.window import Window
 from kivy.properties import ObjectProperty
 from kivy.uix.widget import WidgetException
 
@@ -50,6 +51,7 @@ class FormViewController(EventDispatcher):
         if self.main_controller.nav_drawer.state == 'open':
             self.main_controller.nav_drawer.open_close()
         self.main_controller.change_screen('form_view')
+        self.view.ids.speed_dial._update_pos_buttons(Window, Window.width, Window.height)
 
     def add_widgets_to_form_view(self, widgets: list, title: str):
         for widget in widgets:

@@ -4,26 +4,21 @@
 
     id: main_drag
     name: 'main_screen'
-    MDBoxLayout:
+    MDFloatLayout:
         orientation: "vertical"
         size_hint: 1,1
         MDTopAppBar:
+            pos_hint: {"top": 1}
             id:toolbar
             title: ""
             left_action_items: [["menu", lambda x: main_drag.controller.open_close()]]
         ScrollView:
+            pos_hint: {"top": 0.9}
             MDList:
                 id: main_feed
                 spacing: "18dp"
-        MDBoxLayout:
-            orientation: 'horizontal'
-            size_hint: 1, 0.4
-            padding: 50,0,50,100
-            AnchorLayout:
-                anchor_x: 'right'
-                anchor_y: 'bottom'
-                MDFloatingActionButtonSpeedDial:
-                    id: speed_dial
-                    label_text_color: 1,1,1,1
-                    label_bg_color: app.theme_cls.primary_color
-                    label_radius: 10,10,10,10
+        MDFloatingActionButtonSpeedDial:
+            id: speed_dial
+            label_text_color: 1,1,1,1
+            label_bg_color: app.theme_cls.primary_color
+            label_radius: 10,10,10,10

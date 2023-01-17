@@ -7,7 +7,6 @@ from kivy import Config, platform
 from kivymd.app import MDApp
 from kivy.core.window import Window
 
-from Forms.safety_talk import SafetyTalk
 from Model.main_model import MainModel
 from Controller.main_controller import MainController
 from Controller.login_screen_controller import LoginScreenController

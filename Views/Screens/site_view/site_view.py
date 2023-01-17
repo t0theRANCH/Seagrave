@@ -6,10 +6,7 @@ from kivy.properties import ObjectProperty
 from Views.Containers.equipment_content.equipment_content import EquipmentContent
 from Views.Containers.form_content.form_content import FormContent
 from Views.Containers.picture_content.picture_content import PictureContent
-from Views.Popups.equipment_service.equipment_service import EquipmentServicePopupContent, EquipmentService
-from kivymd.uix.dialog import MDDialog
 from kivymd.uix.expansionpanel import MDExpansionPanel, MDExpansionPanelOneLine
-from kivymd.uix.list import IconLeftWidget, OneLineIconListItem
 from kivymd.uix.screen import MDScreen
 
 from Views.Containers.address_content.address_content import AddressContent
