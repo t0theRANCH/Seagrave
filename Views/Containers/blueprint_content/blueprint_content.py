@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 class BlueprintContent(MDBoxLayout):
     def __init__(self, blueprint_data: dict, controller: 'SiteViewController', **kwargs):
         super().__init__(**kwargs)
-        self.blueprint_types = ['Architectural', 'Erection', 'Cladding']
+        self.blueprint_types = ['Architectural', 'Foundation', 'Structural', 'Cladding']
         self.controller = controller
         self.blueprint_data = blueprint_data
         self.new_blueprints = None

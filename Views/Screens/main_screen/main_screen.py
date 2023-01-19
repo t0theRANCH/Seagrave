@@ -21,6 +21,9 @@ class MainScreen(MDScreen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+    def on_pre_enter(self):
+        self.ids.speed_dial._update_pos_buttons(Window, Window.width, Window.height)
+
     def add_widgets_to_feed(self, new_feed: dict, title: str, deletable: bool):
         for n in new_feed:
             widget = RVButton(id=n['id'], deletable=True, controller=self.controller, model=self.controller.model) \
@@ -28,10 +31,12 @@ class MainScreen(MDScreen):
             if 'equipment' in title:
                 widget.equipment = True
             widget.text = n['text']
+            if 'forms' not in title:
+                widget.secondary_text = n['secondary_text']
+                widget.tertiary_text = n['tertiary_text']
             widget.feed = self.controller.feed
             widget.screen_manager = self.manager
             self.ids.main_feed.add_widget(widget)
-        self.ids.speed_dial._update_pos_buttons(Window, Window.width, Window.height)
 
 
 Builder.load_file(join(dirname(__file__), "main_screen.kv"))

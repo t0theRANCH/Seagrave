@@ -1,5 +1,5 @@
 from Views.Buttons.rv_button.delete_icon import DeleteIcon
-from kivymd.uix.list import OneLineAvatarIconListItem
+from kivymd.uix.list import ThreeLineAvatarIconListItem
 
 from typing import TYPE_CHECKING, Union
 if TYPE_CHECKING:
@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     from Model.main_model import MainModel
 
 
-class RVButton(OneLineAvatarIconListItem):
+class RVButton(ThreeLineAvatarIconListItem):
     def __init__(self, id: str, controller: Union['MainScreenController', 'FormViewController'], model: 'MainModel',
                  deletable: bool = False, equipment: bool = False, blueprints: bool = False, **kwargs):
         super().__init__(**kwargs)

@@ -112,13 +112,13 @@ class MainModel(EventDispatcher):
         self.login_model.db_handler()
 
     # Sites
-    
+
     def update_sites(self, db_id: str, new_entry: dict, column: str = None):
         self.sites_model.update_sites(db_id, new_entry, column)
-        
+
     def update_time_clock(self, db_id: str, new_entry: dict, column: str = None):
         self.sites_model.update_time_clock(db_id, new_entry)
-        
+
     def delete_site(self, action):
         self.sites_model.delete_site(action)
 
@@ -165,6 +165,12 @@ class MainModel(EventDispatcher):
     def add_form_option(self, param: list):
         return self.forms_model.add_form_option(param[0])
 
+    def add_hazard(self, hazard_type, hazard):
+        self.forms_model.add_hazard(hazard_type, hazard)
+
+    def delete_hazard(self, hazard):
+        self.forms_model.delete_hazard(hazard)
+
     def delete_form_option(self, params: list):
         return self.forms_model.delete_form_option(params)
 
@@ -181,7 +187,7 @@ class MainModel(EventDispatcher):
 
     def update_pictures(self, db_id: str, new_entry: dict, column: str = None):
         self.images_model.update_pictures(db_id, new_entry, column)
-        
+
     def update_blueprints(self, db_id: str, new_entry: dict, column: str = None):
         self.images_model.update_blueprints(db_id, new_entry, column)
 
@@ -193,7 +199,7 @@ class MainModel(EventDispatcher):
 
     def set_banner_image(self, value):
         self.images_model.set_banner_image(value)
-    
+
     def select_image_to_upload(self, path, file_type, blueprint_type=None):
         return self.images_model.select_image_to_upload(path, file_type, blueprint_type)
 
@@ -201,23 +207,28 @@ class MainModel(EventDispatcher):
 
     @property
     def site_rows(self):
-        return [{"text": f"{self.sites[s]['customer']} - {self.sites[s]['city']}", "id": str(s),
-                       "type": 'site'} for s in self.sites]
+        return [{"text": f"{self.sites[s]['customer']}", "id": str(s),
+                 "secondary_text": f"{self.sites[s]['address']}", "tertiary_text": f"{self.sites[s]['city']}",
+                 "type": 'site'} for s in self.sites]
 
     @property
     def equipment_rows(self):
-        return [{"text": str(self.equipment[e]['type']), "id": str(e), "type": 'equipment'}
-                           for e in self.equipment]
+        return [{"text": str(self.equipment[e]['type']), "id": str(e), "type": 'equipment',
+                 "secondary_text": f"{self.equipment[e]['unit_num']}",
+                 "tertiary_text": f"{self.equipment[e]['mileage']} Hours"}
+                for e in self.equipment]
 
     @property
     def form_rows(self):
         return [{"text": str(self.forms[f]['name']), "id": str(f).lower().replace(' ', '_'), "type": 'forms'}
-                      for f in self.forms if str(self.forms[f]['name']) not in ["Add Site", "Add Equipment"]]
+                for f in self.forms if str(self.forms[f]['name']) not in ["Add Site", "Add Equipment"]]
 
     @property
     def today_rows(self):
-        return [{"text": self.today['forms'][f]['row_text'], "id": str(f), "type": 'forms'}
-                       for f in self.today['forms']]
+        return [{"text": self.today['forms'][f]['name'], "id": str(f), "type": 'forms',
+                 "secondary_text": f"{self.today['forms'][f]['date']} {self.today['forms'][f]['location']}",
+                 "tertiary_text": f"{self.today['forms'][f]['separator']}"}
+                for f in self.today['forms']]
 
     @property
     def blueprints(self):
@@ -238,7 +249,7 @@ class MainModel(EventDispatcher):
     @property
     def pictures(self):
         return JsonStore('database/pictures/pictures.json')
-    
+
     @property
     def register(self):
         return JsonStore('database/register.json')
@@ -262,4 +273,3 @@ class MainModel(EventDispatcher):
     @property
     def time_clock(self):
         return JsonStore('database/time_clock.json')
-    

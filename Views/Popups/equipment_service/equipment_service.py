@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from os.path import join, dirname
 
 from kivy.lang import Builder
@@ -5,12 +6,14 @@ from kivy.metrics import dp
 from kivy.properties import StringProperty
 
 from kivymd.uix.boxlayout import MDBoxLayout
-from kivymd.uix.button import MDFlatButton, MDRaisedButton
+from kivymd.uix.button import MDFlatButton, MDRaisedButton, MDIconButton
 from kivymd.uix.dialog import MDDialog
 
 from typing import TYPE_CHECKING, Union
 
 from kivymd.uix.menu import MDDropdownMenu
+
+from Forms.form_fields.form_widgets import SingleOptionDatePicker
 
 if TYPE_CHECKING:
     from Controller.main_screen_controller import MainScreenController
@@ -68,10 +71,19 @@ class EquipmentServicePopupContent(MDBoxLayout):
         if self.mileage:
             self.ids.mileage_field.text = self.mileage
             if self.last_service:
-                self.ids.mileage_until_service_field.text = f"{int(self.mileage) - int(self.last_service)}"
+                self.ids.mileage_until_service_field.text = f"{int(self.last_service) + 500 - int(self.mileage)} " \
+                                                            f"Hours Until Next Service"
         if self.last_inspection:
             self.ids.last_inspection_field.text = self.last_inspection
-            self.ids.mileage_until_inspection_field.text = f"{int(self.mileage) - int(self.last_inspection)}"
+            date_obj = datetime.strptime(self.last_inspection, '%d/%m/%Y')
+            next_inspection = date_obj + timedelta(days=365)
+            days_until_inspection = (next_inspection - datetime.now()).days
+            months_until_inspection = days_until_inspection // 30
+            if months_until_inspection < 3:
+                result = f"{days_until_inspection} Days"
+            else:
+                result = f"{months_until_inspection} Months"
+            self.ids.days_until_inspection_field.text = f"{result} Until Next Inspection"
 
 
 Builder.load_file(join(dirname(__file__), "equipment_service.kv"))

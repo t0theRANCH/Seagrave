@@ -34,7 +34,6 @@ class EquipmentModel:
         if old_site_info:
             self.main_model.update_sites(new_entry=old_site_info, db_id=old_site_id, column='equipment')
         equipment_info = self.get_equipment_info(equipment_id, site_id, new_data)
-        print(new_data)
         self.main_model.update_sites(new_entry=site_info, db_id=site_id, column='equipment')
         self.update_equipment(new_entry=equipment_info, db_id=equipment_id, column='site')
 

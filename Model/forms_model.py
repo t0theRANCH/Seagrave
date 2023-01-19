@@ -149,7 +149,8 @@ class FormsModel:
             (x for x in popup.content_cls.ids.selection_list.children if x.instance_item.text == selection), None)
         widget_to_delete.do_unselected_item()
         fields = popup.content_cls.fields
-        fields.remove(selection)
+        if selection in fields:
+            fields.remove(selection)
         if selection in popup.selections:
             popup.selections.remove(selection)
         widgets = self.main_model.multi
@@ -310,3 +311,26 @@ class FormsModel:
         new_id = response['body']
         updated_db[str(new_id)] = self.main_model.form_view_fields
         self.main_model.iterate_register(response)
+
+    def add_hazard(self, hazard_type, hazard):
+        form_entry = self.main_model.forms[self.main_model.form_view_fields['name']]
+        if hazard_type == 'Task-Specific':
+            work_to_be_done = self.main_model.form_view_fields['work_to_be_done']
+            task = self.main_model.form_view_fields['task']
+            form_entry[work_to_be_done][task].append(hazard)
+        else:
+            form_entry['hazards'].append(hazard)
+        self.update_forms(db_id=self.main_model.form_view_fields['name'], new_entry=form_entry)
+
+    def delete_hazard(self, hazard):
+        form_entry = self.main_model.forms[self.main_model.form_view_fields['name']]
+        if hazard in form_entry['hazards']:
+            form_entry['hazards'].remove(hazard)
+        else:
+            work_to_be_done = self.main_model.form_view_fields['work_to_be_done']
+            task = self.main_model.form_view_fields['task']
+            if hazard in form_entry[work_to_be_done][task]:
+                form_entry[work_to_be_done][task].remove(hazard)
+        self.update_forms(db_id=self.main_model.form_view_fields['name'], new_entry=form_entry)
+
+

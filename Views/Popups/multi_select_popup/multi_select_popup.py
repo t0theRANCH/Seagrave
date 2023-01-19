@@ -11,7 +11,7 @@ from kivymd.uix.dialog import MDDialog
 
 from typing import TYPE_CHECKING
 
-from kivymd.uix.list import TwoLineAvatarIconListItem
+from kivymd.uix.list import TwoLineAvatarIconListItem, OneLineIconListItem, IconLeftWidget
 from kivymd.uix.snackbar import Snackbar
 
 if TYPE_CHECKING:
@@ -97,6 +97,7 @@ class MultiSelectPopupContent(MDBoxLayout):
         self.ids.selection_list.selected_mode = True
         self.pre_selected = None
         self.delete_button = None
+        self.hazard_popup = None
 
     def on_popup(self, instance, value):
         if self.equipment:
@@ -220,18 +221,44 @@ class MultiSelectPopupContent(MDBoxLayout):
             self.popup.buttons.remove(self.delete_button)
 
     def add_button(self):
-        if self.ids.add_new.text and self.popup.db:
+        if self.popup.title == 'Hazards' and not self.hazard_popup:
+            items = [OneLineIconListItem(IconLeftWidget(icon='alert-octagon'), text='General Hazards',
+                                         on_release=self.add_to_hazards),
+                     OneLineIconListItem(IconLeftWidget(icon='alert-octagon'), text='Task-Specific Hazards',
+                                         on_release=self.add_to_hazards)]
+            self.hazard_popup = MDDialog(title='Which type of hazard?', type='simple', items=items)
+            self.hazard_popup.size_hint_x = 1
+            self.hazard_popup.open()
+            return
+        if self.ids.add_new.text and self.popup.db and not self.hazard_popup:
             self.update_fields(self.popup.model.add_form_option, [self.popup, self.ids.add_new.text])
-            i = SelectableListItem(text=str(self.ids.add_new.text), popup=self.popup)
-            self.ids.selection_list.add_widget(i)
-            self.ids.add_new.text = ''
-            self.toggle_select_all_button(False)
+            self.add_selection()
             return
         if not self.ids.add_new.text:
             Snackbar(text='Entry cannot be empty').open()
-            return
+            return False
         if not self.popup.db:
             Snackbar(text='Items cannot be added to this list from here').open()
+            return False
+        return True
+
+    def add_to_hazards(self, instance):
+        self.hazard_popup.dismiss()
+        if not self.add_button():
+            self.hazard_popup = None
+            return
+        if 'General' in instance.text:
+            self.popup.model.add_hazard(hazard_type='General', hazard=self.ids.add_new.text)
+        else:
+            self.popup.model.add_hazard(hazard_type='Task-Specific', hazard=self.ids.add_new.text)
+        self.hazard_popup = None
+        self.add_selection()
+
+    def add_selection(self):
+        i = SelectableListItem(text=str(self.ids.add_new.text), popup=self.popup)
+        self.ids.selection_list.add_widget(i)
+        self.ids.add_new.text = ''
+        self.toggle_select_all_button(False)
 
     def confirm_delete_fields(self, obj):
         popup = ConfirmDelete(item=[list_item.instance_item.text
@@ -243,8 +270,11 @@ class MultiSelectPopupContent(MDBoxLayout):
     def delete_field(self, value):
         widget_list = [x for x in self.ids.selection_list.children if x.selected]
         for list_item in widget_list:
-            self.update_fields(func=self.popup.model.delete_form_option,
-                               param=[self.popup, list_item.instance_item.text])
+            if self.popup.title == 'Hazards' and not self.hazard_popup:
+                self.popup.model.delete_hazard(hazard=list_item.instance_item.text)
+            else:
+                self.update_fields(func=self.popup.model.delete_form_option,
+                                   param=[self.popup, list_item.instance_item.text])
             self.ids.selection_list.remove_widget(list_item)
         self.show_or_hide_delete_button([x for x in self.ids.selection_list.children if x.selected])
 

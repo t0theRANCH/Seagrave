@@ -46,6 +46,7 @@ class FormViewController(EventDispatcher):
             self.check_signature('initials', form.today_form)
         if 'Field Level' in form.form_title:
             self.add_saved_hazards()
+            self.add_hazards_as_selections()
         self.view.get_tree()
         self.main_controller.site_view_controller.remove_widgets()
         if self.main_controller.nav_drawer.state == 'open':
@@ -149,8 +150,8 @@ class FormViewController(EventDispatcher):
         hazards = list(
             self.model.forms['Field Level Hazard Assessment'][self.model.form_view_fields['work_to_be_done']][
                 self.model.form_view_fields.get('task', '')])
-
         hazards = list(dict.fromkeys(hazards))
+        hazards.extend(self.model.forms['Field Level Hazard Assessment']['hazards'])
         for m in self.model.multi:
             if m.id == 'hazards':
                 m.selections = hazards
