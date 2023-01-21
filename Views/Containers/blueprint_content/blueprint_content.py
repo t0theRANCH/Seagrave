@@ -24,6 +24,8 @@ class BlueprintContent(MDBoxLayout):
         if phone := self.controller.model.phone:
             phone.get_storage_permissions()
             phone.open_file_picker(instance_item)
+            self.popup.dismiss()
+            self.popup = None
 
     def view_blueprints(self, instance_item: TwoLineListItem):
         blueprint_to_open = next((b['path'] for b in self.blueprint_data if b['type'] == instance_item.text), '')

@@ -6,7 +6,6 @@ from android.storage import primary_external_storage_path
 from android.permissions import request_permissions, Permission
 from android.runnable import run_on_ui_thread
 from kivy._event import EventDispatcher
-from kivy.clock import Clock
 from kivy.properties import ObjectProperty
 from kivymd.uix.snackbar import Snackbar
 

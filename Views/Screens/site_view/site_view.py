@@ -1,7 +1,7 @@
 from os.path import join, dirname
 
 from kivy.lang import Builder
-from kivy.properties import ObjectProperty
+from kivy.properties import ObjectProperty, StringProperty
 
 from Views.Containers.equipment_content.equipment_content import EquipmentContent
 from Views.Containers.form_content.form_content import FormContent
@@ -25,6 +25,7 @@ if TYPE_CHECKING:
 class SiteView(MDScreen):
     controller: 'SiteViewController' = ObjectProperty()
     model: 'MainModel' = ObjectProperty()
+    previous_screen = StringProperty(allownone=True)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -39,6 +40,11 @@ class SiteView(MDScreen):
         self.complete_forms = None
         self.equipment = None
         self.pictures = None
+
+    def on_leave(self, *args):
+        screen_manager = self.controller.main_controller.screen_manager
+        next_screen = screen_manager.get_screen(screen_manager.current)
+        next_screen.previous_screen = self.name
 
     def on_pre_enter(self, *args):
         self.ids.top_appbar.toolbar_cls = SliverToolbar(headline_text=self.location, view=self)

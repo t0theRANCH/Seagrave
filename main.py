@@ -1,9 +1,5 @@
-import shutil
-from os import listdir
-from os.path import join, dirname
-
 import kivy
-from kivy import Config, platform
+from kivy import platform
 from kivymd.app import MDApp
 from kivy.core.window import Window
 

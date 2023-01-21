@@ -1,7 +1,7 @@
 from os.path import join, dirname
 
 from kivy.lang import Builder
-from kivy.properties import ObjectProperty, OptionProperty
+from kivy.properties import ObjectProperty, OptionProperty, StringProperty
 
 from Views.Containers.add_note_to_picture.add_note_to_picture import AddNote
 from kivymd.uix.button import MDFlatButton
@@ -18,11 +18,17 @@ if TYPE_CHECKING:
 class PictureView(MDScreen):
     controller: 'PictureViewController' = ObjectProperty()
     model: 'MainModel' = ObjectProperty()
+    previous_screen = StringProperty(allownone=True)
     orientation = OptionProperty("portrait", options=['portrait', 'landscape'])
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.popup: Union[None, MDDialog] = None
+
+    def on_leave(self, *args):
+        screen_manager = self.controller.main_controller.screen_manager
+        next_screen = screen_manager.get_screen(screen_manager.current)
+        next_screen.previous_screen = self.name
 
     def on_portrait(self):
         self.ids.scatter.pos_hint = {'center_x': 0.5, 'top': 1}

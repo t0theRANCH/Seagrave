@@ -25,5 +25,8 @@ class LoginCard(MD3Card):
     def forgot_password(self):
         self.controller.forgot_password()
 
+    def back(self):
+        pass
+
 
 Builder.load_file(join(dirname(__file__), "login_card.kv"))

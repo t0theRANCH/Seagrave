@@ -1,7 +1,7 @@
 from os.path import join, dirname
 
 from kivy.lang import Builder
-from kivy.properties import ObjectProperty
+from kivy.properties import ObjectProperty, StringProperty
 
 from Forms.form_fields.form_widgets import SingleOption, SingleOptionDatePicker, SignatureOption, RiskButton
 from Views.Popups.error_popup.error_popup import ErrorPopup
@@ -19,6 +19,7 @@ if TYPE_CHECKING:
 class FormView(MDScreen):
     controller: 'FormViewController' = ObjectProperty()
     model: 'MainModel' = ObjectProperty()
+    previous_screen = StringProperty(allownone=True)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -33,6 +34,11 @@ class FormView(MDScreen):
             "Submit": ["send-check", "on_release", self.controller.submit_form]
         }
         self.add_save_button()
+
+    def on_leave(self, *args):
+        screen_manager = self.controller.main_controller.screen_manager
+        next_screen = screen_manager.get_screen(screen_manager.current)
+        next_screen.previous_screen = self.name
 
     def add_save_button(self):
         self.ids.speed_dial.data = self.speed_dial_with_save_button

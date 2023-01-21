@@ -1,7 +1,7 @@
 from os.path import join, dirname
 
 from kivy.lang import Builder
-from kivy.properties import ObjectProperty
+from kivy.properties import ObjectProperty, StringProperty
 from kivymd.uix.screen import MDScreen
 from Views.Buttons.image_button.image_button import PictureButtonContainer
 
@@ -14,11 +14,17 @@ if TYPE_CHECKING:
 class PictureListView(MDScreen):
     controller: 'PictureListViewController' = ObjectProperty()
     model: 'MainModel' = ObjectProperty()
+    previous_screen = StringProperty(allownone=True)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.pictures = None
         self.tiles = []
+
+    def on_leave(self, *args):
+        screen_manager = self.controller.main_controller.screen_manager
+        next_screen = screen_manager.get_screen(screen_manager.current)
+        next_screen.previous_screen = self.name
 
     def populate_grid(self):
         picture_view_controller = self.controller.main_controller.picture_view_controller

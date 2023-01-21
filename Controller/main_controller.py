@@ -1,5 +1,6 @@
 from kivy._event import EventDispatcher
 from kivy.properties import ObjectProperty
+from kivy.uix.screenmanager import SwapTransition
 
 from Views.Screens.root_screen.root_screen import RootScreen
 
@@ -45,6 +46,7 @@ class MainController(EventDispatcher):
             self.screen_manager.add_widget(s.view)
 
     def change_screen(self, screen_name: str):
+        self.screen_manager.transition = SwapTransition()
         self.screen_manager.current = screen_name
 
     def input_data_into_nav_drawer(self):
