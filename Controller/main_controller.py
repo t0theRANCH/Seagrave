@@ -29,7 +29,6 @@ class MainController(EventDispatcher):
         super().__init__(**kwargs)
         self.model = model
         self.view = RootScreen(controller=self, model=self.model)
-
         self.screen_manager = self.view.ids.screen_manager
         self.nav_drawer = self.view.ids.nav
 

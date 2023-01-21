@@ -10,22 +10,16 @@ class LoginModel:
         self.main_model = main_model
 
     def check_for_user_info(self):
-        u = self.main_model.phone.get_prefs_entry('user')
-        if s := self.main_model.phone.get_prefs_entry('password'):
-            p = self.main_model.phone.decrypt_key()
-        else:
-            p = ''
+        u = self.main_model.phone.get_user()
+        p = self.main_model.phone.get_password()
         user = str(u) if u else ''
         return user, p
 
     def save_password(self, user: str, password: str):
-        cipher, iv = self.main_model.phone.encrypt_key(password)
-        self.main_model.phone.add_password_shared_prefs(cipher, iv)
-        self.main_model.phone.add_shared_prefs('user', user)
+        self.main_model.phone.save_password(user, password)
 
     def dont_save_password(self, user: str):
-        self.main_model.phone.add_shared_prefs('user', user)
-        self.main_model.phone.add_shared_prefs('password', '')
+        self.main_model.phone.dont_save_password(user)
 
     def db_handler(self):
         response = self.post_auth_db_check()

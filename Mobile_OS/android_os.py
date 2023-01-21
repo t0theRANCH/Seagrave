@@ -1,11 +1,11 @@
 import json
-from os import getcwd, listdir
+from os import getcwd
 from jnius import autoclass, cast
 from android import activity
 from android.storage import primary_external_storage_path
 from android.permissions import request_permissions, Permission
 from android.runnable import run_on_ui_thread
-from kivy._event import EventDispatcher
+from kivy.event import EventDispatcher
 from kivy.properties import ObjectProperty
 from kivymd.uix.snackbar import Snackbar
 
@@ -77,7 +77,17 @@ class Android(EventDispatcher):
     def get_content_resolver(self):
         return self.context.getContentResolver()
 
-    def get_key(self, prefs):
+    def save_password(self, user, password):
+        cipher, iv = self.encrypt_key(password)
+        self.add_password_shared_prefs(cipher, iv)
+        self.add_shared_prefs('user', user)
+        
+    def dont_save_password(self, user):
+        self.add_shared_prefs('user', user)
+        self.add_shared_prefs('password', '')
+    
+    @staticmethod
+    def get_key(prefs):
         key_store = KeyStore()
         keyStore = key_store.getInstance("AndroidKeyStore")
         keyStore.load(None)
@@ -88,7 +98,8 @@ class Android(EventDispatcher):
             cipherTextWrapper = None
         return key, cipherTextWrapper
 
-    def get_cipher(self):
+    @staticmethod
+    def get_cipher():
         cipher = Cipher()
         return cipher.getInstance("AES/GCM/NoPadding")
 
@@ -134,6 +145,12 @@ class Android(EventDispatcher):
         editor.putString('password', j)
         editor.commit()
 
+    def get_user(self):
+        return self.get_prefs_entry('user')
+    
+    def get_password(self):
+        return self.decrypt_key() if (s := self.get_prefs_entry('password')) else ''
+    
     def get_prefs_entry(self, key):
         return self.prefs.getString(key, None)
 
@@ -203,15 +220,8 @@ class Android(EventDispatcher):
             Snackbar(text='Blueprints must be a PDF')
         activity.unbind(on_activity_result=self.access_file_tree_result)
 
-    def open_pdf(self, database, file_name):
-        # file_provider = FileProvider()
+    def open_pdf(self, uri_path):
         intent = self.create_intent(action='view', grant_uri_read_permission=True)
-        # file = File()
-        # share_file = file(f"{self.file_directory}/app/database/{database}/{file_name}")
-        # uri = file_provider.getUriForFile(self.context.getApplicationContext(), f"{self.package_name}.fileprovider",
-        #                                  share_file)
-        # construct url name from s3 url and file name
-        uri_path = 'https://buildmedia.readthedocs.org/media/pdf/pyjnius/latest/pyjnius.pdf'
         uri = Uri()
         intent.setDataAndType(uri.parse(uri_path), "application/pdf")
         self.start_intent(intent)
@@ -232,3 +242,5 @@ class Android(EventDispatcher):
             if result:
                 activity.bind(on_activity_result=result)
             self.currentActivity.startActivityForResult(intent, result_code)
+
+    

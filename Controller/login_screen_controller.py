@@ -9,6 +9,8 @@ from kivymd.toast import toast
 
 if platform == 'android':
     from Mobile_OS.android_os import Android
+elif platform == 'ios':
+    from Mobile_OS.ios import IOS
 from Views.Popups.save_password.save_password import SavePassword
 from Views.Screens.login_screen.login_screen import LoginScreen
 from api_requests import Requests
@@ -35,7 +37,12 @@ class LoginScreenController(EventDispatcher):
         self.enter_user_data(user, password)
 
     def set_phone(self):
-        self.model.phone = Android() if platform == 'android' else None
+        if platform == 'android':
+            self.model.phone = Android()
+        elif platform == 'ios':
+            self.model.phone = IOS()
+        else:
+            self.model.phone = None
 
     def enter_user_data(self, user: str, password: str):
         self.view.login_card.ids.email.text = user
