@@ -1,8 +1,7 @@
 from os import getcwd
 
 from kivymd.uix.snackbar import Snackbar
-from pyobjus import autoclass, protocol, objc_str
-from pyobjus.dylib_manager import load_framework, INCLUDE
+from pyobjus import autoclass, objc_str
 
 from kivy.event import EventDispatcher
 from kivy.properties import ObjectProperty

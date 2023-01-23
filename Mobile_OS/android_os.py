@@ -174,6 +174,7 @@ class Android(EventDispatcher):
         return intent
 
     def open_file_picker(self, instance_item):
+        self.get_storage_permissions()
         self.instance_item = instance_item
         intent = self.create_intent(action='open_document', grant_uri_read_permission=True, action_openable=True)
         if not instance_item:

@@ -18,7 +18,6 @@ class PictureContent(MDBoxLayout):
 
     def add_picture(self):
         if self.phone:
-            self.phone.get_storage_permissions()
             self.phone.open_file_picker(instance_item=None)
 
     def view_pictures(self):

@@ -16,6 +16,7 @@ from Views.Screens.login_screen.login_screen import LoginScreen
 from api_requests import Requests
 
 from typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
     from Controller.main_controller import MainController
     from Model.main_model import MainModel
@@ -69,8 +70,8 @@ class LoginScreenController(EventDispatcher):
         self.view.register()
 
     def send_sign_up_email(self):
-        r = Requests.open_request(name='signUp', data={"email": self.view.current_card.ids.email.text.capitalize(),
-                                                       "password": self.view.current_card.ids.password.text})
+        r = Requests.open_request(name='sign_up', data={"email": self.view.current_card.ids.email.text.capitalize(),
+                                                        "password": self.view.current_card.ids.password.text})
         if 'error' in r:
             self.view.current_card.ids.email.helper_text = r['body']
             self.view.current_card.ids.email.error = True
@@ -80,7 +81,10 @@ class LoginScreenController(EventDispatcher):
         self.view.switch_cards(self.view.confirm_code_card)
 
     def send_code(self):
-        # TO DO: make API call and back end functions for this
+        r = Requests.open_request(name='sign_up_resend', data={"email": self.view.current_card.ids.email.text})
+        if 'error' in r:
+            self.display_error_message(r['message'])
+            return
         toast("Verification code sent!")
 
     def send_password_reset_code(self):
@@ -88,7 +92,7 @@ class LoginScreenController(EventDispatcher):
         toast("Verification code sent!")
 
     def send_confirmation_code(self, code):
-        r = Requests.open_request(name='confirmSignUp', data={"code": code, "email": self.view.sign_up_card.ids.email})
+        r = Requests.open_request(name='sign_up_confirm', data={"code": code, "email": self.view.sign_up_card.ids.email})
         if 'error' in r:
             self.display_error_message(r['message'])
             return
@@ -106,24 +110,27 @@ class LoginScreenController(EventDispatcher):
         self.view.switch_cards(self.view.reset_password_card)
 
     def log_in(self):
-        u = 'tyson'  # self.ids.email.text
-        s = 'Tyson,123'  # self.ids.password.text
-        if True:  # self.field_check():
+        if self.email_field_check() and self.password_field_check():
             self.clear_errors()
+            u = self.view.current_card.ids.email.text
+            s = self.view.current_card.ids.password.text
             r = Requests.open_request(name='authenticate', data={"email": u.capitalize(), "password": s})
             if 'AuthenticationResult' in r:
-                self.model.access_token = r['AuthenticationResult']['AccessToken']
-                self.model.id_token = r['AuthenticationResult']['IdToken']
-                self.model.refresh_token = r['AuthenticationResult']['RefreshToken']
-                self.model.device_key = r['AuthenticationResult']['NewDeviceMetadata']['DeviceKey']
-                self.save_password_prompt()
-                self.model.db_handler()
-                self.populate_main_screen()
-                self.switch_to_main()
+                self.authentication(r)
         else:
             self.view.current_card.ids.password.helper_text = 'Password must have at lease one uppercase, number, and symbol, ' \
-                                            'and be over 7 characters'
+                                                                      'and be over 7 characters'
             self.view.current_card.ids.password.error = True
+
+    def authentication(self, r):
+        self.model.access_token = r['AuthenticationResult']['AccessToken']
+        self.model.id_token = r['AuthenticationResult']['IdToken']
+        self.model.refresh_token = r['AuthenticationResult']['RefreshToken']
+        self.model.device_key = r['AuthenticationResult']['NewDeviceMetadata']['DeviceKey']
+        self.save_password_prompt()
+        self.model.db_handler()
+        self.populate_main_screen()
+        self.switch_to_main()
 
     def clear_errors(self):
         self.view.login_card.ids.email.helper_text = ''
@@ -132,7 +139,7 @@ class LoginScreenController(EventDispatcher):
         self.view.login_card.ids.password.error = False
 
     def save_password_prompt(self):
-        if self.model.phone and not self.model.phone.get_prefs_entry('user'):
+        if self.model.phone and not self.model.phone.get_user():
             save_password = SavePassword(self)
             save_password.open()
 
@@ -185,4 +192,3 @@ class LoginScreenController(EventDispatcher):
             self.model.id_token = ''
             self.model.refresh_token = ''
             self.model.access_token = ''
-    

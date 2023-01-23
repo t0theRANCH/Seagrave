@@ -33,7 +33,7 @@ class LoginModel:
         data = {'blueprints': [bp[x]['path'].split('/')[-1] for x in bp],
                 'pictures': [pic[x]['path'].split('/')[-1] for x in pic],
                 'AccessToken': self.main_model.access_token, 'iteration': reg['iteration']}
-        return Requests.secure_request(name='populate', data=data, id_token=self.main_model.id_token)
+        return Requests.secure_request(data=data, id_token=self.main_model.id_token)
 
     def populate_db(self, response: dict):
         dbs = list(response)

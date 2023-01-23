@@ -4,45 +4,54 @@ import re
 
 import boto3
 import requests
-from offline_requests import OfflineRequest
+from kivymd.uix.snackbar import Snackbar
 
+from requests.exceptions import ConnectionError, HTTPError, Timeout, TooManyRedirects, RequestException
 
-def offline_request(name, data):
-    r = OfflineRequest(func_string=name, data=data)
-    return r.func()
+api_url = 'https://1tapy3c6x8.execute-api.us-east-2.amazonaws.com'
+stage = 'test'
 
 
 class Requests:
 
     @staticmethod
+    def connection(func):
+        def wrapper(*args, **kwargs):
+            try:
+                return func(*args, **kwargs)
+            except (ConnectionError, HTTPError, Timeout, TooManyRedirects, RequestException) as e:
+                Snackbar(text=f'Connection Error: {e}').show()
+                return {'error': 'Connection Error'}
+        return wrapper
+
+    @staticmethod
+    @connection
     def secure_request(name, id_token, data):
-        return offline_request(name, data)
-        #r = requests.post(f"https://fv8863t87d.execute-api.us-east-1.amazonaws.com/default/{name}",
-        #                     data=json.dumps(data), headers={'token': id_token})
-        #return r.json()
+        r = requests.post(f"{api_url}/{stage}/{name}",
+                          data=json.dumps(data), headers={'token': id_token})
+        return r.json()
 
     @staticmethod
+    @connection
     def open_request(name, data):
-        return offline_request(name, data)
-        #r = requests.post(f"https://fv8863t87d.execute-api.us-east-1.amazonaws.com/default/{name}",
-        #                     data=json.dumps(data))
-        #return r.json()
+        r = requests.post(f"{api_url}/{stage}/{name}",
+                          data=json.dumps(data))
+        return r.json()
 
     @staticmethod
+    @connection
     def upload(path, id_token):
         with open(path, "rb") as f:
             im_bytes = f.read()
         im_b64 = base64.b64encode(im_bytes).decode("utf8")
         file_dict = {"name": path.split('/')[-1], "file": im_b64}
-        return offline_request(name='upload', data=file_dict)
-        #r = requests.post("https://fv8863t87d.execute-api.us-east-1.amazonaws.com/default/upload",
-        #                     data=json.dumps(file_dict), headers={'token': id_token})
-        #return r.json()
+        r = requests.post(f"{api_url}/{stage}/upload",
+                          data=json.dumps(file_dict), headers={'token': id_token})
+        return r.json()
 
     @staticmethod
+    @connection
     def download(credentials, folder, title, dl_list=None):
-        pass
-        """
         s3 = boto3.client('s3', aws_access_key_id=credentials['aws_access_key_id'],
                           aws_secret_access_key=credentials['aws_secret_access_key'])
         if dl_list:
@@ -56,4 +65,3 @@ class Requests:
                 s3.download_file(credentials['bucket'], dl, f"{folder}/{dl}")
         else:
             s3.download_file(credentials['bucket'], title, f"{folder}/{title}")
-        """

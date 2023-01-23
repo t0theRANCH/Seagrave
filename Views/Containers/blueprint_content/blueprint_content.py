@@ -22,7 +22,6 @@ class BlueprintContent(MDBoxLayout):
 
     def open_file_picker(self, instance_item: OneLineIconListItem):
         if phone := self.controller.model.phone:
-            phone.get_storage_permissions()
             phone.open_file_picker(instance_item)
             self.popup.dismiss()
             self.popup = None

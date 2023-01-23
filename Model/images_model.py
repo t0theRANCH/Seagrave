@@ -19,7 +19,7 @@ class ImagesModel:
         self.main_model.pictures[db_id] = rest
         if column:
             data = {'database': 'pictures', 'column': column}
-            Requests.secure_request('sqlUpdate', id_token=self.main_model.id_token, data=data)
+            Requests.secure_request(id_token=self.main_model.id_token, data=data)
 
     def update_blueprints(self, db_id: str, new_entry: dict, column: str = None):
         rest = self.main_model.blueprints[db_id]
@@ -27,7 +27,7 @@ class ImagesModel:
         self.main_model.blueprints[db_id] = rest
         if column:
             data = {'database': 'blueprints', 'column': column}
-            Requests.secure_request('sqlUpdate', id_token=self.main_model.id_token, data=data)
+            Requests.secure_request(id_token=self.main_model.id_token, data=data)
 
     def add_note_to_picture(self, picture_id, note):
         pic_db_entry = self.main_model.pictures[picture_id]
@@ -60,7 +60,7 @@ class ImagesModel:
         data = {"database": file_type, "name": path, "site": self.main_model.current_site}
         if blueprint_type:
             data['type'] = blueprint_type
-        response = Requests.secure_request(data=data, name='sqlCreate', id_token=self.main_model.id_token)
+        response = Requests.secure_request(name='sqlCreate', id_token=self.main_model.id_token)
         self.add_new_image_to_database(response, file_type, path)
         return True
 

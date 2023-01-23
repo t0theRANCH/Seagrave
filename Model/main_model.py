@@ -1,7 +1,7 @@
 import json
 from os import remove
 
-from kivy._event import EventDispatcher
+from kivy.event import EventDispatcher
 from kivy.properties import ObjectProperty, StringProperty, DictProperty
 from kivy.storage.jsonstore import JsonStore
 
@@ -16,6 +16,7 @@ from typing import TYPE_CHECKING, Union
 
 if TYPE_CHECKING:
     from Mobile_OS.android_os import Android
+    from Mobile_OS.ios import IOS
     from Views.Buttons.rv_button.rv_button import RVButton
     from kivy.storage.jsonstore import JsonStore
     from Views.Popups.text_field_popup.text_field_popup import TextFieldPopup
@@ -23,7 +24,7 @@ if TYPE_CHECKING:
 
 
 class MainModel(EventDispatcher):
-    phone: 'Android' = ObjectProperty()
+    phone: Union['Android', 'IOS'] = ObjectProperty()
     access_token: str = StringProperty()
     id_token: str = StringProperty()
     refresh_token: str = StringProperty()
@@ -74,7 +75,7 @@ class MainModel(EventDispatcher):
     def delete_item(database: 'JsonStore', button: 'RVButton', id_token: str):
         data = {"database": button.feed, "id": button.id}
         database.delete(button.id)
-        return Requests.secure_request(name='sqlDelete', data=data, id_token=id_token)
+        return Requests.secure_request(data=data, id_token=id_token)
 
     def remove_site_from_equipment_db(self, index: str):
         for e in self.equipment:

@@ -42,7 +42,7 @@ class FormsModel:
             return None
 
     def download_form(self, button_id):
-        r = Requests.secure_request(name='getCredentials', data={"AccessToken": self.main_model.access_token},
+        r = Requests.secure_request(data={"AccessToken": self.main_model.access_token},
                                     id_token=self.main_model.id_token)
         Requests.download(credentials=r, folder='database/forms', title=button_id)
         if self.main_model.phone:
@@ -54,7 +54,7 @@ class FormsModel:
         self.main_model.completed_forms[db_id] = rest
         if column:
             data = {'database': 'completed_forms', 'column': column}
-            Requests.secure_request('sqlUpdate', id_token=self.main_model.id_token, data=data)
+            Requests.secure_request(id_token=self.main_model.id_token, data=data)
 
     def update_forms(self, db_id: str, new_entry: dict):
         rest = self.main_model.forms[db_id]
@@ -67,7 +67,7 @@ class FormsModel:
         self.main_model.today['forms'] = rest
         if column:
             data = {'database': 'today', 'column': column}
-            Requests.secure_request('sqlUpdate', id_token=self.main_model.id_token, data=data)
+            Requests.secure_request(id_token=self.main_model.id_token, data=data)
 
     def delete_todays_form(self, database: 'JsonStore', button: 'RVButton', id_token: str):
         entry = button if isinstance(button, str) else button.id
@@ -263,7 +263,7 @@ class FormsModel:
                   'separator': self.main_model.form_view_fields[separator],
                   'file_name': f"{file_name}.pdf"}
         data = {"database": "completed_forms"}
-        response = Requests.secure_request(name='sqlCreate', data=data | fields, id_token=self.main_model.id_token)
+        response = Requests.secure_request(data=data | fields, id_token=self.main_model.id_token)
         self.record_completed_form(response=response, fields=fields)
         if 'index' in self.main_model.form_view_fields:
             self.delete_todays_form(self.main_model.today, self.main_model.form_view_fields['index'],
@@ -307,7 +307,7 @@ class FormsModel:
         return updated_db, data
 
     def add_to_db(self, updated_db, data):
-        response = Requests.secure_request(name='sqlCreate', id_token=self.main_model.id_token, data=data)
+        response = Requests.secure_request(id_token=self.main_model.id_token, data=data)
         new_id = response['body']
         updated_db[str(new_id)] = self.main_model.form_view_fields
         self.main_model.iterate_register(response)
