@@ -1,5 +1,5 @@
 from kivy.storage.jsonstore import JsonStore
-from api_requests import Requests
+from api_requests import secure_request
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -17,7 +17,7 @@ class EquipmentModel:
         self.main_model.equipment[db_id] = rest
         if column:
             data = {'database': 'equipment', 'column': column}
-            Requests.secure_request(id_token=self.main_model.id_token, data=data)
+            secure_request(id_token=self.main_model.id_token, data=data)
 
     def get_single_equipment_data(self, equipment_id):
         equipment_info = self.main_model.equipment[equipment_id]

@@ -6,6 +6,8 @@ from kivy.properties import ObjectProperty
 from kivy.clock import Clock
 
 from kivymd.toast import toast
+from kivymd.uix.label import MDLabel
+from kivymd.uix.snackbar import MDSnackbar
 
 if platform == 'android':
     from Mobile_OS.android_os import Android
@@ -13,7 +15,7 @@ elif platform == 'ios':
     from Mobile_OS.ios import IOS
 from Views.Popups.save_password.save_password import SavePassword
 from Views.Screens.login_screen.login_screen import LoginScreen
-from api_requests import Requests
+from api_requests import open_request
 
 from typing import TYPE_CHECKING
 
@@ -70,20 +72,19 @@ class LoginScreenController(EventDispatcher):
         self.view.register()
 
     def send_sign_up_email(self):
-        r = Requests.open_request(name='sign_up', data={"email": self.view.current_card.ids.email.text.capitalize(),
-                                                        "password": self.view.current_card.ids.password.text})
+        r = open_request(name='sign_up', data={"email": self.view.current_card.ids.email.text.capitalize(),
+                                               "password": self.view.current_card.ids.password.text})
         if 'error' in r:
             self.view.current_card.ids.email.helper_text = r['body']
             self.view.current_card.ids.email.error = True
             return
-
         self.clear_errors()
         self.view.switch_cards(self.view.confirm_code_card)
 
     def send_code(self):
-        r = Requests.open_request(name='sign_up_resend', data={"email": self.view.current_card.ids.email.text})
+        r = open_request(name='sign_up_resend', data={"email": self.view.sign_up_card.ids.email.text})
         if 'error' in r:
-            self.display_error_message(r['message'])
+            self.display_error_snackbar(r['body'])
             return
         toast("Verification code sent!")
 
@@ -92,9 +93,9 @@ class LoginScreenController(EventDispatcher):
         toast("Verification code sent!")
 
     def send_confirmation_code(self, code):
-        r = Requests.open_request(name='sign_up_confirm', data={"code": code, "email": self.view.sign_up_card.ids.email})
+        r = open_request(name='sign_up_confirm', data={"code": code, "email": self.view.sign_up_card.ids.email.text})
         if 'error' in r:
-            self.display_error_message(r['message'])
+            self.display_error_snackbar(r['body'])
             return
         toast('Your email has been verified, please log in')
         self.main_controller.change_screen('login')
@@ -102,7 +103,7 @@ class LoginScreenController(EventDispatcher):
     def send_password_confirmation_code(self):
         data = {"code": self.view.confirm_password_code_card.code, "email": self.view.reset_password_card.ids.email,
                 "password": self.view.current_card.ids.password}
-        r = Requests.open_request(name='confirmForgotPassword', data=data)
+        r = open_request(name='confirmForgotPassword', data=data)
         self.main_controller.login_controller.display_error_message(r['message'])
         self.main_controller.change_screen('login')
 
@@ -114,12 +115,12 @@ class LoginScreenController(EventDispatcher):
             self.clear_errors()
             u = self.view.current_card.ids.email.text
             s = self.view.current_card.ids.password.text
-            r = Requests.open_request(name='authenticate', data={"email": u.capitalize(), "password": s})
+            r = open_request(name='authenticate', data={"email": u.capitalize(), "password": s})
             if 'AuthenticationResult' in r:
                 self.authentication(r)
         else:
             self.view.current_card.ids.password.helper_text = 'Password must have at lease one uppercase, number, and symbol, ' \
-                                                                      'and be over 7 characters'
+                                                              'and be over 7 characters'
             self.view.current_card.ids.password.error = True
 
     def authentication(self, r):
@@ -155,7 +156,7 @@ class LoginScreenController(EventDispatcher):
     def reset_password(self):
         email = self.view.current_card.ids.email.text
         self.clear_errors()
-        r = Requests.open_request(name='forgotPassword', data={"email": email})
+        r = open_request(name='forgotPassword', data={"email": email})
         if r['success']:
             self.enter_confirmation_code()
 
@@ -172,6 +173,14 @@ class LoginScreenController(EventDispatcher):
     def display_error_message(self, message_text: str):
         self.view.current_card.ids.email.helper_text = message_text
         self.view.current_card.ids.email.error = True
+
+    @staticmethod
+    def display_error_snackbar(message_text: str):
+        MDSnackbar(
+            MDLabel(
+                text=message_text
+            )
+        ).open()
 
     def populate_main_screen(self):
         user = self.model.user

@@ -1,5 +1,3 @@
-from colors import colors
-
 from kivymd.uix.button.button import MDFloatingActionButton, MDFloatingActionButtonSpeedDial
 
 

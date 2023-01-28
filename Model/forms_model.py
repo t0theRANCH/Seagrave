@@ -5,7 +5,7 @@ from kivy.storage.jsonstore import JsonStore
 from Forms.safety_talk import SafetyTalk
 from Forms.equipment_checklist import EquipmentChecklist
 from Forms.flha import FLHA
-from api_requests import Requests
+from api_requests import secure_request, download, upload
 
 from typing import TYPE_CHECKING, Union
 if TYPE_CHECKING:
@@ -42,11 +42,11 @@ class FormsModel:
             return None
 
     def download_form(self, button_id):
-        r = Requests.secure_request(data={"AccessToken": self.main_model.access_token},
+        r = secure_request(data={"AccessToken": self.main_model.access_token},
                                     id_token=self.main_model.id_token)
-        Requests.download(credentials=r, folder='database/forms', title=button_id)
+        download(credentials=r, folder='database/forms', title=button_id)
         if self.main_model.phone:
-            self.main_model.phone.open_pdf(database='forms', file_name=button_id)
+            self.main_model.phone.open_pdf(uri_path=button_id)
 
     def update_completed_forms(self, db_id: str, new_entry: dict, column: str = None):
         rest = self.main_model.completed_forms[db_id]
@@ -54,7 +54,7 @@ class FormsModel:
         self.main_model.completed_forms[db_id] = rest
         if column:
             data = {'database': 'completed_forms', 'column': column}
-            Requests.secure_request(id_token=self.main_model.id_token, data=data)
+            secure_request(id_token=self.main_model.id_token, data=data)
 
     def update_forms(self, db_id: str, new_entry: dict):
         rest = self.main_model.forms[db_id]
@@ -67,7 +67,7 @@ class FormsModel:
         self.main_model.today['forms'] = rest
         if column:
             data = {'database': 'today', 'column': column}
-            Requests.secure_request(id_token=self.main_model.id_token, data=data)
+            secure_request(id_token=self.main_model.id_token, data=data)
 
     def delete_todays_form(self, database: 'JsonStore', button: 'RVButton', id_token: str):
         entry = button if isinstance(button, str) else button.id
@@ -75,7 +75,7 @@ class FormsModel:
         if entry in total:
             total.pop(entry)
             database['forms'] = total
-        return Requests.upload(path="database/today.json", id_token=id_token)
+        return upload(path="database/today.json", id_token=id_token)
 
     def delete_signatures(self, signature_type: str, selections: list):
         if signature_type in self.main_model.form_view_fields:
@@ -89,7 +89,7 @@ class FormsModel:
         options, params = self.compile_entry_to_change(popup, text_field)
         self.update_forms(db_id=popup.db[0], new_entry=params)
         popup.content_cls.add_list_item(text_field)
-        response = Requests.upload(path='database/forms/forms.json', id_token=self.main_model.id_token)
+        response = upload(path='database/forms/forms.json', id_token=self.main_model.id_token)
         self.main_model.iterate_register(response)
         return options, widgets
 
@@ -132,7 +132,7 @@ class FormsModel:
             fields, widgets = self.get_multi_widgets(popup, selection)
         if 'TextField' in str(type(popup)):
             fields, widgets = self.get_single_widgets(popup)
-        response = Requests.upload(path='database/forms/forms.json', id_token=self.main_model.id_token)
+        response = upload(path='database/forms/forms.json', id_token=self.main_model.id_token)
         self.main_model.iterate_register(response)
         return fields, widgets
 
@@ -220,7 +220,7 @@ class FormsModel:
         self.main_model.form_view_fields['index'] = index
         new_pair = {index: self.main_model.form_view_fields}
         self.update_todays_forms(new_entry=new_pair, db_id=form_type)
-        response = Requests.upload(path="database/today.json", id_token=self.main_model.id_token)
+        response = upload(path="database/today.json", id_token=self.main_model.id_token)
         self.main_model.iterate_register(response)
 
     def get_index(self):
@@ -251,7 +251,7 @@ class FormsModel:
         form_instance.make_file()
         form_instance.print()
         self.remove_form_from_db(file_name=form_instance.file_name, form=form, separator=separator)
-        Requests.upload(path=f"{form_instance.file_name}.pdf", id_token=self.main_model.id_token)
+        upload(path=f"{form_instance.file_name}.pdf", id_token=self.main_model.id_token)
         form_instance.remove_file()
 
     def remove_form_from_db(self, file_name, form, separator):
@@ -263,7 +263,7 @@ class FormsModel:
                   'separator': self.main_model.form_view_fields[separator],
                   'file_name': f"{file_name}.pdf"}
         data = {"database": "completed_forms"}
-        response = Requests.secure_request(data=data | fields, id_token=self.main_model.id_token)
+        response = secure_request(data=data | fields, id_token=self.main_model.id_token)
         self.record_completed_form(response=response, fields=fields)
         if 'index' in self.main_model.form_view_fields:
             self.delete_todays_form(self.main_model.today, self.main_model.form_view_fields['index'],
@@ -307,7 +307,7 @@ class FormsModel:
         return updated_db, data
 
     def add_to_db(self, updated_db, data):
-        response = Requests.secure_request(id_token=self.main_model.id_token, data=data)
+        response = secure_request(id_token=self.main_model.id_token, data=data)
         new_id = response['body']
         updated_db[str(new_id)] = self.main_model.form_view_fields
         self.main_model.iterate_register(response)

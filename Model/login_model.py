@@ -1,4 +1,4 @@
-from api_requests import Requests
+from api_requests import secure_request, download
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -33,7 +33,7 @@ class LoginModel:
         data = {'blueprints': [bp[x]['path'].split('/')[-1] for x in bp],
                 'pictures': [pic[x]['path'].split('/')[-1] for x in pic],
                 'AccessToken': self.main_model.access_token, 'iteration': reg['iteration']}
-        return Requests.secure_request(data=data, id_token=self.main_model.id_token)
+        return secure_request(data=data, id_token=self.main_model.id_token)
 
     def populate_db(self, response: dict):
         dbs = list(response)
@@ -42,4 +42,4 @@ class LoginModel:
             if x not in non_file_params:
                 self.main_model.save_db_file(x, response[x])
         credentials = response['credentials']
-        Requests.download(credentials=credentials, folder=None, title=None, dl_list=response['download_list'])
+        download(credentials=credentials, folder=None, title=None, dl_list=response['download_list'])

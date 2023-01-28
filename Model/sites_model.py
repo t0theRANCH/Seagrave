@@ -1,4 +1,4 @@
-from api_requests import Requests
+from api_requests import secure_request
 from datetime import datetime, timedelta
 
 from typing import TYPE_CHECKING
@@ -17,11 +17,11 @@ class SitesModel:
         self.main_model.sites[db_id] = rest
         if column:
             data = {'database': 'sites', 'column': column}
-            Requests.secure_request(id_token=self.main_model.id_token, data=data)
+            secure_request(id_token=self.main_model.id_token, data=data)
 
     def delete_site(self, action):
         data = {'AccessToken': self.main_model.access_token, 'SiteId': self.main_model.current_site, 'action': action}
-        r = Requests.secure_request(data=data, id_token=self.main_model.id_token)
+        r = secure_request(data=data, id_token=self.main_model.id_token)
         site_db = self.main_model.sites
         site_db.delete(self.main_model.current_site)
         self.main_model.iterate_register(r)
@@ -31,7 +31,7 @@ class SitesModel:
         rest.update(new_entry)
         self.main_model.time_clock[db_id] = rest
         data = {'database': 'time_clock'} | new_entry
-        Requests.secure_request(id_token=self.main_model.id_token, data=data)
+        secure_request(id_token=self.main_model.id_token, data=data)
 
     def punch_clock(self, current_datetime, current_day, action):
         time_clock = self.main_model.time_clock['week']

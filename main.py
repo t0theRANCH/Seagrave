@@ -30,7 +30,7 @@ class Hnnnng(MDApp):
         self.main_controller.picture_view_controller = PictureViewController(self.model)
 
     def build(self):
-        if platform == 'linux':
+        if platform in ['linux', 'windows', 'darwin']:
             Window.size = (400, 600)
         self.set_keyboard_height()
         self.set_theme()

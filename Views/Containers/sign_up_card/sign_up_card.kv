@@ -13,12 +13,7 @@
         font_name: 'assets/BankGothicBold.ttf'
     MDBoxLayout:
         orientation: 'vertical'
-        size_hint_y: 0.4
-        MDLabel:
-            text: 'E-mail'
-            font_name: 'assets/BankGothicBold.ttf'
-            font_size: dp(16)
-            pos_hint: {'right': 1.15}
+        size_hint_y: 0.6
         MDTextField:
             id: email
             hint_text: "@seagravebuildings.com"
@@ -30,12 +25,7 @@
             multiline: False
             size_hint_x: 0.7
             font_size: dp(16)
-            pos_hint: {"center_x": 0.5}
-        MDLabel:
-            text: 'Password'
-            font_name: 'assets/BankGothicBold.ttf'
-            font_size: dp(16)
-            pos_hint: {'right': 1.15}
+            pos_hint: {"center_x": 0.5, "center_y": 0}
         MDTextField:
             id: password
             hint_text: "Password"
@@ -45,10 +35,28 @@
             multiline: False
             size_hint_x: 0.7
             font_size: dp(16)
-            pos_hint: {"center_x": 0.5}
+            pos_hint: {"center_x": 0.5, "center_y": 0.3}
             password: True
+            padding: 0, 0, 0, dp(50)
+
+        MDTextField:
+            id: confirm_password
+            hint_text: "Confirm Password"
+            helper_text: ''
+            helper_text_mode: 'on_error'
+            icon_right: "eye-off"
+            multiline: False
+            size_hint_x: 0.7
+            font_size: dp(16)
+            pos_hint: {"center_x": 0.5, "center_y": 0.6}
+            password: True
+
+        MDLabel:
+            id: spacer
+            font_size: dp(8)
+
     MDBoxLayout:
-        size_hint: 1, 0.4
+        size_hint: 1, 0.3
         orientation: 'vertical'
 
         MDFillRoundFlatButton:
@@ -70,12 +78,3 @@
                 font_size: dp(12)
                 pos_hint: {'center_y': 0.5}
                 on_release: root.enter_confirmation_code()
-
-        AnchorLayout:
-            anchor_x: 'right'
-            anchor_y: 'bottom'
-            pos_hint: {'right': 0.9, 'top': 0.5}
-
-            MDFloatingActionButton:
-                icon: "arrow-left-circle"
-                on_release: root.back()

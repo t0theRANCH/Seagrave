@@ -30,12 +30,15 @@ class SignUpCard(MD3Card):
         self.controller.view.switch_cards(self.controller.view.confirm_code_card)
 
     def register(self):
-        if not self.email_field_check():
+        if not self.controller.email_field_check():
             self.ids.email.error = True
             self.ids.email.helper_text = 'Please enter a valid email'
-        if not self.password_field_check():
+        if not self.controller.password_field_check():
             self.ids.email.error = True
             self.ids.email.helper_text = 'Please enter a valid password'
+        if self.ids.password.text != self.ids.confirm_password.text:
+            self.ids.email.error = True
+            self.ids.email.helper_text = 'Passwords do not match'
         self.ids.email.error = False
         self.controller.send_sign_up_email()
 

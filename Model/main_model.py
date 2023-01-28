@@ -5,7 +5,7 @@ from kivy.event import EventDispatcher
 from kivy.properties import ObjectProperty, StringProperty, DictProperty
 from kivy.storage.jsonstore import JsonStore
 
-from api_requests import Requests
+from api_requests import secure_request
 from Model.forms_model import FormsModel
 from Model.images_model import ImagesModel
 from Model.sites_model import SitesModel
@@ -75,7 +75,7 @@ class MainModel(EventDispatcher):
     def delete_item(database: 'JsonStore', button: 'RVButton', id_token: str):
         data = {"database": button.feed, "id": button.id}
         database.delete(button.id)
-        return Requests.secure_request(data=data, id_token=id_token)
+        return secure_request(data=data, id_token=id_token)
 
     def remove_site_from_equipment_db(self, index: str):
         for e in self.equipment:
