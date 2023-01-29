@@ -19,7 +19,7 @@ class ConfirmPasswordCodeCard(MD3Card):
         self.code = ''
 
     def resend_code(self):
-        self.controller.send_password_reset_code()
+        self.controller.reset_password()
 
     def confirm(self):
         code = [x.text for x in self.ids.number_container.input_boxes]

@@ -25,11 +25,17 @@ class CreateNewPasswordCard(MD3Card):
         if not self.controller.password_field_check():
             self.password.error = True
             self.password.helper_text = 'Password must have at least 8 characters, a number, symbol, and capital letter'
+            return
+        self.password.error = False
+        self.password.helper_text = ''
 
     def confirm_password_error_check(self, instance, value):
         if self.password.text != self.confirm_password.text:
             self.confirm_password.error = True
             self.confirm_password.helper_text = 'Both passwords must match'
+            return
+        self.confirm_password.error = False
+        self.confirm_password.helper_text = ''
 
     def reset_password(self):
         self.controller.send_password_confirmation_code()

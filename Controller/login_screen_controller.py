@@ -88,10 +88,6 @@ class LoginScreenController(EventDispatcher):
             return
         toast("Verification code sent!")
 
-    def send_password_reset_code(self):
-        # TO DO: make API call and back end functions for this
-        toast("Verification code sent!")
-
     def send_confirmation_code(self, code):
         r = open_request(name='sign_up_confirm', data={"code": code, "email": self.view.sign_up_card.ids.email.text})
         if 'error' in r:
@@ -101,10 +97,12 @@ class LoginScreenController(EventDispatcher):
         self.main_controller.change_screen('login')
 
     def send_password_confirmation_code(self):
-        data = {"code": self.view.confirm_password_code_card.code, "email": self.view.reset_password_card.ids.email,
-                "password": self.view.current_card.ids.password}
-        r = open_request(name='confirmForgotPassword', data=data)
-        self.main_controller.login_controller.display_error_message(r['message'])
+        data = {"code": self.view.confirm_password_code_card.code,
+                "email": self.view.reset_password_card.ids.email.text,
+                "password": self.view.current_card.ids.password.text}
+        r = open_request(name='forgot_password_confirm', data=data)
+        print(r)
+        self.main_controller.login_controller.display_error_snackbar(r['body'])
         self.main_controller.change_screen('login')
 
     def forgot_password(self):
@@ -154,15 +152,18 @@ class LoginScreenController(EventDispatcher):
         self.model.dont_save_password(user)
 
     def reset_password(self):
-        email = self.view.current_card.ids.email.text
+        email = self.view.reset_password_card.ids.email.text
         self.clear_errors()
-        r = open_request(name='forgotPassword', data={"email": email})
+        r = open_request(name='forgot_password', data={"email": email})
+        print(r)
         if r['success']:
             self.enter_confirmation_code()
+        else:
+            self.display_error_message(r['body'])
 
     def enter_confirmation_code(self):
         self.view.confirm_password_code_card.ids.instructions.text = f"Enter the code sent to " \
-                                                                     f"{self.view.current_card.ids.email.text}"
+                                                                     f"{self.view.reset_password_card.ids.email.text}"
         self.view.switch_cards(self.view.confirm_password_code_card)
 
     def check_email_field(self, text: str):
