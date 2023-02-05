@@ -13,6 +13,8 @@ if platform == 'android':
     from Mobile_OS.android_os import Android
 elif platform == 'ios':
     from Mobile_OS.ios import IOS
+else:
+    from Mobile_OS.pc import PC
 from Views.Popups.save_password.save_password import SavePassword
 from Views.Screens.login_screen.login_screen import LoginScreen
 from api_requests import open_request
@@ -45,7 +47,7 @@ class LoginScreenController(EventDispatcher):
         elif platform == 'ios':
             self.model.phone = IOS()
         else:
-            self.model.phone = None
+            self.model.phone = PC()
 
     def enter_user_data(self, user: str, password: str):
         self.view.login_card.ids.email.text = user
@@ -101,7 +103,6 @@ class LoginScreenController(EventDispatcher):
                 "email": self.view.reset_password_card.ids.email.text,
                 "password": self.view.current_card.ids.password.text}
         r = open_request(name='forgot_password_confirm', data=data)
-        print(r)
         self.main_controller.login_controller.display_error_snackbar(r['body'])
         self.main_controller.change_screen('login')
 

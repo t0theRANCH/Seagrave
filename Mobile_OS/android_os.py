@@ -81,6 +81,13 @@ class Android(EventDispatcher):
         cipher, iv = self.encrypt_key(password)
         self.add_password_shared_prefs(cipher, iv)
         self.add_shared_prefs('user', user)
+
+    def save_token(self, token, name):
+        cipher, iv = self.encrypt_key(token)
+        self.add_password_shared_prefs(cipher, iv, name)
+
+    def get_token(self, name):
+        return self.decrypt_key() if (s := self.get_prefs_entry(name)) else ''
         
     def dont_save_password(self, user):
         self.add_shared_prefs('user', user)
@@ -139,10 +146,10 @@ class Android(EventDispatcher):
         editor.putString(key, value)
         editor.commit()
 
-    def add_password_shared_prefs(self, cipher, iv):
+    def add_password_shared_prefs(self, cipher, iv, name='password'):
         editor = self.prefs.edit()
         j = json.dumps(CipherTextWrapper(cipher, iv).__dict__)
-        editor.putString('password', j)
+        editor.putString(name, j)
         editor.commit()
 
     def get_user(self):

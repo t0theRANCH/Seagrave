@@ -8,6 +8,7 @@ from Forms.flha import FLHA
 from api_requests import secure_request, download, upload
 
 from typing import TYPE_CHECKING, Union
+
 if TYPE_CHECKING:
     from Model.main_model import MainModel
     from Views.Buttons.rv_button.rv_button import RVButton
@@ -32,7 +33,8 @@ class FormsModel:
         self.main_model.current_site_id = site_id
 
     def get_location(self, form_type):
-        if form_type == 'forms' and 'location' in self.main_model.form_view_fields and self.main_model.form_view_fields['location']:
+        if form_type == 'forms' and 'location' in self.main_model.form_view_fields and self.main_model.form_view_fields[
+            'location']:
             return self.main_model.form_view_fields['location']
         elif form_type == 'equipment':
             return self.main_model.form_view_fields['site']
@@ -43,7 +45,7 @@ class FormsModel:
 
     def download_form(self, button_id):
         r = secure_request(data={"AccessToken": self.main_model.access_token},
-                                    id_token=self.main_model.id_token)
+                           id_token=self.main_model.id_token)
         download(credentials=r, folder='database/forms', title=button_id)
         if self.main_model.phone:
             self.main_model.phone.open_pdf(uri_path=button_id)
@@ -332,5 +334,3 @@ class FormsModel:
             if hazard in form_entry[work_to_be_done][task]:
                 form_entry[work_to_be_done][task].remove(hazard)
         self.update_forms(db_id=self.main_model.form_view_fields['name'], new_entry=form_entry)
-
-

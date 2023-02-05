@@ -17,6 +17,7 @@ from typing import TYPE_CHECKING, Union
 if TYPE_CHECKING:
     from Mobile_OS.android_os import Android
     from Mobile_OS.ios import IOS
+    from Mobile_OS.pc import PC
     from Views.Buttons.rv_button.rv_button import RVButton
     from kivy.storage.jsonstore import JsonStore
     from Views.Popups.text_field_popup.text_field_popup import TextFieldPopup
@@ -24,11 +25,7 @@ if TYPE_CHECKING:
 
 
 class MainModel(EventDispatcher):
-    phone: Union['Android', 'IOS'] = ObjectProperty()
-    access_token: str = StringProperty()
-    id_token: str = StringProperty()
-    refresh_token: str = StringProperty()
-    device_key: str = StringProperty()
+    phone: Union['Android', 'IOS', 'PC'] = ObjectProperty()
     form_view_fields: dict = DictProperty({})
     current_site_id: str = StringProperty()
     current_site: str = StringProperty()
@@ -205,6 +202,53 @@ class MainModel(EventDispatcher):
         return self.images_model.select_image_to_upload(path, file_type, blueprint_type)
 
     # Properties
+    @property
+    def api_key(self):
+        return self.phone.get_token('api_key')
+
+    @api_key.setter
+    def api_key(self, value):
+        self.phone.save_token(value, 'api_key')
+
+    @property
+    def secure_api_url(self):
+        return self.phone.get_token('secure_api_url')
+
+    @secure_api_url.setter
+    def secure_api_url(self, value):
+        self.phone.save_token(value, 'secure_api_url')
+
+    @property
+    def access_token(self):
+        return self.phone.get_token('access_token')
+
+    @access_token.setter
+    def access_token(self, value):
+        self.phone.save_token(value, 'access_token')
+
+    @property
+    def id_token(self):
+        return self.phone.get_token('id_token')
+
+    @id_token.setter
+    def id_token(self, value):
+        self.phone.save_token(value, 'id_token')
+
+    @property
+    def refresh_token(self):
+        return self.phone.get_token('refresh_token')
+
+    @refresh_token.setter
+    def refresh_token(self, value):
+        self.phone.save_token(value, 'refresh_token')
+
+    @property
+    def device_key(self):
+        return self.phone.get_token('device_key')
+
+    @device_key.setter
+    def device_key(self, value):
+        self.phone.save_token(value, 'device_key')
 
     @property
     def site_rows(self):
