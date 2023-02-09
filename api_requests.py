@@ -1,6 +1,7 @@
 import base64
 import json
 import re
+
 import requests
 
 from kivymd.uix.label import MDLabel
@@ -55,21 +56,27 @@ def upload(path, id_token, url):
 
 
 @connection
-def download(url, id_token, folder, title, dl_list=None):
+def download(url, id_token, access_token, folder, title, dl_list=None):
     if dl_list:
+        dl_list.append('flha.pdf')
         for dl in dl_list:
             if re.search("^forms.json$", dl) or re.search("^today.json$", dl) or re.search(
                     "^undeletable.json$", dl):
                 folder = 'database'
             else:
-                folder = f"database/{dl.split('-')[0]}"
-            data = {'path': f"{folder}/{dl}"}
-            r = requests.post(f"{url}/{stage}/download", data=data, headers={'token': id_token})
-            with open(f"{folder}/{dl}", "wb") as f:
-                f.write(r.content)
+                folder = 'assets'
+                # folder = f"database/{dl.split('-')[0]}"
+            data = {'path': dl, 'function_name': 'download', 'AccessToken': access_token}
+            if download_url := secure_request(
+                name='check_credentials', data=data, id_token=id_token, url=url
+            ):
+                print(download_url)
+                response = requests.get(download_url)
+                with open(f"{folder}/{dl}", "wb") as f:
+                    f.write(response.content)
         return
 
     data = {'path': f"{folder}/{title}"}
-    r = requests.post(f"{url}/{stage}/download", data=data, headers={'token': id_token})
+    r = requests.post(f"{url}/{stage}/download", data=json.dumps(data), headers={'token': id_token})
     with open(f"{folder}/{title}", "wb") as f:
         f.write(r.content)

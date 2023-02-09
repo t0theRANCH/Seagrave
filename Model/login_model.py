@@ -27,12 +27,14 @@ class LoginModel:
                                id_token=self.main_model.id_token,
                                data={'AccessToken': self.main_model.access_token})
         if 'error' not in creds:
-            self.main_model.api_key = creds['api_key']
-            self.main_model.secure_api_url = creds['api_address']
+            self.save_credentials(creds)
         response = self.post_auth_db_check()
-        print(response)
         if 'none' not in response['status']:
             self.populate_db(response=response)
+
+    def save_credentials(self, creds):
+        self.main_model.api_key = creds['api_key']
+        self.main_model.secure_api_url = creds['api_address']
 
     def post_auth_db_check(self):
         reg = self.main_model.register
@@ -47,5 +49,8 @@ class LoginModel:
         for x in dbs:
             if x not in non_file_params:
                 self.main_model.save_db_file(x, response[x])
-        download(url=self.main_model.secure_api_url, id_token=self.main_model.id_token, folder=None, title=None,
+        download(url=self.main_model.secure_api_url,
+                 id_token=self.main_model.id_token,
+                 access_token=self.main_model.access_token,
+                 folder=None, title=None,
                  dl_list=response['download_list'])

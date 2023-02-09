@@ -250,6 +250,7 @@ class MainModel(EventDispatcher):
     def device_key(self, value):
         self.phone.save_token(value, 'device_key')
 
+
     @property
     def site_rows(self):
         return [{"text": f"{self.sites[s]['customer']}", "id": str(s),

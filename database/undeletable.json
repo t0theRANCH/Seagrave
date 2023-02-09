@@ -1,1 +1,48 @@
-{"message": "Could not parse request body into json: Could not parse payload into json: Unrecognized token \'path\': was expecting (JSON String, Number, Array, Object or token \'null\', \'true\' or \'false\')\n at [Source: (byte[])\"path=database%2Fundeletable.json\"; line: 1, column: 6]"}
+{
+  "Crew Attending": [
+    "Max",
+    "Mitchell",
+    "Kaleb",
+    "Tyson"
+  ],
+  "Workers": [
+    "Max",
+    "Mitchell",
+    "Kaleb",
+    "Tyson"
+  ],
+  "Who gives the talk": [
+    "Max",
+    "Mitchell",
+    "Kaleb",
+    "Tyson"
+  ],
+  "Tasks": [
+    "Digging",
+    "Tamping",
+    "Running conduit/hose",
+    "Building forms",
+    "Installing forms",
+    "Tying Rebar",
+    "Setting Anchor Bolts",
+    "Finishing",
+    "Drilling Anchor Bolts",
+    "Organizing Materials",
+    "Bolting Connections",
+    "Rigging & Hoisting",
+    "Making a Custom Opening",
+    "Insulating Wall",
+    "Insulating Firewall",
+    "Cutting Sheets",
+    "Cutting Trim",
+    "Hanging Wall Sheets",
+    "Roofing",
+    "Hanging Trim",
+    "Hanging Gutter",
+    "Install Energy Saver Tarp, Wall",
+    "Install Energy Saver Tarp, Roof",
+    "Banding Energy Saver Tarp"
+  ],
+  "Hazards": [
+  ]
+}

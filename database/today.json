@@ -1,1 +1,1 @@
-{"message": "Could not parse request body into json: Could not parse payload into json: Unrecognized token \'path\': was expecting (JSON String, Number, Array, Object or token \'null\', \'true\' or \'false\')\n at [Source: (byte[])\"path=database%2Ftoday.json\"; line: 1, column: 6]"}
+{"sites": {"new": {}}, "equipment": {"new": {}}, "forms": {}}
