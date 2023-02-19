@@ -29,6 +29,7 @@ class MainModel(EventDispatcher):
     form_view_fields: dict = DictProperty({})
     current_site_id: str = StringProperty()
     current_site: str = StringProperty()
+    primary_color: tuple = ()
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -122,6 +123,9 @@ class MainModel(EventDispatcher):
 
     def punch_clock(self, current_datetime, current_day, action):
         self.sites_model.punch_clock(current_datetime, current_day, action)
+
+    def get_hours(self):
+        return self.sites_model.get_hours()
 
     # Equipment
 
@@ -241,15 +245,6 @@ class MainModel(EventDispatcher):
     @refresh_token.setter
     def refresh_token(self, value):
         self.phone.save_token(value, 'refresh_token')
-
-    @property
-    def device_key(self):
-        return self.phone.get_token('device_key')
-
-    @device_key.setter
-    def device_key(self, value):
-        self.phone.save_token(value, 'device_key')
-
 
     @property
     def site_rows(self):

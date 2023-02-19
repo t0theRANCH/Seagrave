@@ -200,6 +200,7 @@ class FormsModel:
                     return False, minimum
                 self.main_model.form_view_fields['separator'] = self.main_model.form_view_fields[minimum]
                 return True, None
+        return True, None
 
     def check_for_duplicates(self, form_type, separator):
         if form_type != 'forms':
@@ -234,7 +235,7 @@ class FormsModel:
             return str(0)
 
     def update_equipment_entry(self):
-        machine = self.main_model.form_view_fields['machine']
+        machine = self.main_model.form_view_fields['type']
         unit_num = self.main_model.form_view_fields['unit_num']
         mileage = self.main_model.form_view_fields['mileage']
         for e in self.main_model.equipment:
@@ -264,8 +265,11 @@ class FormsModel:
                   'date': self.main_model.form_view_fields['date'],
                   'separator': self.main_model.form_view_fields[separator],
                   'file_name': f"{file_name}.pdf"}
-        data = {"database": "completed_forms"}
-        response = secure_request(data=data | fields, id_token=self.main_model.id_token)
+        data = {"database": "completed_forms",
+                "cols": fields,
+                'function_name': 'sql_create', 'AccessToken': self.main_model.access_token
+                }
+        response = secure_request(data=data, id_token=self.main_model.id_token, url=self.main_model.secure_api_url)
         self.record_completed_form(response=response, fields=fields)
         if 'index' in self.main_model.form_view_fields:
             self.delete_todays_form(self.main_model.today, self.main_model.form_view_fields['index'],
@@ -292,7 +296,12 @@ class FormsModel:
     def add_equipment(self):
         self.get_site_id(self.main_model.form_view_fields['site'])
         self.main_model.form_view_fields['site'] = self.main_model.current_site_id
-        data = {"name": self.main_model.form_view_fields['name'], "site": self.main_model.current_site_id,
+        data = {'cols': {"type": self.main_model.form_view_fields['type'], "site_id": self.main_model.current_site_id,
+                         "unit_num": self.main_model.form_view_fields['unit_num'],
+                         "mileage": self.main_model.form_view_fields['mileage'],
+                         "last_service": self.main_model.form_view_fields['last_service'],
+                         "last_inspection": self.main_model.form_view_fields['last_inspection'],
+                         "owned": self.main_model.form_view_fields['owned']},
                 "database": 'equipment'}
         updated_db = self.main_model.equipment
         site_entry = self.main_model.sites[self.main_model.current_site_id]
@@ -301,15 +310,19 @@ class FormsModel:
         return updated_db, data
 
     def add_site(self):
-        data = {"customer": self.main_model.form_view_fields['customer'],
-                "address": self.main_model.form_view_fields['address'],
-                "city": self.main_model.form_view_fields['city'], "database": 'sites'}
+        data = {'cols': {"customer": self.main_model.form_view_fields['customer'],
+                         "address": self.main_model.form_view_fields['address'],
+                         "city": self.main_model.form_view_fields['city'],
+                         "complete": False,
+                         "banner_image": ''},
+                "database": 'sites'}
         updated_db = self.main_model.sites
         self.main_model.form_view_fields.pop('name', 'default')
         return updated_db, data
 
     def add_to_db(self, updated_db, data):
-        response = secure_request(id_token=self.main_model.id_token, data=data)
+        data.update({'function_name': 'sql_create', 'AccessToken': self.main_model.access_token})
+        response = secure_request(id_token=self.main_model.id_token, data=data, url=self.main_model.secure_api_url)
         new_id = response['body']
         updated_db[str(new_id)] = self.main_model.form_view_fields
         self.main_model.iterate_register(response)

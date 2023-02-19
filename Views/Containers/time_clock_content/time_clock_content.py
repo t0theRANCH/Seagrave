@@ -27,16 +27,17 @@ class TimeClockContent(MDBoxLayout):
         return datetime.now().strftime('%A')
 
     def get_status(self):
-        if self.current_day in self.time_clock_data['week'] and self.time_clock_data['week'] and \
-                self.time_clock_data['week']['in']:
+        if self.current_day in self.time_clock_data and self.time_clock_data[self.current_day]['in']:
             return 'out'
         return 'in'
 
     def get_total_hours(self):
         total_hours = 0
-        for day, data in self.time_clock_data['week'].items():
-            punch_in = datetime.strptime(data['in'], '%m/%d/%y %H:%M')
-            punch_out = datetime.strptime(data['out'], '%m/%d/%y %H:%M')
+        for data in dict(self.time_clock_data).values():
+            if not data['clock_out']:
+                continue
+            punch_in = datetime.strptime(data['clock_in'], '%Y-%m-%d %H:%M:%S')
+            punch_out = datetime.strptime(data['clock_out'], '%Y-%m-%d %H:%M:%S')
             hours = punch_out - punch_in
             total_hours += (hours.seconds // 3600)
         return total_hours
@@ -51,7 +52,7 @@ class TimeClockContent(MDBoxLayout):
         self.status = 'out' if self.status == 'in' else 'in'
 
     def punch_clock(self):
-        self.controller.punch_clock(current_datetime=datetime.now().strftime("%m/%d/%y %H:%M"),
+        self.controller.punch_clock(current_datetime=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                                     current_day=self.get_current_day(),
                                     action=self.status
                                     )

@@ -47,13 +47,15 @@ class CreateForm:
                                controller=self.controller, model=self.model)
         city = SingleOption(ind='city', title='City', pre_select=[], db=["Add Site", "city"],
                             controller=self.controller, model=self.model)
+        start_date = SingleOptionDatePicker(ind='start_date', text='Start Date', model=self.model, time=False,
+                                            mandatory=False)
         self.model.form_view_fields['equipment'] = []
         self.model.form_view_fields['blueprints'] = []
         self.model.form_view_fields['pictures'] = []
         self.model.form_view_fields['forms'] = []
         self.controller.view.type = 'site'
         self.remove_save_button()
-        return [customer, address, city]
+        return [customer, address, city, start_date]
 
     def add_equipment(self):
         name = SingleOption(ind='type', title='Type of Equipment', pre_select=[],
@@ -70,17 +72,13 @@ class CreateForm:
                                                  mandatory=False, time=False)
         unit_num = SingleOption(ind='unit_num', title='Unit Number', pre_select=[],
                                 controller=self.controller, model=self.model)
+        owned = CheckBoxOption(ind='owned', text='Owned')
         self.fill_in_site(widget=site, key='site')
-        self.model.form_view_fields['type'] = ''
-        self.model.form_view_fields['mileage'] = ''
-        self.model.form_view_fields['last_service'] = ''
-        self.model.form_view_fields['last_inspection'] = ''
-        self.model.form_view_fields['unit_num'] = ''
         self.model.form_view_fields['forms'] = []
         self.model.form_view_fields['pictures'] = []
         self.controller.view.type = 'equipment'
         self.remove_save_button()
-        return [name, site, unit_num, mileage, last_service, last_inspection]
+        return [name, site, unit_num, mileage, last_service, last_inspection, owned]
 
     def remove_save_button(self):
         self.controller.view.remove_save_button()

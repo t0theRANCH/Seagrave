@@ -2,9 +2,10 @@ from kivy.metrics import dp
 from kivy.properties import ListProperty, StringProperty, ObjectProperty, BooleanProperty
 from kivymd.uix.list import BaseListItem
 
+from Model.main_model import MainModel
+
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from Model.main_model import MainModel
     from Controller.form_view_controller import FormViewController
 
 
@@ -27,7 +28,7 @@ class BaseFormWidget(BaseListItem):
         self.text = value
 
     def select(self):
-        self.bg_color = (0.404, 0.545, 0.376, 1)
+        self.bg_color = self.model.primary_color  # (0.404, 0.545, 0.376, 1)
         self.filled = True
 
     def un_select(self):

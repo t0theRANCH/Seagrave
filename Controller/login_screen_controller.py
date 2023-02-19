@@ -1,4 +1,5 @@
 import re
+from time import sleep
 
 from kivy import platform
 from kivy._event import EventDispatcher
@@ -126,9 +127,9 @@ class LoginScreenController(EventDispatcher):
         self.model.access_token = r['AuthenticationResult']['AccessToken']
         self.model.id_token = r['AuthenticationResult']['IdToken']
         self.model.refresh_token = r['AuthenticationResult']['RefreshToken']
-        self.model.device_key = r['AuthenticationResult']['NewDeviceMetadata']['DeviceKey']
         self.save_password_prompt()
         self.model.db_handler()
+        self.model.get_hours()
         self.populate_main_screen()
         self.switch_to_main()
 
@@ -156,7 +157,6 @@ class LoginScreenController(EventDispatcher):
         email = self.view.reset_password_card.ids.email.text
         self.clear_errors()
         r = open_request(name='forgot_password', data={"email": email})
-        print(r)
         if r['success']:
             self.enter_confirmation_code()
         else:
@@ -198,6 +198,14 @@ class LoginScreenController(EventDispatcher):
     def refresh_auth(self, *args):
         if self.model.refresh_token:
             self.model.db_handler()
+            if not self.model.id_token:
+                response = open_request(name='authenticate_refresh',
+                                        data={"refresh_token": self.model.refresh_token,
+                                              "username": self.model.user['given_name']})
+                if 'success' in response.get('message', ''):
+                    self.model.access_token = response['data']['access_token']
+                    self.model.id_token = response['data']['id_token']
+                    self.model.db_handler()
         else:
             self.main_controller.change_screen('login')
             self.model.id_token = ''

@@ -23,14 +23,22 @@ class LoginModel:
         self.main_model.phone.dont_save_password(user)
 
     def db_handler(self):
-        creds = secure_request(name='get_credentials',
-                               id_token=self.main_model.id_token,
+        creds = secure_request(id_token=self.main_model.id_token,
                                data={'AccessToken': self.main_model.access_token})
-        if 'error' not in creds:
+        if 'message' not in creds:
             self.save_credentials(creds)
+        elif 'expired' in creds['message'] or 'unauthorized' in creds['message']:
+            return self.delete_tokens()
         response = self.post_auth_db_check()
-        if 'none' not in response['status']:
+        if 'Not authorized' in response.get('body', ''):
+            return self.delete_tokens()
+        if 'status' in response and 'none' not in response['status']:
             self.populate_db(response=response)
+
+    def delete_tokens(self):
+        self.main_model.access_token = ''
+        self.main_model.id_token = ''
+        return
 
     def save_credentials(self, creds):
         self.main_model.api_key = creds['api_key']
@@ -40,7 +48,7 @@ class LoginModel:
         reg = self.main_model.register
         data = {'AccessToken': self.main_model.access_token, 'iteration': reg['iteration'],
                 'api_key': self.main_model.api_key, 'function_name': 'populate'}
-        return secure_request(name='check_credentials', data=data, id_token=self.main_model.id_token,
+        return secure_request(data=data, id_token=self.main_model.id_token,
                               url=self.main_model.secure_api_url)
 
     def populate_db(self, response: dict):
@@ -54,3 +62,4 @@ class LoginModel:
                  access_token=self.main_model.access_token,
                  folder=None, title=None,
                  dl_list=response['download_list'])
+

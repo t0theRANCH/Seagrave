@@ -1,1 +1,14 @@
-{"user": "Tyson", "status": "out", "week": {"Tuesday": {"in": "01/03/23 18:07", "out": "01/03/23 18:07"}}}
+{
+  "Saturday": {
+    "id": 6,
+    "employee": "Tyson",
+    "clock_in": "2023-02-18 18:25:05",
+    "clock_out": null
+  },
+  "Sunday": {
+    "id": 7,
+    "employee": "Tyson",
+    "clock_in": "2023-02-19 10:54:14",
+    "clock_out": null
+  }
+}

@@ -41,6 +41,7 @@ class Hnnnng(MDApp):
         self.theme_cls.primary_palette = "BlueGray"
         self.theme_cls.accent_palette = "Gray"
         self.theme_cls.material_style = 'M3'
+        self.model.primary_color = self.theme_cls.primary_color
 
     @staticmethod
     def set_keyboard_height():

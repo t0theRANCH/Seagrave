@@ -69,7 +69,7 @@ class SingleOptionDatePicker(FormWidget):
         if self.time:
             self.show_time_picker()
             return
-        self.fill_in_response(self.time)
+        self.fill_in_response(self.selection)
 
     def on_release(self):
         date_dialog = MDDatePicker()
