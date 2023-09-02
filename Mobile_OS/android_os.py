@@ -112,7 +112,7 @@ class Android(EventDispatcher):
         print(f"external path: {os.getcwd()}")
 
     def test_encrypt_decrypt(self):
-        api_key = 'd1o7ojnvolnedkhplr3maovjt'
+        api_key = ''
         encrypted_data, iv = self.encrypt_key(api_key)
         self.add_password_shared_prefs(encrypted_data, iv, 'api_key')
 
