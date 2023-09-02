@@ -33,7 +33,11 @@ def File():
 
 
 def FileProvider():
-    return autoclass('android.support.v4.content.FileProvider')
+    return autoclass('androidx.core.content.FileProvider')
+
+
+def MediaStore():
+    return autoclass('android.provider.MediaStore$MediaColumns')
 
 
 def OpenableColumns():

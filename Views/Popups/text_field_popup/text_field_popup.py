@@ -50,9 +50,11 @@ class TextFieldPopup(MDDialog):
         self.content_cls.confirm_delete_field(value)
 
     def submit(self, obj):
+        self.controller.main_controller.view.scrim_on()
         self.set_item()
         if not self.selected:
             Snackbar(text='Entry cannot be empty').open()
+            self.controller.main_controller.view.scrim_off()
             return
         if self.content_cls.ids.save.active:
             self.add()
@@ -66,6 +68,7 @@ class TextFieldPopup(MDDialog):
                 if r.id.split(' - ')[-1] in self.model.form_view_fields['plan']:
                     r.select()
                     r.add_button_text(self.selected)
+        self.controller.main_controller.view.scrim_off()
         self.dismiss()
 
     def add(self):

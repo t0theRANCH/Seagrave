@@ -5,6 +5,9 @@ from kivy.lang import Builder
 from kivy.properties import ObjectProperty
 from kivymd.uix.navigationdrawer import MDNavigationDrawer
 
+from Views.Popups.settings.settings import Settings, SettingsContent
+from Views.Popups.debug.debug import Debug, DebugContent
+
 from typing import TYPE_CHECKING, Union
 if TYPE_CHECKING:
     from Controller.main_controller import MainController
@@ -43,6 +46,16 @@ class NavDrawer(MDNavigationDrawer):
         screen = self.get_current_screen()
         screen.controller.change_feed(feed, deletable)
         self.open_close()
+
+    def settings(self):
+        settings_content = SettingsContent(model=self.root_screen.model)
+        settings = Settings(title='Settings', type='custom', content_cls=settings_content)
+        settings.open()
+
+    def debug(self):
+        debug_content = DebugContent(model=self.root_screen.model)
+        debug = Debug(title='Debug', type='custom', content_cls=debug_content)
+        debug.open()
 
     def danger_zone(self):
         screen = self.get_current_screen()

@@ -1,19 +1,19 @@
+import contextlib
 import shutil
 import subprocess
 import webbrowser
+import keyring
 from os import getcwd
 
+from kivy.uix.popup import Popup
 from kivy.utils import platform
 from kivy.event import EventDispatcher
 from kivy.properties import ObjectProperty
-
-import keyring
-
-from typing import TYPE_CHECKING
-
 from kivy.uix.filechooser import FileChooserListView
 from kivymd.uix.label import MDLabel
 from kivymd.uix.snackbar import MDSnackbar
+
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from Controller.main_controller import MainController
@@ -23,6 +23,7 @@ class PC(EventDispatcher):
     main_controller: 'MainController' = ObjectProperty()
     file_chooser = None
     instance_item = None
+    popup = None
 
     def save_password(self, user, password):
         self.save_user(user)
@@ -40,6 +41,18 @@ class PC(EventDispatcher):
     def get_token(name):
         return keyring.get_password('token', name)
 
+    @staticmethod
+    def get_encrypted_data(name):
+        return keyring.get_password('token', name)
+
+    @staticmethod
+    def save_encrypted_data(data, name):
+        keyring.set_password('token', name, data)
+
+    def delete_data(self, name):
+        with contextlib.suppress(Exception):
+            keyring.delete_password('token', name)
+
     def dont_save_password(self, user):
         self.save_user(user)
 
@@ -52,17 +65,21 @@ class PC(EventDispatcher):
 
     def open_file_picker(self, instance_item):
         self.file_chooser = FileChooserListView()
+        self.file_chooser.path = getcwd()
         self.instance_item = instance_item
         self.file_chooser.bind(on_submit=self.on_submit)
-        self.file_chooser.open()
+        self.popup = Popup(title='Select File', content=self.file_chooser, size_hint=(0.9, 0.9))
+        self.popup.open()
 
-    def on_submit(self, instance, selection):
-        image_type = 'blueprints' if selection.split('.')[-1] == 'pdf' else 'pictures'
-        dest_path = f"{getcwd()}/database/{image_type}/{selection}"
+    def on_submit(self, instance, selection, *args):
+        image = selection[0].split('/')[-1]
+        image_type = 'blueprints' if image.split('.')[-1] == 'pdf' else 'pictures'
+        dest_path = f"database/{image_type}/{image}"
+        blueprint_type = self.instance_item.text if self.instance_item else None
+
+        shutil.copy(selection[0], dest_path)
         result = self.main_controller.model.select_image_to_upload(path=dest_path, file_type=image_type,
-                                                                   blueprint_type=self.instance_item.text)
-        # copy file to database
-        shutil.copy(selection, dest_path)
+                                                                   blueprint_type=blueprint_type)
         self.instance_item = None
         if not result:
             MDSnackbar(
@@ -72,8 +89,8 @@ class PC(EventDispatcher):
             ).open()
 
     @staticmethod
-    def open_pdf(uri_path):
-        if platform == 'Linux':
+    def open_pdf(uri_path, mime_type='application/pdf'):
+        if platform == 'linux':
             subprocess.run(['xdg-open', uri_path])
         elif platform == 'win':
             subprocess.run(['start', uri_path], shell=True)

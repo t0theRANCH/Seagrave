@@ -1,5 +1,5 @@
 <SignUpCard>:
-    adaptive_height: True
+    size_hint: 1, 1
     orientation: "vertical"
     md_bg_color: 0,0,0,1
 
@@ -78,3 +78,15 @@
                 font_size: dp(12)
                 pos_hint: {'center_y': 0.5}
                 on_release: root.enter_confirmation_code()
+
+    MDBoxLayout:
+        orientation: 'vertical'
+        size_hint_y: 0.2
+        AnchorLayout:
+            anchor_x: 'right'
+            anchor_y: 'bottom'
+            pos_hint: {'right': 0.9, 'top': 0.5}
+
+            MDFloatingActionButton:
+                icon: "arrow-left-circle"
+                on_release: root.back()

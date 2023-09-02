@@ -1,4 +1,6 @@
 import json
+import os
+import shutil
 from os import getcwd
 from jnius import autoclass, cast
 from android import activity
@@ -18,6 +20,7 @@ from Mobile_OS.java_classes import (
     File,
     FileProvider,
     OpenableColumns,
+    MediaStore,
     String,
     GCMParameterSpec,
     KeyGenParameterSpec,
@@ -82,25 +85,51 @@ class Android(EventDispatcher):
         self.add_password_shared_prefs(cipher, iv)
         self.add_shared_prefs('user', user)
 
-    def save_token(self, token, name):
-        cipher, iv = self.encrypt_key(token)
+    def save_encrypted_data(self, token, name):
+        cipher, iv = self.encrypt_key(token, name)
         self.add_password_shared_prefs(cipher, iv, name)
 
+    def get_encrypted_data(self, name):
+        return self.decrypt_key(name) if (s := self.get_prefs_entry(name)) else ''
+
     def get_token(self, name):
-        return self.decrypt_key() if (s := self.get_prefs_entry(name)) else ''
-        
+        return self.get_prefs_entry(name)
+
+    def save_token(self, token, name):
+        self.add_shared_prefs(name, token)
+
     def dont_save_password(self, user):
         self.add_shared_prefs('user', user)
         self.add_shared_prefs('password', '')
-    
+
+    def test_get_dir(self):
+        from os import listdir
+        full_directory = listdir(f"{self.file_directory}/app/database/blueprints")
+        directory = listdir("database/blueprints")
+        print(f"full directory: {full_directory}")
+        print(f"directory: {directory}")
+        print(f"private path: {self.file_directory}")
+        print(f"external path: {os.getcwd()}")
+
+    def test_encrypt_decrypt(self):
+        api_key = 'd1o7ojnvolnedkhplr3maovjt'
+        encrypted_data, iv = self.encrypt_key(api_key)
+        self.add_password_shared_prefs(encrypted_data, iv, 'api_key')
+
+        stored_data = self.get_prefs_entry('api_key')
+        p = self.decrypt_key(stored_data)
+        print('api key ...')
+        print(''.join(p))
+
     @staticmethod
-    def get_key(prefs):
+    def get_key(prefs, name='password'):
         key_store = KeyStore()
         keyStore = key_store.getInstance("AndroidKeyStore")
         keyStore.load(None)
-        key = keyStore.getKey("SEAGRAVE", None)
-        if key:
-            cipherTextWrapper = json.loads(prefs.getString('password', None))
+        key = keyStore.getKey(name, None)
+        pw = prefs.getString(name, None)
+        if key and pw:
+            cipherTextWrapper = json.loads(prefs.getString(name, None))
         else:
             cipherTextWrapper = None
         return key, cipherTextWrapper
@@ -110,13 +139,13 @@ class Android(EventDispatcher):
         cipher = Cipher()
         return cipher.getInstance("AES/GCM/NoPadding")
 
-    def encrypt_key(self, password):
+    def encrypt_key(self, password, name='password'):
         key_properties = KeyProperties()
         key_generator = KeyGenerator()
         key_gen_parameter_spec = KeyGenParameterSpec()
         string = String()
 
-        kg = key_gen_parameter_spec("SEAGRAVE", key_properties.PURPOSE_ENCRYPT | key_properties.PURPOSE_DECRYPT)
+        kg = key_gen_parameter_spec(name, key_properties.PURPOSE_ENCRYPT | key_properties.PURPOSE_DECRYPT)
         kg.setBlockModes(key_properties.BLOCK_MODE_GCM)
         kg.setEncryptionPaddings(key_properties.ENCRYPTION_PADDING_NONE)
         keygenerator = key_generator.getInstance(key_properties.KEY_ALGORITHM_AES, "AndroidKeyStore")
@@ -126,11 +155,11 @@ class Android(EventDispatcher):
         cipher.init(1, cast('java.security.Key', keygenerator.generateKey()))
         return cipher.doFinal(string(password).getBytes("UTF-8")), cipher.getIV()
 
-    def decrypt_key(self):
+    def decrypt_key(self, name='password'):
         gcm_parameter_spec = GCMParameterSpec()
         string = String()
 
-        secretKey, cipherTextWrapper = self.get_key(self.prefs)
+        secretKey, cipherTextWrapper = self.get_key(self.prefs, name)
         cipher = self.get_cipher()
 
         iv = [int(x) for x in cipherTextWrapper['iv'].split(",")]
@@ -146,6 +175,11 @@ class Android(EventDispatcher):
         editor.putString(key, value)
         editor.commit()
 
+    def delete_data(self, name):
+        editor = self.prefs.edit()
+        editor.putString(name, '')
+        editor.commit()
+
     def add_password_shared_prefs(self, cipher, iv, name='password'):
         editor = self.prefs.edit()
         j = json.dumps(CipherTextWrapper(cipher, iv).__dict__)
@@ -154,10 +188,10 @@ class Android(EventDispatcher):
 
     def get_user(self):
         return self.get_prefs_entry('user')
-    
+
     def get_password(self):
         return self.decrypt_key() if (s := self.get_prefs_entry('password')) else ''
-    
+
     def get_prefs_entry(self, key):
         return self.prefs.getString(key, None)
 
@@ -173,9 +207,9 @@ class Android(EventDispatcher):
         }
         intent.setAction(intent_actions[action])
         if grant_uri_read_permission:
-            intent.setFlags(intent.FLAG_GRANT_READ_URI_PERMISSION)
-            intent.setFlags(intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-            intent.setFlags(intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
+            intent.setFlags(
+                intent.FLAG_GRANT_READ_URI_PERMISSION | intent.FLAG_GRANT_WRITE_URI_PERMISSION | intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
+
         if action_openable:
             intent.addCategory(intent.CATEGORY_OPENABLE)
         return intent
@@ -190,9 +224,9 @@ class Android(EventDispatcher):
             intent.setType('application/pdf')
         self.start_intent(intent, result_code=5, result=self.access_file_tree_result)
 
-    def get_file_name_from_uri(self, uri):
+    def get_file_name_from_uri(self, intent_data):
         openable_columns = OpenableColumns()
-        return_cursor = self.get_content_resolver().query(uri, None, None, None, None)
+        return_cursor = self.get_content_resolver().query(intent_data, None, None, None, None)
         name_index = return_cursor.getColumnIndex(openable_columns.DISPLAY_NAME)
         return_cursor.moveToFirst()
         name = return_cursor.getString(name_index)
@@ -202,15 +236,16 @@ class Android(EventDispatcher):
     def write_file_content(self, uri, path):
         fileinputstream = FileInputStream()
         fileoutputstream = FileOutputStream()
-        pfd = self.get_content_resolver().openFileDescriptor(uri, 'w')
+        pfd = self.get_content_resolver().openFileDescriptor(uri, 'r')  # Use 'r' for reading
         try:
-            file_input_stream = fileinputstream(pfd.fileDescriptor)
+            file_input_stream = fileinputstream(pfd.getFileDescriptor())
             file_output_stream = fileoutputstream(path)
+
             buffer = bytearray(1024)
-            length = None
-            while (length == file_input_stream.read(buffer)) > 0:
-                length = file_input_stream.read(buffer)
+            length = file_input_stream.read(buffer)
+            while length > 0:
                 file_output_stream.write(buffer, 0, length)
+                length = file_input_stream.read(buffer)
         finally:
             file_input_stream.close()
             file_output_stream.close()
@@ -219,7 +254,7 @@ class Android(EventDispatcher):
     def access_file_tree_result(self, request_code, result_code, intent):
         name = self.get_file_name_from_uri(intent.data)
         image_type = 'blueprints' if name.split('.')[-1] == 'pdf' else 'pictures'
-        dest_path = f"{getcwd()}/database/{image_type}/{name}"
+        dest_path = f"database/{image_type}/{name}"
         self.write_file_content(uri=intent.data, path=dest_path)
         result = self.main_controller.model.select_image_to_upload(path=dest_path, file_type=image_type,
                                                                    blueprint_type=self.instance_item.text)
@@ -228,10 +263,14 @@ class Android(EventDispatcher):
             Snackbar(text='Blueprints must be a PDF')
         activity.unbind(on_activity_result=self.access_file_tree_result)
 
-    def open_pdf(self, uri_path):
+    def open_pdf(self, uri_path, mime_type='application/pdf'):
+        self.get_storage_permissions()
         intent = self.create_intent(action='view', grant_uri_read_permission=True)
-        uri = Uri()
-        intent.setDataAndType(uri.parse(uri_path), "application/pdf")
+        file = File()
+        file_provider = FileProvider()
+        share_file = file(f"{self.file_directory}/app/{uri_path}")
+        uri = file_provider.getUriForFile(self.context.getApplicationContext(), f"{self.package_name}.fileprovider", share_file)
+        intent.setDataAndType(uri, mime_type)
         self.start_intent(intent)
 
     def get_directions(self, address, city):
@@ -251,4 +290,16 @@ class Android(EventDispatcher):
                 activity.bind(on_activity_result=result)
             self.currentActivity.startActivityForResult(intent, result_code)
 
-    
+    def start_intent_(self, intent, result=None, result_code=None):
+        try:
+            if not result_code:
+                self.currentActivity.startActivity(intent)
+            else:
+                self.get_activity()
+                self.get_current_activity()
+                if result:
+                    activity.bind(on_activity_result=result)
+                self.currentActivity.startActivityForResult(intent, result_code)
+        except Exception as e:
+            print(f"Error starting intent: {e}")
+

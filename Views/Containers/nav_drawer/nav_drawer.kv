@@ -44,6 +44,14 @@
                     id:forms
                     on_release: nav.change_feed('today', deletable=True)
                 OneLineListItem:
+                    text: "Settings"
+                    id:settings
+                    on_release: nav.settings()
+                OneLineListItem:
                     id: danger_zone
                     text: "Danger Zone"
                     on_release: nav.danger_zone()
+                OneLineListItem:
+                    id: debug
+                    text: "Debug"
+                    on_release: nav.debug()

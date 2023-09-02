@@ -284,8 +284,10 @@ class MultiSelectPopupContent(MDBoxLayout):
         widget.selections = options
 
     def submit_button(self):
+        self.popup.controller.main_controller.view.scrim_on()
         self.popup.selections = self.selections
         self.popup.controller.save_fields(popup=self.popup, number='multi', equipment=self.equipment)
+        self.popup.controller.main_controller.view.scrim_off()
         self.popup.dismiss()
 
 

@@ -5,6 +5,7 @@ from kivy.properties import ObjectProperty
 
 from Views.Popups.equipment_service.equipment_service import EquipmentServicePopupContent, EquipmentService
 from kivymd.uix.screen import MDScreen
+from Views.Containers.scrim.scrim import Scrim
 from Views.Screens.root_screen.window_manager import WindowManager
 from Views.Containers.nav_drawer.nav_drawer import NavDrawer
 from Views.Containers.editable_label.editable_label import EditableLabel
@@ -22,9 +23,17 @@ class RootScreen(MDScreen):
 
     def __init__(self, **kwargs):
         super(RootScreen, self).__init__(**kwargs)
+        self.scrim = Scrim()
+
+    def scrim_on(self):
+        self.scrim.is_visible = True
+
+    def scrim_off(self):
+        self.scrim.is_visible = False
 
     def open_equipment_service_popup(self, equipment_id, equipment_info, site, controller):
-        popup_content = EquipmentServicePopupContent(pre_select=[f"{x['text']}" for x in self.model.site_rows],
+        popup_content = EquipmentServicePopupContent(pre_select=[f"{x['text']} - {x['tertiary_text']}"
+                                                                 for x in self.model.site_rows],
                                                      mileage=equipment_info['mileage'],
                                                      last_service=equipment_info['last_service'],
                                                      unit_num=equipment_info['unit_num'],

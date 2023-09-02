@@ -46,7 +46,7 @@ class SiteViewController(EventDispatcher):
 
     def refresh_equipment_data(self):
         self.view.equipment = {e: self.model.equipment[e] for e in self.model.equipment
-                               if self.model.equipment[e]['site'] == self.model.current_site}
+                               if self.model.equipment[e]['site_id'] == self.model.current_site}
 
     def equipment_service_popup(self, equipment_id):
         equipment_info, site = self.main_controller.equipment_service_popup(equipment_id)
@@ -56,21 +56,21 @@ class SiteViewController(EventDispatcher):
         self.view.new_forms = [x for x in self.model.forms if x not in ["Add Site", "Add Equipment"]]
         self.view.incomplete_forms = {f: {'name': self.model.today['forms'][f]['name'],
                                           'date': self.model.today['forms'][f]['date'],
-                                          'separator': self.model.today['forms'][f]['separator']}
+                                          'separation': self.model.today['forms'][f]['separation']}
                                       for f in self.model.today['forms']}
         self.view.complete_forms = {x: {'name': self.model.completed_forms[x]['name'],
                                         'date': self.model.completed_forms[x]['date'],
-                                        'separator': self.model.completed_forms[x]['separator'],
+                                        'separation': self.model.completed_forms[x]['separation'],
                                         'file_name': self.model.completed_forms[x]['file_name']}
                                     for x in self.model.sites[str(self.model.current_site)]['forms']}
 
     def refresh_picture_data(self):
         self.view.pictures = {x: self.model.pictures[x] for x in self.model.pictures
-                              if self.model.pictures[x]['site'] == self.model.current_site}
+                              if self.model.pictures[x]['site_id'] == self.model.current_site}
 
     def refresh_blueprint_data(self):
         self.view.blueprints = {x: self.model.blueprints[x] for x in self.model.blueprints
-                                if self.model.blueprints[x]['site'] == self.model.current_site}
+                                if self.model.blueprints[x]['site_id'] == self.model.current_site}
 
     def set_banner_image(self):
         header_image = RotatedImage(image_path='assets/20220926_162254.jpg', site=self.view.location)
@@ -93,10 +93,10 @@ class SiteViewController(EventDispatcher):
 
     def select_danger_zone_item(self, instance_item: OneLineIconListItem):
         result = {'Mark Site Complete': 'complete', 'Delete Site': 'delete'}
+        self.popup.dismiss()
+        self.model.delete_site(result[instance_item.text])
         self.change_feed(title='sites', deletable=False)
         self.main_controller.change_screen('main_screen')
-        self.model.delete_site(result[instance_item.text])
-        self.popup.dismiss()
 
     def punch_clock(self, current_datetime, current_day, action):
         self.model.punch_clock(current_datetime=current_datetime, current_day=current_day, action=action)

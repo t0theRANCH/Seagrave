@@ -1,0 +1,20 @@
+<DebugContent>:
+    size_hint_y: None
+    orientation:'vertical'
+    height: "400dp"
+    id: debug_content
+    MDLabel:
+        id: content_label
+        size_hint_y: None
+        height: self.texture_size[1]
+    ScrollView:
+        MDList:
+            id: debug_list
+            OneLineListItem:
+                text: "Files"
+                on_release: root.display_content(self)
+            OneLineListItem:
+                text: "Json_Database"
+                on_release: root.display_content(self)
+
+

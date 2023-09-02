@@ -27,6 +27,7 @@ class LoginScreen(MDScreen):
         super().__init__(**kwargs)
         self.current_card = None
         self.card_to = None
+        self.scrim = None
         self.login_card = LoginCard(self.controller)
         self.sign_up_card = SignUpCard(self.controller)
         self.confirm_code_card = ConfirmCodeCard(self.controller)

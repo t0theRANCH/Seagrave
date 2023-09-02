@@ -27,12 +27,24 @@ class BlueprintContent(MDBoxLayout):
             self.popup = None
 
     def view_blueprints(self, instance_item: TwoLineListItem):
-        blueprint_to_open = next((b['path'] for b in self.blueprint_data if b['type'] == instance_item.text), '')
-        if phone := self.controller.model.phone:
-            phone.open_pdf(uri_path=blueprint_to_open)
+        if blueprint_to_open := next(
+            (
+                self.blueprint_data[b]['name']
+                for b in self.blueprint_data
+                if self.blueprint_data[b]['type'] == instance_item.text
+            ),
+            '',
+        ):
+            folders = blueprint_to_open.split('/')
+            blueprint_to_open = f"{folders[0]}/{folders[-2]}/{folders[-1]}"
+            self.controller.model.download_blueprints(folders[-1])
+            self.popup.dismiss()
+            if phone := self.controller.model.phone:
+                phone.open_pdf(uri_path=blueprint_to_open)
 
     def open_blueprints(self):
-        items = [OneLineIconListItem(IconLeftWidget(icon='warehouse'), text=b['type'], on_release=self.view_blueprints)
+        items = [OneLineIconListItem(IconLeftWidget(icon='warehouse'), text=self.blueprint_data[b]['type'],
+                                     on_release=self.view_blueprints)
                  for b in self.blueprint_data]
         self.popup = MDDialog(title='View Blueprints', items=items, type='simple')
         self.popup.size_hint_x = 1

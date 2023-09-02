@@ -45,7 +45,7 @@ class Form(ABC):
     def make_file(self):
         self.file_name = f"{self.name.lower().replace(' ', '_').replace('/', '_')}_{self.fields.get('location', '')}_" \
                          f"{self.date_time.replace(' ', '-').replace(':', '_')}_{self.separator}"
-        self.pdf = SimpleDocTemplate(f"{self.file_name}.pdf", pagesize=letter)
+        self.pdf = SimpleDocTemplate(f"database/forms/{self.file_name}.pdf", pagesize=letter)
         self.width = letter[0] - self.pdf.leftMargin * 2
 
     def title(self, text):
@@ -149,7 +149,7 @@ class Form(ABC):
         return Paragraph(f"<i>{item}</i>", style)
 
     def remove_file(self):
-        remove(f"{self.file_name}.pdf")
+        remove(f"database/forms/{self.file_name}.pdf")
         remove(self.signature_path)
         for signature in self.fields.get('signatures', ''):
             remove(f"database/{self.fields['signatures'].get(signature, '')}")

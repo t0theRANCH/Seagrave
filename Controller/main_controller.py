@@ -1,10 +1,13 @@
 from kivy._event import EventDispatcher
 from kivy.properties import ObjectProperty
-from kivy.uix.screenmanager import SwapTransition
+from kivy.uix.screenmanager import SwapTransition, SlideTransition
 
 from Views.Screens.root_screen.root_screen import RootScreen
 
 from typing import TYPE_CHECKING
+
+from api_requests import upload
+
 if TYPE_CHECKING:
     from kivymd.uix.screenmanager import MDScreenManager
     from kivymd.uix.navigationdrawer import MDNavigationDrawer
@@ -34,7 +37,16 @@ class MainController(EventDispatcher):
 
     def start_up(self):
         self.load_controllers()
-        self.change_screen('login')
+        if self.model.settings['Keep Me Logged In']:
+            self.login_controller.set_phone()
+            self.login_controller.refresh_auth()
+            if self.model.id_token:
+                self.login_controller.populate_main_screen()
+                self.login_controller.switch_to_main()
+            else:
+                self.change_screen('login')
+        else:
+            self.change_screen('login')
         return self.view
 
     def load_controllers(self):
@@ -44,8 +56,11 @@ class MainController(EventDispatcher):
             s.main_controller = self
             self.screen_manager.add_widget(s.view)
 
-    def change_screen(self, screen_name: str):
-        self.screen_manager.transition = SwapTransition()
+    def change_screen(self, screen_name: str, slide: bool = False, direction: str = 'left'):
+        if slide:
+            self.screen_manager.transition = SlideTransition(direction=direction)
+        else:
+            self.screen_manager.transition = SwapTransition()
         self.screen_manager.current = screen_name
 
     def input_data_into_nav_drawer(self):

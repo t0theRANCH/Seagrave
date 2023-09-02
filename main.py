@@ -1,3 +1,5 @@
+import traceback
+
 import kivy
 from kivy import platform
 from kivymd.app import MDApp
@@ -30,7 +32,7 @@ class Hnnnng(MDApp):
         self.main_controller.picture_view_controller = PictureViewController(self.model)
 
     def build(self):
-        if platform in ['linux', 'windows', 'darwin']:
+        if platform in ['linux', 'windows', 'macosx', 'darwin']:
             Window.size = (400, 600)
         self.set_keyboard_height()
         self.set_theme()
@@ -51,6 +53,23 @@ class Hnnnng(MDApp):
     def on_pause(self):
         return True
 
+    def send_crash_report(self, crash_report):
+        self.model.send_crash_report(crash_report)
+
+    def log_out(self):
+        settings = dict(self.model.settings)
+        if not settings.get('Keep Me Logged In', False):
+            self.model.refresh_token = ''
+            self.model.access_token = ''
+            self.model.id_token = ''
+
 
 if __name__ == '__main__':
-    Hnnnng().run()
+    app = Hnnnng()
+    try:
+        app.run()
+    except Exception as e:
+        crash_info = traceback.format_exc()
+        app.send_crash_report(crash_info)
+    finally:
+        app.log_out()

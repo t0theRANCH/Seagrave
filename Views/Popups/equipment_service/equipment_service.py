@@ -3,10 +3,9 @@ from os.path import join, dirname
 
 from kivy.lang import Builder
 from kivy.metrics import dp
-from kivy.properties import StringProperty
 
 from kivymd.uix.boxlayout import MDBoxLayout
-from kivymd.uix.button import MDFlatButton, MDRaisedButton, MDIconButton
+from kivymd.uix.button import MDFlatButton, MDRaisedButton
 from kivymd.uix.dialog import MDDialog
 
 from typing import TYPE_CHECKING, Union
@@ -67,23 +66,36 @@ class EquipmentServicePopupContent(MDBoxLayout):
 
     def fill_in_information(self):
         self.ids.dropdown.pre_select = self.pre_select
-        self.ids.unit_num_field.text = self.unit_num
+        self.ids.unit_num_field.text = str(self.unit_num)
         if self.mileage:
-            self.ids.mileage_field.text = self.mileage
+            self.ids.mileage_field.text = str(self.mileage)
             if self.last_service:
+                self.ids.last_service_field.text = str(self.last_service)
                 self.ids.mileage_until_service_field.text = f"{int(self.last_service) + 500 - int(self.mileage)} " \
                                                             f"Hours Until Next Service"
         if self.last_inspection:
-            self.ids.last_inspection_field.text = self.last_inspection
-            date_obj = datetime.strptime(self.last_inspection, '%d/%m/%Y')
-            next_inspection = date_obj + timedelta(days=365)
-            days_until_inspection = (next_inspection - datetime.now()).days
-            months_until_inspection = days_until_inspection // 30
-            if months_until_inspection < 3:
-                result = f"{days_until_inspection} Days"
-            else:
-                result = f"{months_until_inspection} Months"
+            self.fill_in_inspection()
+
+    def fill_in_inspection(self):
+        self.ids.last_inspection_field.text = self.last_inspection
+        date_obj = datetime.strptime(self.last_inspection, '%Y-%m-%d')
+        next_inspection = date_obj + timedelta(days=365)
+        days_until_inspection = (next_inspection - datetime.now()).days
+        months_until_inspection = days_until_inspection // 30
+        result = (
+            f"{abs(days_until_inspection)} Days"
+            if abs(months_until_inspection) < 3
+            else f"{abs(months_until_inspection)} Months"
+        )
+        if abs(days_until_inspection) == 1:
+            result = result.rstrip('s')
+
+        if days_until_inspection > 0:
             self.ids.days_until_inspection_field.text = f"{result} Until Next Inspection"
+        elif days_until_inspection < 0:
+            self.ids.days_until_inspection_field.text = f"Inspection Overdue by {result}"
+        else:
+            self.ids.days_until_inspection_field.text = "Inspection is Today"
 
 
 Builder.load_file(join(dirname(__file__), "equipment_service.kv"))

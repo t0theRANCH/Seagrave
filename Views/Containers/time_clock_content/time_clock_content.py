@@ -27,7 +27,7 @@ class TimeClockContent(MDBoxLayout):
         return datetime.now().strftime('%A')
 
     def get_status(self):
-        if self.current_day in self.time_clock_data and self.time_clock_data[self.current_day]['in']:
+        if self.current_day in self.time_clock_data and self.time_clock_data[self.current_day]['clock_in']:
             return 'out'
         return 'in'
 

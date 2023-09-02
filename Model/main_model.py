@@ -1,11 +1,15 @@
 import json
+from datetime import datetime
 from os import remove
 
 from kivy.event import EventDispatcher
 from kivy.properties import ObjectProperty, StringProperty, DictProperty
 from kivy.storage.jsonstore import JsonStore
+from kivymd.uix.label import MDLabel
+from kivymd.uix.snackbar import MDSnackbar
 
-from api_requests import secure_request
+from api_requests import secure_request, open_request
+from api_requests import upload
 from Model.forms_model import FormsModel
 from Model.images_model import ImagesModel
 from Model.sites_model import SitesModel
@@ -40,11 +44,25 @@ class MainModel(EventDispatcher):
         self.login_model = LoginModel(main_model=self)
         self.single, self.multi, self.checkbox, self.risk, self.signature, self.labels, self.pops = [], [], [], [], [], [], []
 
+    @staticmethod
+    def display_error_snackbar(message_text: str):
+        MDSnackbar(
+            MDLabel(
+                text=message_text
+            )
+        ).open()
+
+    def send_crash_report(self, crash_info):
+        data = {'log_type': 'crash_report', 'data': str(crash_info)}
+        print(crash_info)
+        open_request(name='log', data=data)
+
     def is_undeletable(self, title: str, text: str):
         if title in self.undeletable:
             return text in self.undeletable[title]
 
     def iterate_register(self, response: dict):
+        self.db_handler()
         with open('database/register.json', 'r') as f:
             data = json.load(f)
             data['iteration'] = response['iteration']
@@ -69,32 +87,46 @@ class MainModel(EventDispatcher):
         self.iterate_register(response)
         button.parent.remove_widget(button)
 
-    @staticmethod
-    def delete_item(database: 'JsonStore', button: 'RVButton', id_token: str):
-        data = {"database": button.feed, "id": button.id}
+    def delete_item(self, database: 'JsonStore', button: 'RVButton', id_token: str):
         database.delete(button.id)
-        return secure_request(data=data, id_token=id_token)
+        data = {'AccessToken': self.access_token, 'Id': button.id, 'action': 'delete',
+                'function_name': 'sql_delete', 'database': button.feed}
+        return secure_request(data=data, id_token=id_token, url=self.secure_api_url)
 
     def remove_site_from_equipment_db(self, index: str):
         for e in self.equipment:
             if index == self.equipment[e]['site']:
                 db = self.equipment[e]
                 db['site'] = ''
-                self.update_equipment(db_id=e, new_entry=db, column='site')
+                self.update_equipment(db_id=e, new_entry=db)
+
+    def remove_pictures_from_site_db(self, index: str):
+        for p in self.pictures:
+            if index == self.pictures[p]['site_id']:
+                db = self.pictures[p]
+                db['site_id'] = ''
+                self.update_pictures(db_id=p, new_entry=db, column='site_id')
+
+    def remove_blueprints_from_site_db(self, index: str):
+        for b in self.blueprints:
+            if index == self.blueprints[b]['site_id']:
+                db = self.blueprints[b]
+                db['site_id'] = ''
+                self.update_blueprints(db_id=b, new_entry=db, column='site_id')
 
     def remove_equipment_from_site_db(self, index: str):
         for s in self.sites:
             if index in self.sites[s]['equipment']:
                 db = self.sites[s]
                 db['equipment'].remove(index)
-                self.update_sites(db_id=s, new_entry=db, column='equipment')
+                self.update_sites(db_id=s, new_entry=db)
 
     def remove_form_from_site_db(self, index: str):
         for s in self.sites:
             if index in self.sites[s]['forms']:
                 db = self.sites[s]
                 db['forms'].remove(index)
-                self.update_sites(db_id=s, new_entry=db, column='forms')
+                self.update_sites(db_id=s, new_entry=db)
 
     # Login
 
@@ -102,10 +134,17 @@ class MainModel(EventDispatcher):
         return self.login_model.check_for_user_info()
 
     def save_password(self, user: str, password: str):
+        self.save_password_settings(True)
         self.login_model.save_password(user, password)
 
     def dont_save_password(self, user: str):
+        self.save_password_settings(False)
         self.login_model.dont_save_password(user)
+
+    def save_password_settings(self, value):
+        settings = dict(self.settings)
+        settings["Save Password"] = value
+        self.save_db_file('settings', settings)
 
     def db_handler(self):
         self.login_model.db_handler()
@@ -129,8 +168,8 @@ class MainModel(EventDispatcher):
 
     # Equipment
 
-    def update_equipment(self, db_id: str, new_entry: dict, column: str = None):
-        self.equipment_model.update_equipment(db_id, new_entry, column)
+    def update_equipment(self, db_id: str, new_entry: dict):
+        self.equipment_model.update_equipment(db_id, new_entry)
 
     def get_equipment_data(self):
         return {e: self.equipment[e] for e in self.equipment if self.equipment[e]['site'] != self.current_site}
@@ -145,6 +184,8 @@ class MainModel(EventDispatcher):
 
     def download_form(self, button_id):
         self.forms_model.download_form(button_id)
+        if button_id not in self.file_cache['forms']:
+            self.file_cache['forms'][button_id] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
     def update_completed_forms(self, db_id: str, new_entry: dict, column: str = None):
         self.forms_model.update_completed_forms(db_id, new_entry, column)
@@ -193,6 +234,26 @@ class MainModel(EventDispatcher):
     def update_blueprints(self, db_id: str, new_entry: dict, column: str = None):
         self.images_model.update_blueprints(db_id, new_entry, column)
 
+    def clear_pictures(self):
+        self.images_model.clear_pictures()
+
+    def clear_blueprints(self):
+        self.images_model.clear_blueprints()
+
+    def clear_forms(self):
+        self.images_model.clear_forms()
+
+    def download_pictures(self):
+        self.images_model.download_pictures()
+        for picture in self.sites[self.current_site]['pictures']:
+            if picture not in self.file_cache['pictures']:
+                self.file_cache['pictures'][picture] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+    def download_blueprints(self, file_name):
+        self.images_model.download_blueprints(file_name)
+        if file_name not in self.file_cache['blueprints']:
+            self.file_cache['blueprints'][file_name] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
     def add_note_to_picture(self, picture_id, note):
         self.images_model.add_note_to_picture(picture_id, note)
 
@@ -208,19 +269,25 @@ class MainModel(EventDispatcher):
     # Properties
     @property
     def api_key(self):
-        return self.phone.get_token('api_key')
+        return self.phone.get_encrypted_data('api_key')
 
     @api_key.setter
     def api_key(self, value):
-        self.phone.save_token(value, 'api_key')
+        if value:
+            self.phone.save_encrypted_data(value, 'api_key')
+        else:
+            self.phone.delete_data('api_key')
 
     @property
     def secure_api_url(self):
-        return self.phone.get_token('secure_api_url')
+        return self.phone.get_encrypted_data('secure_api_url')
 
     @secure_api_url.setter
     def secure_api_url(self, value):
-        self.phone.save_token(value, 'secure_api_url')
+        if value:
+            self.phone.save_encrypted_data(value, 'secure_api_url')
+        else:
+            self.phone.delete_data('secure_api_url')
 
     @property
     def access_token(self):
@@ -228,7 +295,10 @@ class MainModel(EventDispatcher):
 
     @access_token.setter
     def access_token(self, value):
-        self.phone.save_token(value, 'access_token')
+        if value:
+            self.phone.save_token(value, 'access_token')
+        else:
+            self.phone.delete_data('access_token')
 
     @property
     def id_token(self):
@@ -236,7 +306,10 @@ class MainModel(EventDispatcher):
 
     @id_token.setter
     def id_token(self, value):
-        self.phone.save_token(value, 'id_token')
+        if value:
+            self.phone.save_token(value, 'id_token')
+        else:
+            self.phone.delete_data('id_token')
 
     @property
     def refresh_token(self):
@@ -244,7 +317,11 @@ class MainModel(EventDispatcher):
 
     @refresh_token.setter
     def refresh_token(self, value):
-        self.phone.save_token(value, 'refresh_token')
+        if value:
+            self.phone.save_token(value, 'refresh_token')
+        else:
+            self.phone.delete_data('refresh_token')
+
 
     @property
     def site_rows(self):
@@ -268,7 +345,7 @@ class MainModel(EventDispatcher):
     def today_rows(self):
         return [{"text": self.today['forms'][f]['name'], "id": str(f), "type": 'forms',
                  "secondary_text": f"{self.today['forms'][f]['date']} {self.today['forms'][f]['location']}",
-                 "tertiary_text": f"{self.today['forms'][f]['separator']}"}
+                 "tertiary_text": f"{self.today['forms'][f]['separation']}"}
                 for f in self.today['forms']]
 
     @property
@@ -285,7 +362,7 @@ class MainModel(EventDispatcher):
 
     @property
     def forms(self):
-        return JsonStore('database/forms/forms.json')
+        return JsonStore('database/forms.json')
 
     @property
     def pictures(self):
@@ -294,6 +371,10 @@ class MainModel(EventDispatcher):
     @property
     def register(self):
         return JsonStore('database/register.json')
+
+    @property
+    def settings(self):
+        return JsonStore('database/settings.json')
 
     @property
     def sites(self):
@@ -314,3 +395,9 @@ class MainModel(EventDispatcher):
     @property
     def time_clock(self):
         return JsonStore('database/time_clock.json')
+
+    @property
+    def file_cache(self):
+        return JsonStore('database/file_cache.json')
+
+

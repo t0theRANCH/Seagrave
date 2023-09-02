@@ -1,5 +1,7 @@
 from os.path import join, dirname
 
+from kivy.clock import Clock
+from kivy.core.window import Window
 from kivy.lang import Builder
 from kivy.properties import ObjectProperty, OptionProperty, StringProperty
 
@@ -25,6 +27,12 @@ class PictureView(MDScreen):
         super().__init__(**kwargs)
         self.popup: Union[None, MDDialog] = None
 
+    def on_pre_enter(self):
+        Clock.schedule_once(self.update_fab_pos, 0.3)
+
+    def update_fab_pos(self, *args):
+        self.ids.speed_dial._update_pos_buttons(Window, Window.width, Window.height)
+
     def on_leave(self, *args):
         screen_manager = self.controller.main_controller.screen_manager
         next_screen = screen_manager.get_screen(screen_manager.current)
@@ -43,14 +51,14 @@ class PictureView(MDScreen):
 
     def open_add_note_popup(self):
         self.popup = MDDialog(title='Annotate Picture', type="custom", content_cls=AddNote(),
-                              buttons=[MDFlatButton(text='Cancel', on_release=self.dismiss),
-                                       MDFlatButton(text='Add Note', on_release=self.confirm_add_note)])
+                              buttons=[MDFlatButton(text='Cancel', on_release=self.dismiss_popup),
+                                       MDFlatButton(text='Add Note', on_release=self.controller.confirm_add_note)])
         self.popup.open()
 
     def open_set_as_banner_image_popup(self):
         self.popup = MDDialog(text='Use this photo as the banner image for this site?', type='confirmation',
-                              buttons=[MDFlatButton(text='Cancel', on_release=self.dismiss),
-                                       MDFlatButton(text='OK', on_release=self.confirm_add_image)]
+                              buttons=[MDFlatButton(text='Cancel', on_release=self.dismiss_popup),
+                                       MDFlatButton(text='OK', on_release=self.controller.confirm_add_image)]
                               )
         self.popup.open()
 

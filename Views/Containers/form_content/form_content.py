@@ -33,7 +33,7 @@ class FormContent(MDBoxLayout):
         if items := [ThreeLineIconListItem(IconLeftWidget(icon='note-edit'),
                                            text=v['name'],
                                            secondary_text=v['date'],
-                                           tertiary_text=v['separator'],
+                                           tertiary_text=v['separation'],
                                            id=k, on_release=self.finish_incomplete_form)
                      for k, v in self.incomplete_form_data.items()]:
             self.popup = MDDialog(title='Finish Incomplete Form', items=items, type='simple')
@@ -46,7 +46,7 @@ class FormContent(MDBoxLayout):
         if items := [ThreeLineIconListItem(IconLeftWidget(icon='note-check'),
                                            text=v['name'],
                                            secondary_text=v['date'],
-                                           tertiary_text=v['separator'],
+                                           tertiary_text=v['separation'],
                                            id=v['file_name'],
                                            on_release=self.view_form)
                      for k, v in self.complete_form_data.items()]:
@@ -68,6 +68,8 @@ class FormContent(MDBoxLayout):
     def view_form(self, instance_item: IconLeftWidget):
         self.controller.model.download_form(button_id=instance_item.id)
         self.popup.dismiss()
+        if phone := self.controller.model.phone:
+            phone.open_pdf(uri_path=f'database/forms/{instance_item.id}')
 
 
 Builder.load_file(join(dirname(__file__), "form_content.kv"))

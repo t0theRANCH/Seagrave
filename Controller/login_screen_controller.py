@@ -1,5 +1,4 @@
 import re
-from time import sleep
 
 from kivy import platform
 from kivy._event import EventDispatcher
@@ -50,6 +49,14 @@ class LoginScreenController(EventDispatcher):
         else:
             self.model.phone = PC()
 
+        self.model.phone.main_controller = self.main_controller
+
+    def scrim_on(self):
+        self.main_controller.view.scrim_on()
+
+    def scrim_off(self):
+        self.main_controller.view.scrim_off()
+
     def enter_user_data(self, user: str, password: str):
         self.view.login_card.ids.email.text = user
         self.view.login_card.ids.password.text = password
@@ -75,42 +82,54 @@ class LoginScreenController(EventDispatcher):
         self.view.register()
 
     def send_sign_up_email(self):
+        self.scrim_on()
         r = open_request(name='sign_up', data={"email": self.view.current_card.ids.email.text.capitalize(),
                                                "password": self.view.current_card.ids.password.text})
         if 'error' in r:
             self.view.current_card.ids.email.helper_text = r['body']
             self.view.current_card.ids.email.error = True
+            self.scrim_off()
             return
+        self.scrim_off()
         self.clear_errors()
         self.view.switch_cards(self.view.confirm_code_card)
 
     def send_code(self):
+        self.scrim_on()
         r = open_request(name='sign_up_resend', data={"email": self.view.sign_up_card.ids.email.text})
         if 'error' in r:
             self.display_error_snackbar(r['body'])
+            self.scrim_off()
             return
+        self.scrim_off()
         toast("Verification code sent!")
 
     def send_confirmation_code(self, code):
+        self.scrim_on()
         r = open_request(name='sign_up_confirm', data={"code": code, "email": self.view.sign_up_card.ids.email.text})
         if 'error' in r:
             self.display_error_snackbar(r['body'])
+            self.scrim_off()
             return
+        self.scrim_off()
         toast('Your email has been verified, please log in')
         self.main_controller.change_screen('login')
 
     def send_password_confirmation_code(self):
+        self.scrim_on()
         data = {"code": self.view.confirm_password_code_card.code,
                 "email": self.view.reset_password_card.ids.email.text,
                 "password": self.view.current_card.ids.password.text}
         r = open_request(name='forgot_password_confirm', data=data)
         self.main_controller.login_controller.display_error_snackbar(r['body'])
+        self.scrim_off()
         self.main_controller.change_screen('login')
 
     def forgot_password(self):
         self.view.switch_cards(self.view.reset_password_card)
 
     def log_in(self):
+        self.scrim_on()
         if self.email_field_check() and self.password_field_check():
             self.clear_errors()
             u = self.view.current_card.ids.email.text
@@ -122,14 +141,24 @@ class LoginScreenController(EventDispatcher):
             self.view.current_card.ids.password.helper_text = 'Password must have at lease one uppercase, number, and symbol, ' \
                                                               'and be over 7 characters'
             self.view.current_card.ids.password.error = True
+        self.scrim_off()
 
     def authentication(self, r):
         self.model.access_token = r['AuthenticationResult']['AccessToken']
         self.model.id_token = r['AuthenticationResult']['IdToken']
         self.model.refresh_token = r['AuthenticationResult']['RefreshToken']
+        if not self.model.access_token:
+            self.display_error_snackbar('Error logging in, please try again')
+            return
         self.save_password_prompt()
         self.model.db_handler()
+        if not self.model.access_token:
+            self.display_error_snackbar('Error logging in, please try again')
+            return
         self.model.get_hours()
+        self.model.clear_pictures()
+        self.model.clear_blueprints()
+        self.model.clear_forms()
         self.populate_main_screen()
         self.switch_to_main()
 

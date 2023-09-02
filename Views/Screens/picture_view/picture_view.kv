@@ -1,7 +1,7 @@
 <PictureView>:
     name: "picture_view"
     id: picture_view
-    heros_to: [hero_to]
+    heroes_to: [hero_to]
 
     MDBoxLayout:
         id: layout
@@ -21,5 +21,6 @@
             anchor_y: 'bottom'
             MDFloatingActionButtonSpeedDial:
                 id: speed_dial
-                label_text_color: 0,0,0,1
-                callback: root.controller.select_speed_dial_button
+                label_text_color: 1,1,1,1
+                label_bg_color: app.theme_cls.primary_color
+                label_radius: 10,10,10,10

@@ -19,10 +19,10 @@ class PictureViewController(EventDispatcher):
         super().__init__(**kwargs)
         self.model = model
         self.view = PictureView(name='picture_view', controller=self, model=self.model)
-        self.speed_dial_data = {"Set as Banner Image": "image-edit", "Add a note": 'note-plus',
-                                "Back": "arrow-left-circle"}
-        self.speed_dial_methods = {"Set as Banner Image": self.set_as_banner_image, "Add a note": self.add_note,
-                                   "Back": self.go_back}
+        self.speed_dial_data = {"Set as Banner Image": ["image-edit", "on_release", self.set_as_banner_image],
+                                "Add a note": ["note-plus", "on_release", self.add_note],
+                                "Back": ["arrow-left-circle", "on_release", self.go_back]
+                                }
         self.picture_id = None
         self.popup: Union[None, MDDialog] = None
         self.view.bind(orientation=self.on_orientation)
@@ -31,7 +31,7 @@ class PictureViewController(EventDispatcher):
     def switch_screen(self, tag, picture_id):
         self.view.ids.hero_to.tag = tag
         self.view.picture_id = picture_id
-        self.main_controller.change_screen("picture_view")
+        self.main_controller.change_screen("picture_view", slide=True)
 
     def on_orientation(self):
         if self.view.orientation == 'portrait':
@@ -42,15 +42,11 @@ class PictureViewController(EventDispatcher):
     def set_speed_dial_data(self):
         self.view.ids.speed_dial.data = self.speed_dial_data
 
-    def select_speed_dial_button(self, instance):
-        for i in self.speed_dial_data:
-            if self.speed_dial_data[i] == instance.icon:
-                func = self.speed_dial_methods[i]
-                func()
-                self.view.ids.speed_dial.close_stack()
-                return
+    def close_speed_dial(self):
+        if self.view.ids.speed_dial.state == "open":
+            self.view.ids.speed_dial.close_stack()
 
-    def add_note(self):
+    def add_note(self, obj):
         self.view.open_add_note_popup()
 
     def dismiss(self, obj):
@@ -68,9 +64,9 @@ class PictureViewController(EventDispatcher):
     def confirm_add_image(self, obj):
         self.model.set_banner_image(self.picture_id)
 
-    def set_as_banner_image(self):
+    def set_as_banner_image(self, obj):
         self.view.open_set_as_banner_image_popup()
 
-    def go_back(self):
+    def go_back(self, obj):
         self.main_controller.screen_manager.current_heroes = []
-        self.main_controller.change_screen('picture_list_view')
+        self.main_controller.change_screen('picture_list_view', slide=True, direction='right')

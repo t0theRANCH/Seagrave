@@ -65,7 +65,7 @@ class SingleOptionDatePicker(FormWidget):
         super().__init__(*args, **kwargs)
 
     def on_save(self, instance, value, date_range):
-        self.selection = value.strftime("%d/%m/%Y")
+        self.selection = value.strftime("%Y-%m-%d")
         if self.time:
             self.show_time_picker()
             return
@@ -82,7 +82,7 @@ class SingleOptionDatePicker(FormWidget):
         time_dialog.open()
 
     def get_time(self, instance, time):
-        t = time.strftime("%H:%M")
+        t = time.strftime("%H:%M:%S")
         dt = f"{self.selection} {t}"
         self.fill_in_response(dt, time)
 

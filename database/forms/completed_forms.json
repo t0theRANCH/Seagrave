@@ -1,1 +1,10 @@
-{"1": {"name": "Field Level Hazard Assessment", "site": "1", "location": "GFL - Pickering", "date": "08/01/2023", "separator": "Digging", "file_name": "field_level_hazard_assessment_GFL - Pickering_23-01-08-Jan_01_Digging.pdf"}, "2": {"name": "Equipment and Vehicle Pre-Start Checklist", "site": "1", "location": "GFL - Pickering", "date": "14/01/2023", "separator": "Genie Telehandler", "file_name": "equipment_vehicle_pre-start_checklist_GFL - Pickering_23-01-14-Jan_01_Genie Telehandler.pdf"}}
+{
+  "4": {
+    "name": "Safety Talk Report Form",
+    "site_id": "3",
+    "file_name": "safety_talk_GFL - Toronto_23-08-26-Aug_08_Toolbox Talk.pdf",
+    "location": "GFL - Toronto",
+    "separation": "Toolbox Talk",
+    "date": "0000-00-00"
+  }
+}

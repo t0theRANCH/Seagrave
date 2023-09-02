@@ -28,4 +28,4 @@ class PictureListViewController(EventDispatcher):
         screen_manager = self.main_controller.screen_manager
         screen_manager.current_heroes = []
         screen_manager.get_screen('site_view').remove_widgets()
-        screen_manager.current = 'site_view'
+        self.main_controller.change_screen('site_view')

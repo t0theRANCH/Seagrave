@@ -2,6 +2,7 @@ from os.path import join, dirname
 
 from kivy.clock import Clock
 from kivy.lang import Builder
+from kivy.properties import ObjectProperty
 from kivy.uix.behaviors import ButtonBehavior
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.hero import MDHeroFrom
@@ -32,13 +33,12 @@ class PictureButton(MDHeroFrom):
         self.picture_id = None
 
     def on_release(self):
-        def switch_screen(*args):
-            self.controller.main_controller.screen_manager.transition._direction = 'in'
-            self.controller.main_controller.screen_manager.current_heroes.append(self.tag)
+        pass
+        """def switch_screen(*args):
+            self.controller.main_controller.screen_manager.current_heroes = [self.tag]
             self.controller.switch_screen(self.tag, self.picture_id)
-
         if self.controller.main_controller.screen_manager.current == 'picture_list_view':
-            Clock.schedule_once(switch_screen, 0.2)
+            Clock.schedule_once(switch_screen, 0.2)"""
 
 
 Builder.load_file(join(dirname(__file__), "image_button.kv"))

@@ -6,6 +6,8 @@ from Forms.form_fields.form_widgets import (
     SingleOptionDatePicker,
 )
 
+from datetime import datetime
+
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -18,6 +20,7 @@ class CreateForm:
     def __init__(self, model: 'MainModel', controller: 'FormViewController', form_id: str,
                  popup: 'TextFieldPopup' = None):
         self.model = model
+        self.model.form_view_fields = {'date': datetime.now().strftime("%Y-%m-%d")}
         self.controller = controller
         self.popup = popup
         self.form_ids = [x.lower().replace(' ', '_') for x in self.model.forms]
@@ -53,6 +56,7 @@ class CreateForm:
         self.model.form_view_fields['blueprints'] = []
         self.model.form_view_fields['pictures'] = []
         self.model.form_view_fields['forms'] = []
+        self.model.form_view_fields['complete'] = False
         self.controller.view.type = 'site'
         self.remove_save_button()
         return [customer, address, city, start_date]

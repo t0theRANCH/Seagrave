@@ -1,0 +1,17 @@
+<LabelSwitch>:
+    orientation: 'horizontal'
+    spacing: '10dp'
+    size_hint_y: None
+    height: self.minimum_height
+
+    MDLabel:
+        id:lbl
+        size_hint_y: None
+        height: "40dp"
+        text: root.label_text
+        theme_text_color: "Secondary"
+
+    MDSwitch:
+        id:switch
+        active: root.switch_active
+        on_active: root.on_switch_active(*args)
