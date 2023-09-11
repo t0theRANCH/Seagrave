@@ -1,15 +1,19 @@
+import time
 from os.path import join, dirname
 
 from kivy.clock import Clock
-from kivy.core.window import Window
 from kivy.lang import Builder
+from kivy.metrics import dp
 from kivy.properties import ObjectProperty, StringProperty
+from kivymd.uix.button.button import MDFloatingBottomButton, MDFloatingRootButton
 
 from kivymd.uix.screen import MDScreen
+from kivymd.uix.taptargetview import MDTapTargetView
 
 from Views.Buttons.rv_button.rv_button import RVButton
 
 from typing import TYPE_CHECKING, Union
+
 if TYPE_CHECKING:
     from Model.main_model import MainModel
     from Controller.main_screen_controller import MainScreenController
@@ -22,6 +26,13 @@ class MainScreen(MDScreen):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.tap_target_view = None
+
+    def set_button_position(self, *args):
+        button = self.ids.speed_dial
+        button.y = dp(20)
+        button.x = self.parent.width - (
+                    dp(56) + dp(20))
 
     def on_leave(self, *args):
         screen_manager = self.controller.main_controller.screen_manager
@@ -29,10 +40,34 @@ class MainScreen(MDScreen):
         next_screen.previous_screen = self.name
 
     def on_pre_enter(self):
-        Clock.schedule_once(self.update_fab_pos, 0.3)
+        Clock.schedule_once(self.set_button_position, 2)
+        Clock.schedule_once(self.add_tap_target, 3)
+        Clock.schedule_once(self.check_tutorial, 4)
 
-    def update_fab_pos(self, *args):
-        self.ids.speed_dial._update_pos_buttons(Window, Window.width, Window.height)
+    def check_tutorial(self, *args):
+        if self.model.settings['Tutorials'] and self.model.settings['Tutorial']['main_screen']:
+            self.tap_target_view.start()
+            self.model.update_tutorial_settings('main_screen', False)
+
+    def add_tap_target(self, *args):
+        speed_dial = None
+        for child in self.ids.speed_dial.children:
+            if isinstance(child, MDFloatingRootButton):
+                speed_dial = child
+        self.tap_target_view = MDTapTargetView(
+            widget=speed_dial,
+            title_text="Add New Item",
+            description_text="Add a new site, equipment, or form",
+            widget_position="right_bottom",
+            cancelable=True
+        )
+
+
+    def tap_target(self):
+        if self.tap_target_view.state == "close":
+            self.tap_target_view.start()
+        else:
+            self.tap_target_view.stop()
 
     def add_widgets_to_feed(self, new_feed: dict, title: str, deletable: bool):
         for n in new_feed:

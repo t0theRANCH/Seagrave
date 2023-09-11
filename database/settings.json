@@ -1,1 +1,13 @@
-{"Save Password": true, "Keep Me Logged In": true, "Cache Documents (Weeks)": "Completion of Site"}
+{
+  "Save Password": true,
+  "Keep Me Logged In": true,
+  "Cache Documents (Weeks)": "Completion of Site",
+  "Tutorials": true,
+  "Tutorial": {
+    "main_screen": true,
+    "form_view_welcome": true,
+    "form_view_complete": true,
+    "text_field_popup": true,
+    "multi_select_popup": true
+  }
+}

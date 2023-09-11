@@ -102,25 +102,6 @@ class Android(EventDispatcher):
         self.add_shared_prefs('user', user)
         self.add_shared_prefs('password', '')
 
-    def test_get_dir(self):
-        from os import listdir
-        full_directory = listdir(f"{self.file_directory}/app/database/blueprints")
-        directory = listdir("database/blueprints")
-        print(f"full directory: {full_directory}")
-        print(f"directory: {directory}")
-        print(f"private path: {self.file_directory}")
-        print(f"external path: {os.getcwd()}")
-
-    def test_encrypt_decrypt(self):
-        api_key = ''
-        encrypted_data, iv = self.encrypt_key(api_key)
-        self.add_password_shared_prefs(encrypted_data, iv, 'api_key')
-
-        stored_data = self.get_prefs_entry('api_key')
-        p = self.decrypt_key(stored_data)
-        print('api key ...')
-        print(''.join(p))
-
     @staticmethod
     def get_key(prefs, name='password'):
         key_store = KeyStore()

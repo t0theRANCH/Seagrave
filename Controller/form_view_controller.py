@@ -185,6 +185,13 @@ class FormViewController(EventDispatcher):
             for x, y in popup.selections.items():
                 self.check_equipment_for_failure(title=popup.title, grade=y, component=x)
 
+        if self.model.settings['Tutorials'] and self.model.settings['Tutorial']['form_view_complete']:
+            widgets = self.model.single + self.model.multi + self.model.checkbox + self.model.signature + self.model.risk
+            for w in widgets:
+                if not w.filled:
+                    return
+            self.view.tap_target()
+
     def colour_completed_list_items(self, widgets: list, popup_id: str, selections: Union[list, str],
                                     number: str = 'multi'):
         for w in widgets:

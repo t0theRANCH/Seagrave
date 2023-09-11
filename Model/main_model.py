@@ -57,6 +57,16 @@ class MainModel(EventDispatcher):
         print(crash_info)
         open_request(name='log', data=data)
 
+    def update_settings(self, db_id: str, new_entry):
+        rest = self.settings[db_id]
+        rest.update(new_entry)
+        self.settings[db_id] = rest
+
+    def update_tutorial_settings(self, key, value):
+        tutorial_settings = self.settings['Tutorial']
+        tutorial_settings[key] = value
+        self.update_settings('Tutorial', tutorial_settings)
+
     def is_undeletable(self, title: str, text: str):
         if title in self.undeletable:
             return text in self.undeletable[title]

@@ -1,7 +1,9 @@
 from os.path import join, dirname
 
+from kivy.clock import Clock
 from kivy.lang import Builder
 from kivy.metrics import dp
+from kivymd.uix.taptargetview import MDTapTargetView
 
 from Views.Popups.confirm_delete.confirm_delete import ConfirmDelete
 from kivymd.uix.boxlayout import MDBoxLayout
@@ -12,6 +14,7 @@ from kivymd.uix.menu import MDDropdownMenu
 from kivymd.uix.snackbar import Snackbar
 
 from typing import TYPE_CHECKING, Callable
+
 if TYPE_CHECKING:
     from Model.main_model import MainModel
     from Controller.form_view_controller import FormViewController
@@ -34,6 +37,9 @@ class TextFieldPopup(MDDialog):
         self.db = db
         self.signatures = None
         self.plan_option = plan_option
+
+    def on_pre_open(self):
+        self.content_cls.show_tutorial()
 
     def set_item(self):
         self.selected = self.content_cls.ids.dropdown.text
@@ -89,6 +95,24 @@ class TextFieldPopupContent(MDBoxLayout):
                             "on_release": lambda x=f"{p}": self.call_back(x)} for p in pre_select]
         self.menu = MDDropdownMenu(items=self.pre_select, caller=self.ids.dropdown.arrow, width_mult=6)
         self.ids.dropdown.menu = self.menu
+        self.tap_target_view = None
+
+    def show_tutorial(self):
+        if not self.model.settings['Tutorials'] or not self.model.settings['Tutorial']['text_field_popup']:
+            self.ids.dropdown.ids.text_field.helper_text = ''
+            return
+        dropdown = self.ids.dropdown
+        dropdown.ids.text_field.helper_text = 'Click here to add a new item'
+        dropdown.ids.text_field.helper_text_mode = 'persistent'
+        self.tap_target_view = MDTapTargetView(
+            widget=dropdown.ids.open_menu,
+            title_text="Select an Item",
+            description_text="Tap here to select a previously saved item",
+            widget_position="right",
+            cancelable=True
+        )
+        Clock.schedule_once(self.tap_target_view.start, 4)
+        self.model.update_tutorial_settings('text_field_popup', False)
 
     def call_back(self, *args):
         self.popup.selected = args[0]
@@ -96,8 +120,9 @@ class TextFieldPopupContent(MDBoxLayout):
         self.menu.dismiss()
 
     def add_list_item(self, list_item: str):
-        self.pre_select.append({"text": f"{list_item}", "viewclass": "ListItem", "height": dp(56), 'popup_content': self,
-                                "on_release": lambda x=f"{list_item}": self.call_back(x)})
+        self.pre_select.append(
+            {"text": f"{list_item}", "viewclass": "ListItem", "height": dp(56), 'popup_content': self,
+             "on_release": lambda x=f"{list_item}": self.call_back(x)})
 
     def add_field(self):
         if self.ids.dropdown.text and self.popup.db and not self.popup.plan_option:

@@ -25,7 +25,9 @@ class SettingsContent(MDBoxLayout):
     def __init__(self, model, **kwargs):
         super().__init__(**kwargs)
         self.model = model
-        self.switches = {'Save Password': self.ids.save_password, 'Keep Me Logged In': self.ids.keep_logged_in}
+        self.switches = {'Save Password': self.ids.save_password,
+                         'Keep Me Logged In': self.ids.keep_logged_in,
+                         'Tutorials': self.ids.tutorials}
         self.menus = {'Cache Documents (Weeks)':
                           {'widget': self.ids.cache_documents,
                            'menu_items': ['1', '2', '3', '4', '5', 'Completion of Site'],
@@ -40,11 +42,13 @@ class SettingsContent(MDBoxLayout):
         for text, menu in self.menus.items():
             menu['widget'].hint_text = text
             pre_select = [{"text": f"{m}", "viewclass": "OneLineListItem", "height": dp(56), 'popup_content': self,
-                            "on_release": lambda x=f"{m}": self.call_back(x, menu['widget'])} for m in menu['menu_items']]
+                           "on_release": lambda x=f"{m}": self.call_back(x, menu['widget'])} for m in
+                          menu['menu_items']]
             menu['widget'].menu = MDDropdownMenu(items=pre_select, caller=menu['widget'].arrow, width_mult=6)
 
     def call_back(self, value, menu):
-        if self.menus[menu.hint_text]['integer'] and not self.check_int(value) and value not in self.menus[menu.hint_text]['accepted_values']:
+        if self.menus[menu.hint_text]['integer'] and not self.check_int(value) and value not in \
+                self.menus[menu.hint_text]['accepted_values']:
             self.model.display_error_snackbar('Please enter an integer')
             menu.menu.dismiss()
             return
@@ -57,7 +61,6 @@ class SettingsContent(MDBoxLayout):
             switch.switch_active = settings.get(switch.label_text, False)
         for menu in self.menus.values():
             menu['widget'].text = settings.get(menu['widget'].text, '')
-
 
     def save_settings(self):
         settings = dict(self.model.settings)

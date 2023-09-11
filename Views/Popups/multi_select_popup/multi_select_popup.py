@@ -46,6 +46,9 @@ class MultiSelectPopup(MDDialog):
         self.content_cls.selections = self.selected
         self.content_cls.pop_selection_list(fields=self.selections)
 
+    def on_pre_open(self):
+        self.content_cls.show_tutorial()
+
     def select_all(self, obj):
         self.content_cls.select_all()
 
@@ -98,6 +101,15 @@ class MultiSelectPopupContent(MDBoxLayout):
         self.pre_selected = None
         self.delete_button = None
         self.hazard_popup = None
+
+    def show_tutorial(self):
+        add_new = self.ids.add_new
+        if not self.popup.model.settings['Tutorials'] or not self.popup.model.settings['Tutorial']['multi_select_popup']:
+            add_new.helper_text = ''
+            return
+        add_new.helper_text = 'Click here to add a new item'
+        add_new.helper_text_mode = 'persistent'
+        self.popup.model.update_tutorial_settings('multi_select_popup', False)
 
     def on_popup(self, instance, value):
         if self.equipment:

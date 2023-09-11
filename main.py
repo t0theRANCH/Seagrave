@@ -62,6 +62,10 @@ class Hnnnng(MDApp):
             self.model.refresh_token = ''
             self.model.access_token = ''
             self.model.id_token = ''
+        if settings['Tutorials']:
+            for item in settings['Tutorial']:
+                settings['Tutorial'][item] = True
+        self.model.update_settings('Tutorial', settings['Tutorial'])
 
 
 if __name__ == '__main__':

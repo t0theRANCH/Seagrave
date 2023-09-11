@@ -2,18 +2,20 @@ from os.path import join, dirname
 
 from kivy.lang import Builder
 from kivy.properties import ObjectProperty, StringProperty
+from kivymd.uix.dialog import MDDialog
+from kivymd.uix.taptargetview import MDTapTargetView
 
 from Forms.form_fields.form_widgets import SingleOption, SingleOptionDatePicker, SignatureOption, RiskButton
 from Views.Popups.error_popup.error_popup import ErrorPopup
 from Views.Popups.signature_popup.signature_popup import SignaturePopup, SignaturePopupContent
 from kivymd.uix.label import MDLabel
 from kivymd.uix.screen import MDScreen
+from kivymd.uix.button.button import MDFloatingRootButton
 
 from typing import TYPE_CHECKING, Union
 if TYPE_CHECKING:
     from Controller.form_view_controller import FormViewController
     from Model.main_model import MainModel
-    from kivymd.uix.button.button import MDFloatingBottomButton
 
 
 class FormView(MDScreen):
@@ -24,6 +26,7 @@ class FormView(MDScreen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.type = 'forms'
+        self.dialog = None
         self.speed_dial_with_save_button = {
             "Back": ["arrow-left-circle", "on_release", self.controller.remove_widgets],
             "Save": ["content-save", "on_release", self.controller.save_form],
@@ -35,10 +38,37 @@ class FormView(MDScreen):
         }
         self.add_save_button()
 
+    def tap_target(self):
+        speed_dial = None
+        for child in self.ids.speed_dial.children:
+            if isinstance(child, MDFloatingRootButton):
+                speed_dial = child
+        tap_target_view = MDTapTargetView(
+            widget=speed_dial,
+            title_text="All Finished?",
+            description_text="Click Here to Submit the Form",
+            widget_position="right_bottom",
+            cancelable=True
+        )
+        tap_target_view.start()
+        self.model.update_tutorial_settings('form_view_complete', False)
+
+    def on_enter(self, *args):
+        if self.model.settings['Tutorials'] and self.model.settings['Tutorial']['form_view_welcome']:
+            self.show_tutorial()
+
     def on_leave(self, *args):
         screen_manager = self.controller.main_controller.screen_manager
         next_screen = screen_manager.get_screen(screen_manager.current)
         next_screen.previous_screen = self.name
+
+    def show_tutorial(self):
+        if self.dialog:
+            self.dialog.dismiss()
+            self.dialog = None
+        self.dialog = MDDialog(title="Tutorial", text="Here you can fill out the form. Select an option to get started")
+        self.dialog.open()
+        self.model.update_tutorial_settings('form_view_welcome', False)
 
     def add_save_button(self):
         self.ids.speed_dial.data = self.speed_dial_with_save_button
