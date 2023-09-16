@@ -45,11 +45,11 @@ class SitesModel:
             self.main_model.time_clock[key] = value
 
     def punch_clock(self, current_datetime, current_day, action):
-        data = self.format_request(action, current_datetime)
+        data = self.format_request(action, current_datetime, current_day)
         response = secure_request(id_token=self.main_model.id_token, data=data, url=self.main_model.secure_api_url)
         self.get_hours()
 
-    def format_request(self, action, current_datetime):
+    def format_request(self, action, current_datetime, current_day):
         if action == 'in':
             d = {'function_name': 'sql_create',
                  'cols': {'employee': self.main_model.user['given_name'],
@@ -60,7 +60,8 @@ class SitesModel:
             d = {'function_name': 'sql_update',
                  'cols': {'clock_out': current_datetime,
                           'status': 'out',
-                          'employee': self.main_model.user['given_name']}
+                          'employee': self.main_model.user['given_name'],
+                          'id': self.main_model.time_clock[current_day]['id']}
                  }
         return {
                    'AccessToken': self.main_model.access_token,

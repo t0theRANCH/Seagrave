@@ -33,12 +33,11 @@ class PictureButton(MDHeroFrom):
         self.picture_id = None
 
     def on_release(self):
-        pass
-        """def switch_screen(*args):
+        def switch_screen(*args):
             self.controller.main_controller.screen_manager.current_heroes = [self.tag]
             self.controller.switch_screen(self.tag, self.picture_id)
         if self.controller.main_controller.screen_manager.current == 'picture_list_view':
-            Clock.schedule_once(switch_screen, 0.2)"""
+            Clock.schedule_once(switch_screen, 0.2)
 
 
 Builder.load_file(join(dirname(__file__), "image_button.kv"))

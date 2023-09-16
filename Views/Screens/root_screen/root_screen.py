@@ -1,5 +1,6 @@
 from os.path import join, dirname
 
+from kivy.core.window import Window
 from kivy.lang import Builder
 from kivy.properties import ObjectProperty
 
@@ -30,6 +31,9 @@ class RootScreen(MDScreen):
 
     def scrim_off(self):
         self.scrim.is_visible = False
+
+    def update_fab_pos(self, widget):
+        widget._update_pos_buttons(Window, Window.width, Window.height)
 
     def open_equipment_service_popup(self, equipment_id, equipment_info, site, controller):
         popup_content = EquipmentServicePopupContent(pre_select=[f"{x['text']} - {x['tertiary_text']}"

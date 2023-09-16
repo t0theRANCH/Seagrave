@@ -29,10 +29,7 @@ class MainScreen(MDScreen):
         self.tap_target_view = None
 
     def set_button_position(self, *args):
-        button = self.ids.speed_dial
-        button.y = dp(20)
-        button.x = self.parent.width - (
-                    dp(56) + dp(20))
+        self.controller.main_controller.view.update_fab_pos(self.ids.speed_dial)
 
     def on_leave(self, *args):
         screen_manager = self.controller.main_controller.screen_manager
@@ -40,7 +37,7 @@ class MainScreen(MDScreen):
         next_screen.previous_screen = self.name
 
     def on_pre_enter(self):
-        Clock.schedule_once(self.set_button_position, 2)
+        Clock.schedule_once(self.set_button_position, 0.3)
         Clock.schedule_once(self.add_tap_target, 3)
         Clock.schedule_once(self.check_tutorial, 4)
 

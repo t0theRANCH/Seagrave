@@ -262,25 +262,13 @@ class Android(EventDispatcher):
         self.start_intent(intent)
 
     def start_intent(self, intent, result=None, result_code=None):
+        self.get_activity()
+        self.get_current_activity()
         if not result_code:
             self.currentActivity.startActivity(intent)
         else:
-            self.get_activity()
-            self.get_current_activity()
             if result:
                 activity.bind(on_activity_result=result)
             self.currentActivity.startActivityForResult(intent, result_code)
 
-    def start_intent_(self, intent, result=None, result_code=None):
-        try:
-            if not result_code:
-                self.currentActivity.startActivity(intent)
-            else:
-                self.get_activity()
-                self.get_current_activity()
-                if result:
-                    activity.bind(on_activity_result=result)
-                self.currentActivity.startActivityForResult(intent, result_code)
-        except Exception as e:
-            print(f"Error starting intent: {e}")
 

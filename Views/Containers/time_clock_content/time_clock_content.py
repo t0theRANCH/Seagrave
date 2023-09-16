@@ -26,6 +26,12 @@ class TimeClockContent(MDBoxLayout):
     def get_current_day():
         return datetime.now().strftime('%A')
 
+    def scrim_on(self):
+        self.controller.main_controller.view.scrim_on()
+
+    def scrim_off(self):
+        self.controller.main_controller.view.scrim_off()
+
     def get_status(self):
         if self.current_day in self.time_clock_data and self.time_clock_data[self.current_day]['clock_in']:
             return 'out'
@@ -33,11 +39,15 @@ class TimeClockContent(MDBoxLayout):
 
     def get_total_hours(self):
         total_hours = 0
-        for data in dict(self.time_clock_data).values():
-            if not data['clock_out']:
+        for day, data in dict(self.time_clock_data).items():
+            if not data['clock_out'] and self.current_day != day:
                 continue
             punch_in = datetime.strptime(data['clock_in'], '%Y-%m-%d %H:%M:%S')
-            punch_out = datetime.strptime(data['clock_out'], '%Y-%m-%d %H:%M:%S')
+            if data['clock_out']:
+                punch_out_time = data['clock_out']
+            else:
+                punch_out_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            punch_out = datetime.strptime(punch_out_time, '%Y-%m-%d %H:%M:%S')
             hours = punch_out - punch_in
             total_hours += (hours.seconds // 3600)
         return total_hours
@@ -52,12 +62,14 @@ class TimeClockContent(MDBoxLayout):
         self.status = 'out' if self.status == 'in' else 'in'
 
     def punch_clock(self):
+        self.scrim_on()
         self.controller.punch_clock(current_datetime=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                                     current_day=self.get_current_day(),
                                     action=self.status
                                     )
         self.set_status()
         self.set_punch_button_text()
+        self.scrim_off()
 
 
 Builder.load_file(join(dirname(__file__), "time_clock_content.kv"))

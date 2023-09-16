@@ -1,5 +1,6 @@
 from os.path import join, dirname
 
+from kivy.clock import Clock
 from kivy.lang import Builder
 from kivy.properties import ObjectProperty, StringProperty
 from kivymd.uix.dialog import MDDialog
@@ -52,6 +53,12 @@ class FormView(MDScreen):
         )
         tap_target_view.start()
         self.model.update_tutorial_settings('form_view_complete', False)
+
+    def set_button_position(self, *args):
+        self.controller.main_controller.view.update_fab_pos(self.ids.speed_dial)
+
+    def on_pre_enter(self):
+        Clock.schedule_once(self.set_button_position(), 0.3)
 
     def on_enter(self, *args):
         if self.model.settings['Tutorials'] and self.model.settings['Tutorial']['form_view_welcome']:
