@@ -82,12 +82,14 @@ class FormsModel:
             data = {'database': 'today', 'cols': new_entry, 'AccessToken': self.main_model.access_token}
             secure_request(id_token=self.main_model.id_token, data=data)
 
-    def delete_todays_form(self, database: 'JsonStore', button: 'RVButton', id_token: str):
+    def delete_todays_form(self, database: 'JsonStore', button: 'RVButton', id_token: str, demo_mode: bool = False):
         entry = button if isinstance(button, str) else button.id
         total = database['forms']
         if entry in total:
             total.pop(entry)
             database['forms'] = total
+        if demo_mode:
+            return
         return self.upload_file(file_name="database/today.json")
 
     def delete_signatures(self, signature_type: str, selections: list):
@@ -259,7 +261,7 @@ class FormsModel:
 
                 self.main_model.update_equipment(new_entry=equipment_info, db_id=e)
 
-    def process_form(self, signature, form, separator):
+    def process_form(self, signature, form, separator, demo_mode):
         form_class = self.forms[form]
         form_instance = form_class()
         form_instance.separator = self.main_model.form_view_fields[separator]
@@ -268,10 +270,14 @@ class FormsModel:
         form_instance.make_file()
         form_instance.print()
         try:
-            upload(path=f"database/{self.main_model.current_site_id}/forms/{form_instance.file_name}.pdf",
-                   id_token=self.main_model.id_token,
-                   url=self.main_model.secure_api_url, access_token=self.main_model.access_token)
-            self.remove_form_from_db(file_name=form_instance.file_name, form=form, separator=separator)
+            if not demo_mode:
+                upload(path=f"database/{self.main_model.current_site_id}/forms/{form_instance.file_name}.pdf",
+                       id_token=self.main_model.id_token,
+                       url=self.main_model.secure_api_url, access_token=self.main_model.access_token)
+                self.remove_form_from_db(file_name=form_instance.file_name, form=form, separator=separator)
+            else:
+                file_name = f"database/forms/{form_instance.file_name}.pdf"
+                self.main_model.phone.open_pdf(file_name)
         except Exception as e:
             self.save_incomplete_form(separator, 'this input is not used')
             MDSnackbar(
@@ -280,7 +286,17 @@ class FormsModel:
                 )
             ).open()
         finally:
-            form_instance.remove_file()
+            if not demo_mode:
+                form_instance.remove_file()
+            else:
+                self.remove_files(form_instance)
+                self.remove_from_device(demo_mode=True)
+
+    def remove_files(self, form_instance):
+        self.main_model.files_to_be_deleted.append(f"database/forms/{form_instance.file_name}.pdf")
+        self.main_model.files_to_be_deleted.append(form_instance.signature_path)
+        for signature in form_instance.fields.get('signatures', ''):
+            self.main_model.files_to_be_deleted.append(f"database/{form_instance.fields['signatures'].get(signature, '')}")
 
     def get_equipment_id(self):
         if 'unit_num' not in self.main_model.form_view_fields:
@@ -294,9 +310,15 @@ class FormsModel:
             ):
                 return e
 
-    def remove_form_from_db(self, file_name, form, separator):
+    def remove_from_device(self, demo_mode=False):
         for x in [x for x in ['signatures', 'initials'] if x in self.main_model.form_view_fields]:
             self.main_model.form_view_fields.pop(x)
+        if 'index' in self.main_model.form_view_fields:
+            self.delete_todays_form(self.main_model.today, self.main_model.form_view_fields['index'],
+                                    self.main_model.id_token, demo_mode=demo_mode)
+        self.main_model.current_site_id = ''
+
+    def remove_form_from_db(self, file_name, form, separator):
         fields = {"name": form, "site_id": self.main_model.current_site_id,
                   'location': self.main_model.form_view_fields['location'],
                   'date': self.main_model.form_view_fields['date'],
@@ -310,10 +332,6 @@ class FormsModel:
         response = secure_request(data=data, id_token=self.main_model.id_token, url=self.main_model.secure_api_url)
         self.record_completed_form(response=response, fields=fields)
 
-        if 'index' in self.main_model.form_view_fields:
-            self.delete_todays_form(self.main_model.today, self.main_model.form_view_fields['index'],
-                                    self.main_model.id_token)
-
     def record_completed_form(self, response, fields):
         self.main_model.iterate_register(response)
         new_id = response['body']
@@ -323,7 +341,7 @@ class FormsModel:
         site['forms'].append(str(new_id))
         self.main_model.completed_forms[new_id] = fields
         self.main_model.update_sites(new_entry=site, db_id=site_id)
-        self.main_model.current_site_id = ''
+        self.remove_from_device()
 
     def process_db_request(self, form_type):
         if 'equipment' in form_type:

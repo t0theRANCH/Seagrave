@@ -1,4 +1,5 @@
 import traceback
+from os import remove
 
 import kivy
 from kivy import platform
@@ -66,6 +67,8 @@ class Hnnnng(MDApp):
             for item in settings['Tutorial']:
                 settings['Tutorial'][item] = True
         self.model.update_settings('Tutorial', settings['Tutorial'])
+        for file in self.model.files_to_be_deleted:
+            remove(file)
 
 
 if __name__ == '__main__':

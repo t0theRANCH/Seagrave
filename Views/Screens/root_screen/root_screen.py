@@ -3,6 +3,8 @@ from os.path import join, dirname
 from kivy.core.window import Window
 from kivy.lang import Builder
 from kivy.properties import ObjectProperty
+from kivymd.uix.label import MDLabel
+from kivymd.uix.snackbar import MDSnackbar
 
 from Views.Popups.equipment_service.equipment_service import EquipmentServicePopupContent, EquipmentService
 from kivymd.uix.screen import MDScreen
@@ -31,6 +33,14 @@ class RootScreen(MDScreen):
 
     def scrim_off(self):
         self.scrim.is_visible = False
+
+    @staticmethod
+    def demo_mode_prompt():
+        MDSnackbar(
+            MDLabel(
+                text='This Feature is Disabled in Demo Mode'
+            )
+        ).open()
 
     def update_fab_pos(self, widget):
         widget._update_pos_buttons(Window, Window.width, Window.height)

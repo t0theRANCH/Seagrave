@@ -43,6 +43,9 @@ class BlueprintContent(MDBoxLayout):
                 phone.open_pdf(uri_path=blueprint_to_open)
 
     def open_blueprints(self):
+        if self.controller.main_controller.demo_mode:
+            self.controller.main_controller.view.demo_mode_prompt()
+            return
         items = [OneLineIconListItem(IconLeftWidget(icon='warehouse'), text=self.blueprint_data[b]['type'],
                                      on_release=self.view_blueprints)
                  for b in self.blueprint_data]
@@ -51,6 +54,9 @@ class BlueprintContent(MDBoxLayout):
         self.popup.open()
 
     def add_new_blueprints(self):
+        if self.controller.main_controller.demo_mode:
+            self.controller.main_controller.view.demo_mode_prompt()
+            return
         items = [OneLineIconListItem(IconLeftWidget(icon='warehouse'), text=b, on_release=self.open_file_picker)
                  for b in self.blueprint_types]
         self.popup = MDDialog(title='Add New Blueprints', items=items, type='simple')

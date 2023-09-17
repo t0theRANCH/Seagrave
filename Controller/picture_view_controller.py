@@ -2,7 +2,7 @@ from kivy._event import EventDispatcher
 
 from Views.Screens.picture_view.picture_view import PictureView
 
-from kivy.properties import ObjectProperty
+from kivy.properties import ObjectProperty, BooleanProperty
 
 from typing import TYPE_CHECKING, Union
 
@@ -14,6 +14,7 @@ if TYPE_CHECKING:
 
 class PictureViewController(EventDispatcher):
     main_controller: 'MainController' = ObjectProperty()
+    demo_mode: bool = BooleanProperty()
 
     def __init__(self, model: 'MainModel', **kwargs):
         super().__init__(**kwargs)

@@ -1,5 +1,5 @@
 from kivy._event import EventDispatcher
-from kivy.properties import ObjectProperty
+from kivy.properties import ObjectProperty, BooleanProperty
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.list import OneLineIconListItem, IconLeftWidget
 
@@ -15,6 +15,7 @@ if TYPE_CHECKING:
 
 class SiteViewController(EventDispatcher):
     main_controller: 'MainController' = ObjectProperty()
+    demo_mode: bool = BooleanProperty()
 
     def __init__(self, model: 'MainModel', **kwargs):
         super().__init__(**kwargs)
@@ -85,6 +86,9 @@ class SiteViewController(EventDispatcher):
         self.main_controller.change_screen('main_screen')
 
     def danger_zone(self):
+        if self.demo_mode:
+            self.main_controller.demo_mode_prompt()
+            return
         menu_items = [
             OneLineIconListItem(IconLeftWidget(icon='note-plus'), text=x, on_release=self.select_danger_zone_item)
             for x in ['Mark Site Complete', 'Delete Site']]
@@ -99,6 +103,9 @@ class SiteViewController(EventDispatcher):
         self.main_controller.change_screen('main_screen')
 
     def punch_clock(self, current_datetime, current_day, action):
+        if self.demo_mode:
+            self.main_controller.demo_mode_prompt()
+            return
         self.model.punch_clock(current_datetime=current_datetime, current_day=current_day, action=action)
 
     def get_directions(self, address, city):

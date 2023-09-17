@@ -34,6 +34,7 @@ class MainController(EventDispatcher):
         self.view = RootScreen(controller=self, model=self.model)
         self.screen_manager = self.view.ids.screen_manager
         self.nav_drawer = self.view.ids.nav
+        self.demo_mode = True
 
     def start_up(self):
         self.load_controllers()
@@ -54,6 +55,7 @@ class MainController(EventDispatcher):
                    self.form_view_controller, self.picture_list_view_controller, self.picture_view_controller]
         for s in screens:
             s.main_controller = self
+            s.demo_mode = self.demo_mode
             self.screen_manager.add_widget(s.view)
 
     def change_screen(self, screen_name: str, slide: bool = False, direction: str = 'left'):
@@ -70,3 +72,6 @@ class MainController(EventDispatcher):
 
     def equipment_service_popup(self, equipment_id):
         return self.model.get_single_equipment_data(equipment_id)
+
+    def demo_mode_prompt(self):
+        self.view.demo_mode_prompt()

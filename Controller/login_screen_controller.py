@@ -2,7 +2,7 @@ import re
 
 from kivy import platform
 from kivy._event import EventDispatcher
-from kivy.properties import ObjectProperty
+from kivy.properties import ObjectProperty, BooleanProperty
 from kivy.clock import Clock
 
 from kivymd.toast import toast
@@ -28,6 +28,7 @@ if TYPE_CHECKING:
 
 class LoginScreenController(EventDispatcher):
     main_controller: 'MainController' = ObjectProperty()
+    demo_mode: bool = BooleanProperty()
 
     def __init__(self, model: 'MainModel', **kwargs):
         super().__init__(**kwargs)
@@ -126,9 +127,15 @@ class LoginScreenController(EventDispatcher):
         self.main_controller.change_screen('login')
 
     def forgot_password(self):
+        if self.demo_mode:
+            self.main_controller.demo_mode_prompt()
+            return
         self.view.switch_cards(self.view.reset_password_card)
 
     def log_in(self):
+        if self.demo_mode:
+            self.populate_main_screen()
+            self.switch_to_main()
         self.scrim_on()
         if self.email_field_check() and self.password_field_check():
             self.clear_errors()
@@ -221,7 +228,8 @@ class LoginScreenController(EventDispatcher):
         self.main_controller.input_data_into_nav_drawer()
 
     def switch_to_main(self):
-        Clock.schedule_interval(self.refresh_auth, (30 * 60))
+        if not self.demo_mode:
+            Clock.schedule_interval(self.refresh_auth, (30 * 60))
         self.main_controller.change_screen('main_screen')
 
     def refresh_auth(self, *args):

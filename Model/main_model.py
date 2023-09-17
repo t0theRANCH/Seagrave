@@ -37,6 +37,7 @@ class MainModel(EventDispatcher):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.files_to_be_deleted = []
         self.forms_model = FormsModel(main_model=self)
         self.images_model = ImagesModel(main_model=self)
         self.sites_model = SitesModel(main_model=self)
@@ -187,8 +188,8 @@ class MainModel(EventDispatcher):
     def get_single_equipment_data(self, equipment_id):
         return self.equipment_model.get_single_equipment_data(equipment_id)
 
-    def edit_equipment_data(self, equipment_id, site_name, new_data):
-        self.equipment_model.edit_equipment_data(equipment_id, site_name, new_data)
+    def edit_equipment_data(self, equipment_id, site_name, new_data, demo_mode=False):
+        self.equipment_model.edit_equipment_data(equipment_id, site_name, new_data, demo_mode)
 
     # Forms
 
@@ -230,8 +231,8 @@ class MainModel(EventDispatcher):
     def save_form_fields(self, submit, separator, form_type):
         return self.forms_model.save_form_fields(submit, separator, form_type)
 
-    def process_form(self, signature, form, separator):
-        self.forms_model.process_form(signature, form, separator)
+    def process_form(self, signature, form, separator, demo_mode):
+        self.forms_model.process_form(signature, form, separator, demo_mode)
 
     def process_db_request(self, form_type):
         self.forms_model.process_db_request(form_type)

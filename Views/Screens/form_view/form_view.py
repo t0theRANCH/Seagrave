@@ -58,7 +58,7 @@ class FormView(MDScreen):
         self.controller.main_controller.view.update_fab_pos(self.ids.speed_dial)
 
     def on_pre_enter(self):
-        Clock.schedule_once(self.set_button_position(), 0.3)
+        Clock.schedule_once(self.set_button_position, 0.3)
 
     def on_enter(self, *args):
         if self.model.settings['Tutorials'] and self.model.settings['Tutorial']['form_view_welcome']:

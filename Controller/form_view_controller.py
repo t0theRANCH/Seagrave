@@ -3,7 +3,7 @@ import contextlib
 
 from kivy._event import EventDispatcher
 from kivy.core.window import Window
-from kivy.properties import ObjectProperty
+from kivy.properties import ObjectProperty, BooleanProperty
 from kivy.uix.widget import WidgetException
 
 from Forms.form_compiler import CreateForm
@@ -22,6 +22,7 @@ if TYPE_CHECKING:
 
 class FormViewController(EventDispatcher):
     main_controller: 'MainController' = ObjectProperty()
+    demo_mode: bool = BooleanProperty()
 
     def __init__(self, model: 'MainModel', **kwargs):
         super().__init__(**kwargs)
@@ -270,6 +271,9 @@ class FormViewController(EventDispatcher):
 
     def save_form(self, *args):
         self.close_speed_dial()
+        if self.demo_mode:
+            self.main_controller.demo_mode_prompt()
+            return
         if done := self.parse_field_check_response(submit=False):
             self.remove_widgets()
 
@@ -326,8 +330,12 @@ class FormViewController(EventDispatcher):
     def fill_form(self, signature):
         self.main_controller.view.scrim_on()
         if self.view.type == 'forms':
-            self.model.process_form(signature, separator=self.separator, form=self.form)
+            self.model.process_form(signature, separator=self.separator, form=self.form, demo_mode=self.demo_mode)
         else:
+            if self.demo_mode:
+                self.main_controller.demo_mode_prompt()
+                self.main_controller.view.scrim_off()
+                return
             self.model.process_db_request(form_type=self.view.type)
         self.main_controller.view.scrim_off()
         self.remove_widgets()

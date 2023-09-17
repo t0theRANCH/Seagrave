@@ -1,7 +1,5 @@
 import base64
 import json
-import re
-from os import listdir
 
 import requests
 
@@ -66,7 +64,6 @@ def upload(path, id_token, url, access_token):
         upload_path = file_path[-1]
     else:
         upload_path = path
-    print(f"upload_path: {upload_path}")
     data = {'AccessToken': access_token,
             'function_name': 'upload',
             'path': upload_path

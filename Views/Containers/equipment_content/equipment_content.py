@@ -9,6 +9,7 @@ from kivymd.uix.dialog import MDDialog
 from kivymd.uix.list import OneLineIconListItem, IconLeftWidget
 
 from typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
     from Controller.site_view_controller import SiteViewController
 
@@ -62,8 +63,10 @@ class EquipmentContent(MDBoxLayout):
 
     def finalize_move(self, obj):
         self.popup.dismiss()
-        self.controller.model.move_equipment(equipment_id=self.move_equipment_target.id,
-                                             site_name=self.controller.view.location)
+        self.controller.model.edit_equipment_data(equipment_id=self.move_equipment_target.id,
+                                                  site_name=self.controller.view.location,
+                                                  new_data=self.controller.model.equipment[self.move_equipment_target.id],
+                                                  demo_mode=self.controller.demo_mode)
         self.controller.refresh_equipment_data()
         self.controller.remove_widgets()
         self.controller.switch_to_site_view(self.controller.model.current_site)

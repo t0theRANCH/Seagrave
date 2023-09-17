@@ -1,5 +1,5 @@
 from kivy._event import EventDispatcher
-from kivy.properties import ObjectProperty
+from kivy.properties import ObjectProperty, BooleanProperty
 
 from Views.Screens.main_screen.main_screen import MainScreen
 
@@ -11,6 +11,7 @@ if TYPE_CHECKING:
 
 class MainScreenController(EventDispatcher):
     main_controller: 'MainController' = ObjectProperty()
+    demo_mode: bool = BooleanProperty()
 
     def __init__(self, model: 'MainModel', **kwargs):
         super().__init__(**kwargs)

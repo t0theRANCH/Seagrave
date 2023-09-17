@@ -22,6 +22,9 @@ class SignUpCard(MD3Card):
         self.controller.view.switch_cards(self.controller.view.login_card)
 
     def enter_confirmation_code(self):
+        if self.controller.demo_mode:
+            self.controller.main_controller.demo_mode_prompt()
+            return
         if not self.controller.email_field_check():
             self.ids.email.error = True
             self.ids.email.helper_text = 'Please enter a valid email'
@@ -30,6 +33,9 @@ class SignUpCard(MD3Card):
         self.controller.view.switch_cards(self.controller.view.confirm_code_card)
 
     def register(self):
+        if self.controller.demo_mode:
+            self.controller.main_controller.demo_mode_prompt()
+            return
         if not self.controller.email_field_check():
             self.ids.email.error = True
             self.ids.email.helper_text = 'Please enter a valid email'

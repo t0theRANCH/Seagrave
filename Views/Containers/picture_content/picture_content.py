@@ -17,10 +17,16 @@ class PictureContent(MDBoxLayout):
         self.phone = self.controller.model.phone
 
     def add_picture(self):
+        if self.controller.demo_mode:
+            self.controller.main_controller.demo_mode_prompt()
+            return
         if self.phone:
             self.phone.open_file_picker(instance_item=None)
 
     def view_pictures(self):
+        if self.controller.demo_mode:
+            self.controller.main_controller.demo_mode_prompt()
+            return
         self.controller.main_controller.picture_list_view_controller.populate_grid(self.picture_data)
         self.controller.main_controller.change_screen('picture_list_view')
 
