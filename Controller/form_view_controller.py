@@ -330,7 +330,7 @@ class FormViewController(EventDispatcher):
     def fill_form(self, signature):
         self.main_controller.view.scrim_on()
         if self.view.type == 'forms':
-            self.model.process_form(signature, separator=self.separator, form=self.form, demo_mode=self.demo_mode)
+            self.model.process_form(signature, separator=self.separator, form=self.form)
         else:
             if self.demo_mode:
                 self.main_controller.demo_mode_prompt()

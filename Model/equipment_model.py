@@ -39,7 +39,7 @@ class EquipmentModel:
                f"{self.main_model.sites[equipment_info['site']]['city']}"
         return equipment_info, site
 
-    def edit_equipment_data(self, equipment_id, site_name, new_data, demo_mode):
+    def edit_equipment_data(self, equipment_id, site_name, new_data):
         site_id = next(x for x in self.main_model.sites if f"{self.main_model.sites[x]['customer']} - "
                                                            f"{self.main_model.sites[x]['city']}" == site_name)
         site_info = self.get_current_site_info(site_id, equipment_id)
@@ -49,7 +49,7 @@ class EquipmentModel:
             self.main_model.update_sites(new_entry=old_site_info, db_id=old_site_id)
         equipment_info = self.get_equipment_info(equipment_id, site_id, new_data)
         self.main_model.update_sites(new_entry=site_info, db_id=site_id)
-        self.update_equipment(new_entry=equipment_info, db_id=equipment_id, demo_mode=demo_mode)
+        self.update_equipment(new_entry=equipment_info, db_id=equipment_id, demo_mode=self.main_model.demo_mode)
 
     def get_old_site_info(self, equipment_id, site_id):
         old_site_id = self.main_model.equipment[equipment_id]['site']

@@ -39,6 +39,8 @@ class LoginScreenController(EventDispatcher):
         self.set_phone()
         if not self.model.phone:
             return
+        if self.demo_mode:
+            return
         user, password = self.model.check_for_user_info()
         self.enter_user_data(user, password)
 
@@ -136,6 +138,7 @@ class LoginScreenController(EventDispatcher):
         if self.demo_mode:
             self.populate_main_screen()
             self.switch_to_main()
+            return
         self.scrim_on()
         if self.email_field_check() and self.password_field_check():
             self.clear_errors()

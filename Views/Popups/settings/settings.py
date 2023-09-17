@@ -2,6 +2,7 @@ from os.path import join, dirname
 
 from kivy.lang import Builder
 from kivy.metrics import dp
+from kivy.properties import BooleanProperty, ObjectProperty
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.button import MDFlatButton, MDRaisedButton
 from kivymd.uix.dialog import MDDialog
@@ -22,12 +23,16 @@ class Settings(MDDialog):
 
 
 class SettingsContent(MDBoxLayout):
+    demo_mode = BooleanProperty()
+    controller = ObjectProperty()
+
     def __init__(self, model, **kwargs):
         super().__init__(**kwargs)
         self.model = model
         self.switches = {'Save Password': self.ids.save_password,
                          'Keep Me Logged In': self.ids.keep_logged_in,
-                         'Tutorials': self.ids.tutorials}
+                         'Tutorials': self.ids.tutorials,
+                         'Demo Mode': self.ids.demo_mode}
         self.menus = {'Cache Documents (Weeks)':
                           {'widget': self.ids.cache_documents,
                            'menu_items': ['1', '2', '3', '4', '5', 'Completion of Site'],
@@ -37,6 +42,9 @@ class SettingsContent(MDBoxLayout):
                       }
         self.load_settings()
         self.load_menus()
+
+    def on_demo_mode(self, instance, value):
+        self.controller.demo_mode = value
 
     def load_menus(self):
         for text, menu in self.menus.items():
@@ -69,6 +77,7 @@ class SettingsContent(MDBoxLayout):
         for text, menu in self.menus.items():
             settings[text] = menu['widget'].text
         self.model.save_db_file('settings', settings)
+        self.demo_mode = settings['Demo Mode']
 
     @staticmethod
     def bool_to_str(boolean):

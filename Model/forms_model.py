@@ -261,7 +261,7 @@ class FormsModel:
 
                 self.main_model.update_equipment(new_entry=equipment_info, db_id=e)
 
-    def process_form(self, signature, form, separator, demo_mode):
+    def process_form(self, signature, form, separator):
         form_class = self.forms[form]
         form_instance = form_class()
         form_instance.separator = self.main_model.form_view_fields[separator]
@@ -270,7 +270,7 @@ class FormsModel:
         form_instance.make_file()
         form_instance.print()
         try:
-            if not demo_mode:
+            if not self.main_model.demo_mode:
                 upload(path=f"database/{self.main_model.current_site_id}/forms/{form_instance.file_name}.pdf",
                        id_token=self.main_model.id_token,
                        url=self.main_model.secure_api_url, access_token=self.main_model.access_token)
@@ -286,11 +286,11 @@ class FormsModel:
                 )
             ).open()
         finally:
-            if not demo_mode:
+            if not self.main_model.demo_mode:
                 form_instance.remove_file()
             else:
                 self.remove_files(form_instance)
-                self.remove_from_device(demo_mode=True)
+                self.remove_from_device(demo_mode=self.main_model.demo_mode)
 
     def remove_files(self, form_instance):
         self.main_model.files_to_be_deleted.append(f"database/forms/{form_instance.file_name}.pdf")

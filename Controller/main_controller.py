@@ -1,5 +1,5 @@
 from kivy._event import EventDispatcher
-from kivy.properties import ObjectProperty
+from kivy.properties import ObjectProperty, BooleanProperty
 from kivy.uix.screenmanager import SwapTransition, SlideTransition
 
 from Views.Screens.root_screen.root_screen import RootScreen
@@ -27,6 +27,7 @@ class MainController(EventDispatcher):
     form_view_controller: 'FormViewController' = ObjectProperty()
     picture_list_view_controller: 'PictureListViewController' = ObjectProperty()
     picture_view_controller: 'PictureViewController' = ObjectProperty()
+    demo_mode = BooleanProperty()
 
     def __init__(self, model: 'MainModel', **kwargs):
         super().__init__(**kwargs)
@@ -34,11 +35,15 @@ class MainController(EventDispatcher):
         self.view = RootScreen(controller=self, model=self.model)
         self.screen_manager = self.view.ids.screen_manager
         self.nav_drawer = self.view.ids.nav
-        self.demo_mode = True
+        self.demo_mode = model.settings['Demo Mode']
+
+    def on_demo_mode(self, instance, value):
+        if not value:
+            self.login_controller.refresh_auth()
 
     def start_up(self):
         self.load_controllers()
-        if self.model.settings['Keep Me Logged In']:
+        if self.model.settings['Keep Me Logged In'] and not self.demo_mode:
             self.login_controller.set_phone()
             self.login_controller.refresh_auth()
             if self.model.id_token:

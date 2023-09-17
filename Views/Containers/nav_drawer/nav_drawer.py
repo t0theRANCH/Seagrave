@@ -50,6 +50,7 @@ class NavDrawer(MDNavigationDrawer):
     def settings(self):
         settings_content = SettingsContent(model=self.root_screen.model)
         settings = Settings(title='Settings', type='custom', content_cls=settings_content)
+        settings_content.controller = self.controller
         settings.open()
 
     def debug(self):

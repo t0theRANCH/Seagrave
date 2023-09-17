@@ -3,7 +3,7 @@ from datetime import datetime
 from os import remove
 
 from kivy.event import EventDispatcher
-from kivy.properties import ObjectProperty, StringProperty, DictProperty
+from kivy.properties import ObjectProperty, StringProperty, DictProperty, BooleanProperty
 from kivy.storage.jsonstore import JsonStore
 from kivymd.uix.label import MDLabel
 from kivymd.uix.snackbar import MDSnackbar
@@ -34,9 +34,11 @@ class MainModel(EventDispatcher):
     current_site_id: str = StringProperty()
     current_site: str = StringProperty()
     primary_color: tuple = ()
+    demo_mode = BooleanProperty(False)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.database_folder = 'demo_database' if self.demo_mode else 'database'
         self.files_to_be_deleted = []
         self.forms_model = FormsModel(main_model=self)
         self.images_model = ImagesModel(main_model=self)
@@ -44,6 +46,11 @@ class MainModel(EventDispatcher):
         self.equipment_model = EquipmentModel(main_model=self)
         self.login_model = LoginModel(main_model=self)
         self.single, self.multi, self.checkbox, self.risk, self.signature, self.labels, self.pops = [], [], [], [], [], [], []
+
+    def on_demo_mode(self, instance, value):
+        print(instance)
+        print(value)
+        self.database_folder = 'demo_database' if value else 'database'
 
     @staticmethod
     def display_error_snackbar(message_text: str):
@@ -188,8 +195,8 @@ class MainModel(EventDispatcher):
     def get_single_equipment_data(self, equipment_id):
         return self.equipment_model.get_single_equipment_data(equipment_id)
 
-    def edit_equipment_data(self, equipment_id, site_name, new_data, demo_mode=False):
-        self.equipment_model.edit_equipment_data(equipment_id, site_name, new_data, demo_mode)
+    def edit_equipment_data(self, equipment_id, site_name, new_data):
+        self.equipment_model.edit_equipment_data(equipment_id, site_name, new_data)
 
     # Forms
 
@@ -231,8 +238,8 @@ class MainModel(EventDispatcher):
     def save_form_fields(self, submit, separator, form_type):
         return self.forms_model.save_form_fields(submit, separator, form_type)
 
-    def process_form(self, signature, form, separator, demo_mode):
-        self.forms_model.process_form(signature, form, separator, demo_mode)
+    def process_form(self, signature, form, separator):
+        self.forms_model.process_form(signature, form, separator)
 
     def process_db_request(self, form_type):
         self.forms_model.process_db_request(form_type)
@@ -361,27 +368,27 @@ class MainModel(EventDispatcher):
 
     @property
     def blueprints(self):
-        return JsonStore('database/blueprints/blueprints.json')
+        return JsonStore(f'{self.database_folder}/blueprints/blueprints.json')
 
     @property
     def completed_forms(self):
-        return JsonStore('database/forms/completed_forms.json')
+        return JsonStore(f'{self.database_folder}/forms/completed_forms.json')
 
     @property
     def equipment(self):
-        return JsonStore('database/equipment.json')
+        return JsonStore(f'{self.database_folder}/equipment.json')
 
     @property
     def forms(self):
-        return JsonStore('database/forms.json')
+        return JsonStore(f'{self.database_folder}/forms.json')
 
     @property
     def pictures(self):
-        return JsonStore('database/pictures/pictures.json')
+        return JsonStore(f'{self.database_folder}/pictures/pictures.json')
 
     @property
     def register(self):
-        return JsonStore('database/register.json')
+        return JsonStore(f'{self.database_folder}/register.json')
 
     @property
     def settings(self):
@@ -389,23 +396,23 @@ class MainModel(EventDispatcher):
 
     @property
     def sites(self):
-        return JsonStore('database/sites.json')
+        return JsonStore(f'{self.database_folder}/sites.json')
 
     @property
     def today(self):
-        return JsonStore('database/today.json')
+        return JsonStore(f'{self.database_folder}/today.json')
 
     @property
     def undeletable(self):
-        return JsonStore('database/undeletable.json')
+        return JsonStore(f'{self.database_folder}/undeletable.json')
 
     @property
     def user(self):
-        return JsonStore('database/user.json')
+        return JsonStore(f'{self.database_folder}/user.json')
 
     @property
     def time_clock(self):
-        return JsonStore('database/time_clock.json')
+        return JsonStore(f'{self.database_folder}/time_clock.json')
 
     @property
     def file_cache(self):
