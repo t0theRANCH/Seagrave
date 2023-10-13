@@ -36,7 +36,7 @@ class BlueprintContent(MDBoxLayout):
             '',
         ):
             folders = blueprint_to_open.split('/')
-            blueprint_to_open = f"{folders[0]}/{folders[-2]}/{folders[-1]}"
+            blueprint_to_open = self.controller.model.get_directory(f"{folders[0]}/{folders[-2]}/{folders[-1]}")
             self.controller.model.download_blueprints(folders[-1])
             self.popup.dismiss()
             if phone := self.controller.model.phone:

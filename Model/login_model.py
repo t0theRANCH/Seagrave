@@ -84,6 +84,6 @@ class LoginModel:
                 date = datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
                 if today - date > difference:
                     self.main_model.file_cache[cache].remove(file)
-                    remove(f"database/{cache}/{file}")
+                    remove(self.main_model.get_directory(f"database/{cache}/{file}"))
         self.main_model.save_db_file('file_cache', self.main_model.file_cache)
 

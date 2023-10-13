@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from datetime import date, datetime
 from os import remove
+from os.path import join
 
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER, TA_LEFT
@@ -16,6 +17,7 @@ from Forms.header import Header
 class Form(ABC):
     name = ''
     signature_path = ''
+    forms_path = ''
     company = 'Seagrave Building Systems'
     separator: str
     fields = {}
@@ -45,7 +47,7 @@ class Form(ABC):
     def make_file(self):
         self.file_name = f"{self.name.lower().replace(' ', '_').replace('/', '_')}_{self.fields.get('location', '')}_" \
                          f"{self.date_time.replace(' ', '-').replace(':', '_')}_{self.separator}"
-        self.pdf = SimpleDocTemplate(f"database/forms/{self.file_name}.pdf", pagesize=letter)
+        self.pdf = SimpleDocTemplate(join(self.forms_path, f"{self.file_name}.pdf"), pagesize=letter)
         self.width = letter[0] - self.pdf.leftMargin * 2
 
     def title(self, text):
@@ -149,10 +151,10 @@ class Form(ABC):
         return Paragraph(f"<i>{item}</i>", style)
 
     def remove_file(self):
-        remove(f"database/forms/{self.file_name}.pdf")
+        remove(join(self.forms_path, f"{self.file_name}.pdf"))
         remove(self.signature_path)
         for signature in self.fields.get('signatures', ''):
-            remove(f"database/{self.fields['signatures'].get(signature, '')}")
+            remove(join(self.forms_path, f"{self.fields['signatures'].get(signature, '')}"))
 
     @abstractmethod
     def print(self):

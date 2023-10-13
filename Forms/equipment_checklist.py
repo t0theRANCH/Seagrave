@@ -103,7 +103,7 @@ class EquipmentChecklist(Form):
 
     def get_signatures(self):
         if 'signatures' in self.fields:
-            self.signatures = {'Repairman': f"database/{self.fields['signatures']['Repairman']}",
+            self.signatures = {'Repairman': f"{self.forms_path}/{self.fields['signatures']['Repairman']}",
                                'Supervisor': self.signature_path}
             return
         self.signatures = {'Repairman': '', 'Supervisor': self.signature_path}

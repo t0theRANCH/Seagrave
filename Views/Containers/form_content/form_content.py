@@ -69,7 +69,7 @@ class FormContent(MDBoxLayout):
         self.controller.model.download_form(button_id=instance_item.id)
         self.popup.dismiss()
         if phone := self.controller.model.phone:
-            phone.open_pdf(uri_path=f'database/forms/{instance_item.id}')
+            phone.open_pdf(uri_path=self.controller.model.get_directory(f'database/forms/{instance_item.id}'))
 
 
 Builder.load_file(join(dirname(__file__), "form_content.kv"))

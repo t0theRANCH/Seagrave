@@ -37,6 +37,11 @@ class Hnnnng(MDApp):
             Window.size = (400, 600)
         self.set_keyboard_height()
         self.set_theme()
+        if not self.model.settings['cleanup']:
+            self.on_stop()
+        settings = dict(self.model.settings)
+        settings['cleanup'] = False
+        self.model.save_db_file('settings', settings)
         return self.main_controller.start_up()
 
     def set_theme(self):
@@ -57,7 +62,7 @@ class Hnnnng(MDApp):
     def send_crash_report(self, crash_report):
         self.model.send_crash_report(crash_report)
 
-    def log_out(self):
+    def on_stop(self):
         settings = dict(self.model.settings)
         if not settings.get('Keep Me Logged In', False):
             self.model.refresh_token = ''
@@ -67,8 +72,11 @@ class Hnnnng(MDApp):
             for item in settings['Tutorial']:
                 settings['Tutorial'][item] = True
         self.model.update_settings('Tutorial', settings['Tutorial'])
-        for file in self.model.files_to_be_deleted:
+        for file in self.model.settings['To Be Deleted']:
             remove(file)
+        settings['To Be Deleted'] = []
+        settings['cleanup'] = True
+        self.model.save_db_file('settings', settings)
 
 
 if __name__ == '__main__':
@@ -78,5 +86,3 @@ if __name__ == '__main__':
     except Exception as e:
         crash_info = traceback.format_exc()
         app.send_crash_report(crash_info)
-    finally:
-        app.log_out()

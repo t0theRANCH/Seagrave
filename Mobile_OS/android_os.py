@@ -92,12 +92,6 @@ class Android(EventDispatcher):
     def get_encrypted_data(self, name):
         return self.decrypt_key(name) if (s := self.get_prefs_entry(name)) else ''
 
-    def get_token(self, name):
-        return self.get_prefs_entry(name)
-
-    def save_token(self, token, name):
-        self.add_shared_prefs(name, token)
-
     def dont_save_password(self, user):
         self.add_shared_prefs('user', user)
         self.add_shared_prefs('password', '')

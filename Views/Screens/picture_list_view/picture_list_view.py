@@ -6,6 +6,7 @@ from kivymd.uix.screen import MDScreen
 from Views.Buttons.image_button.image_button import PictureButtonContainer
 
 from typing import TYPE_CHECKING, Union
+
 if TYPE_CHECKING:
     from Model.main_model import MainModel
     from Controller.picture_list_view_controller import PictureListViewController
@@ -30,7 +31,7 @@ class PictureListView(MDScreen):
         picture_view_controller = self.controller.main_controller.picture_view_controller
         for k, v in self.pictures.items():
             path_folders = v['file_name'].split('/')
-            path = f"{path_folders[0]}/{path_folders[-2]}/{path_folders[-1]}"
+            path = self.controller.model.get_directory(f"{path_folders[0]}/{path_folders[-2]}/{path_folders[-1]}")
             self.model.download_pictures()
             tile = PictureButtonContainer(source=path, tag=v['file_name'].split('/')[-1], picture_id=v,
                                           controller=picture_view_controller)

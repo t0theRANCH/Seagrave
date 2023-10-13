@@ -137,7 +137,6 @@ class FormViewController(EventDispatcher):
             return
         if 'workers' in self.model.today['forms'][form_entry]:
             t = signature.rstrip('atures') if 'signature' in signature else signature.rstrip('s')
-
             self.view.add_worker_signatures(form_entry, signature, t)
 
     def add_signature(self, selections: list):

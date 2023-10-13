@@ -1,0 +1,8 @@
+Kivy~=2.2.0.dev0
+kivymd @ https://github.com/kivymd/KivyMD/archive/refs/heads/master.zip
+keyring~=23.13.1
+pyobjus~=1.2.1
+numpy~=1.24.1
+pillow~=10.0.1
+requests~=2.31.0
+reportlab~=4.0.5

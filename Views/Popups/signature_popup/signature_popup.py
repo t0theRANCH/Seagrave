@@ -1,5 +1,4 @@
 from os.path import join, dirname
-from os import getcwd
 
 from kivy.graphics import Color, Ellipse, Line
 from kivy.lang import Builder
@@ -60,9 +59,9 @@ class SignatureField(StencilView):
     def save_screenshot(self):
         root = self.parent.parent.parent.parent
         file_prefix = f"{root.controller.form}_{root.model.form_view_fields[root.controller.separator]}"
-        full_path_prefix = f"database/{file_prefix}"
+        full_path_prefix = root.model.get_directory(f"database/{file_prefix}")
         if not self.signature_field:
-            self.export_to_png(f"{getcwd()}/{full_path_prefix}_screenshot.png")
+            self.export_to_png(f"{full_path_prefix}/{full_path_prefix}_screenshot.png")
             root.controller.fill_form(f"{file_prefix}_screenshot.png")
 
         else:

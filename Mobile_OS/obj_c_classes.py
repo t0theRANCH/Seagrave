@@ -1,9 +1,10 @@
 from pyobjus import autoclass
+from pyobjus.dylib_manager import load_dylib
 
 
-def Keychain():
-    instance = autoclass("Keychain")
-    return instance()
+def KeychainBridge():
+    load_dylib('./KeychainBridge.dylib')
+    return autoclass('KeychainBridge')
 
 
 def UIApplication():
@@ -14,13 +15,15 @@ def NSURL():
     return autoclass('NSURL')
 
 
+def NSString():
+    return autoclass('NSString')
+
+
+def UTType():
+    return autoclass('UTType')
+
+
 def UIDocumentPickerViewController():
     return autoclass('UIDocumentPickerViewController')
 
 
-def UIViewController():
-    return autoclass('UIViewController')
-
-
-def UIDocumentPickerMode():
-    return autoclass('UIDocumentPickerMode')

@@ -1,8 +1,11 @@
 import json
 from datetime import datetime
-from os import remove
+from os import remove, environ, makedirs, listdir
+from os.path import join, exists
+import shutil
 
 from kivy.event import EventDispatcher
+from kivy.utils import platform
 from kivy.properties import ObjectProperty, StringProperty, DictProperty, BooleanProperty
 from kivy.storage.jsonstore import JsonStore
 from kivymd.uix.label import MDLabel
@@ -34,23 +37,47 @@ class MainModel(EventDispatcher):
     current_site_id: str = StringProperty()
     current_site: str = StringProperty()
     primary_color: tuple = ()
-    demo_mode = BooleanProperty(False)
+    demo_mode = BooleanProperty()
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.writeable_folder = ''
         self.database_folder = 'demo_database' if self.demo_mode else 'database'
-        self.files_to_be_deleted = []
+        self.get_ios_writeable_folder()
         self.forms_model = FormsModel(main_model=self)
         self.images_model = ImagesModel(main_model=self)
         self.sites_model = SitesModel(main_model=self)
         self.equipment_model = EquipmentModel(main_model=self)
         self.login_model = LoginModel(main_model=self)
         self.single, self.multi, self.checkbox, self.risk, self.signature, self.labels, self.pops = [], [], [], [], [], [], []
+        self.demo_mode = self.settings['Demo Mode']
 
     def on_demo_mode(self, instance, value):
-        print(instance)
-        print(value)
-        self.database_folder = 'demo_database' if value else 'database'
+        self.database_folder = 'demo_database' if value else join(self.writeable_folder, 'database')
+
+    def get_ios_writeable_folder(self):
+        if platform != 'ios':
+            return
+        app_dir = join(environ['HOME'], 'Documents', '..')
+        bundle_path = join(app_dir, '')  # replace with bundle identifier
+        self.writeable_folder = join(environ['HOME'], 'Documents')
+        makedirs(join(self.writeable_folder, 'database'), exist_ok=True)
+        self.database_folder = 'demo_database' if self.demo_mode else join(self.writeable_folder, self.database_folder)
+        self.check_writeable_folder(bundle_path)
+        self.check_writeable_folder(bundle_path, folder='demo_database')
+
+    def check_writeable_folder(self, bundle_path, folder='database'):
+        for file in listdir(join(bundle_path, folder)):
+            if file.endswith('.json') and not exists((join(self.writeable_folder, folder, file))):
+                shutil.copy(join(bundle_path, folder, file), self.writeable_folder)
+            else:
+                for sub_file in listdir(join(bundle_path, folder, file)):
+                    if sub_file.endswith('.json') and not exists((join(self.writeable_folder, folder, file, sub_file))):
+                        shutil.copy(join(bundle_path, folder, file, sub_file),
+                                    join(self.writeable_folder, folder, file))
+
+    def get_directory(self, directory: str):
+        return join(self.writeable_folder, directory)
 
     @staticmethod
     def display_error_snackbar(message_text: str):
@@ -81,15 +108,15 @@ class MainModel(EventDispatcher):
 
     def iterate_register(self, response: dict):
         self.db_handler()
-        with open('database/register.json', 'r') as f:
+        register_file_path = self.get_directory('database/register.json')
+        with open(register_file_path, 'r') as f:
             data = json.load(f)
             data['iteration'] = response['iteration']
-        remove('database/register.json')
+        remove(register_file_path)
         self.save_db_file('register', data)
 
-    @staticmethod
-    def save_db_file(database: str, data_dict: dict):
-        with open(f"database/{database}.json", 'w') as fp:
+    def save_db_file(self, database: str, data_dict: dict):
+        with open(self.get_directory('database', f"{database}.json"), 'w') as fp:
             json.dump(data_dict, fp)
 
     def select_delete_item(self, button: 'RVButton'):
@@ -309,37 +336,36 @@ class MainModel(EventDispatcher):
 
     @property
     def access_token(self):
-        return self.phone.get_token('access_token')
+        return self.phone.get_encrypted_data('access_token')
 
     @access_token.setter
     def access_token(self, value):
         if value:
-            self.phone.save_token(value, 'access_token')
+            self.phone.save_encrypted_data(value, 'access_token')
         else:
             self.phone.delete_data('access_token')
 
     @property
     def id_token(self):
-        return self.phone.get_token('id_token')
+        return self.phone.get_encrypted_data('id_token')
 
     @id_token.setter
     def id_token(self, value):
         if value:
-            self.phone.save_token(value, 'id_token')
+            self.phone.save_encrypted_data(value, 'id_token')
         else:
             self.phone.delete_data('id_token')
 
     @property
     def refresh_token(self):
-        return self.phone.get_token('refresh_token')
+        return self.phone.get_encrypted_data('refresh_token')
 
     @refresh_token.setter
     def refresh_token(self, value):
         if value:
-            self.phone.save_token(value, 'refresh_token')
+            self.phone.save_encrypted_data(value, 'refresh_token')
         else:
             self.phone.delete_data('refresh_token')
-
 
     @property
     def site_rows(self):
@@ -368,54 +394,52 @@ class MainModel(EventDispatcher):
 
     @property
     def blueprints(self):
-        return JsonStore(f'{self.database_folder}/blueprints/blueprints.json')
+        return JsonStore(self.get_directory(f'{self.database_folder}/blueprints/blueprints.json'))
 
     @property
     def completed_forms(self):
-        return JsonStore(f'{self.database_folder}/forms/completed_forms.json')
+        return JsonStore(self.get_directory(f'{self.database_folder}/forms/completed_forms.json'))
 
     @property
     def equipment(self):
-        return JsonStore(f'{self.database_folder}/equipment.json')
+        return JsonStore(self.get_directory(f'{self.database_folder}/equipment.json'))
 
     @property
     def forms(self):
-        return JsonStore(f'{self.database_folder}/forms.json')
+        return JsonStore(self.get_directory(f'{self.database_folder}/forms.json'))
 
     @property
     def pictures(self):
-        return JsonStore(f'{self.database_folder}/pictures/pictures.json')
+        return JsonStore(self.get_directory(f'{self.database_folder}/pictures/pictures.json'))
 
     @property
     def register(self):
-        return JsonStore(f'{self.database_folder}/register.json')
+        return JsonStore(self.get_directory(f'{self.database_folder}/register.json'))
 
     @property
     def settings(self):
-        return JsonStore('database/settings.json')
+        return JsonStore(self.get_directory('database/settings.json'))
 
     @property
     def sites(self):
-        return JsonStore(f'{self.database_folder}/sites.json')
+        return JsonStore(self.get_directory(f'{self.database_folder}/sites.json'))
 
     @property
     def today(self):
-        return JsonStore(f'{self.database_folder}/today.json')
+        return JsonStore(self.get_directory(f'{self.database_folder}/today.json'))
 
     @property
     def undeletable(self):
-        return JsonStore(f'{self.database_folder}/undeletable.json')
+        return JsonStore(self.get_directory(f'{self.database_folder}/undeletable.json'))
 
     @property
     def user(self):
-        return JsonStore(f'{self.database_folder}/user.json')
+        return JsonStore(self.get_directory(f'{self.database_folder}/user.json'))
 
     @property
     def time_clock(self):
-        return JsonStore(f'{self.database_folder}/time_clock.json')
+        return JsonStore(self.get_directory(f'{self.database_folder}/time_clock.json'))
 
     @property
     def file_cache(self):
-        return JsonStore('database/file_cache.json')
-
-
+        return JsonStore(self.get_directory('database/file_cache.json'))

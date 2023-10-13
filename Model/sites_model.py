@@ -33,11 +33,11 @@ class SitesModel:
     def delete_cached_files(self):
         site = self.main_model.sites[self.main_model.current_site]
         for blueprint in site['blueprints']:
-            remove(f'blueprints/{self.main_model.blueprints[blueprint]["file_name"]}')
+            remove(self.main_model.get_directory(f'blueprints/{self.main_model.blueprints[blueprint]["file_name"]}'))
         for picture in site['pictures']:
-            remove(f'pictures/{self.main_model.pictures[picture]["file_name"]}')
+            remove(self.main_model.get_directory(f'pictures/{self.main_model.pictures[picture]["file_name"]}'))
         for form in site['forms']:
-            remove(f'forms/{self.main_model.forms[form]["file_name"]}')
+            remove(self.main_model.get_directory(f'forms/{self.main_model.forms[form]["file_name"]}'))
 
     def update_time_clock(self, new_entry: dict):
         self.main_model.time_clock.clear()

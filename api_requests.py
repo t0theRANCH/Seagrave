@@ -58,7 +58,7 @@ def old_upload(path, id_token, url):
 
 
 @connection
-def upload(path, id_token, url, access_token):
+def upload(path, local_path, id_token, url, access_token):
     file_path = path.split('/')
     if file_path[-1] in ['forms.json', 'undeletable.json', 'today.json']:
         upload_path = file_path[-1]
@@ -68,22 +68,15 @@ def upload(path, id_token, url, access_token):
             'function_name': 'upload',
             'path': upload_path
             }
-    upload_file(data, id_token, url, path)
+    upload_file(data, id_token, url, local_path)
 
 
 @connection
-def upload_file(data, id_token, url, path):
+def upload_file(data, id_token, url, local_path):
     if not (
         upload_url := secure_request(data=data, id_token=id_token, url=url)
     ):
         return
-    upload_path_folders = path.split('/')
-    local_path = (
-        f"{upload_path_folders[0]}/{upload_path_folders[-1]}"
-        if upload_path_folders[-1]
-        in ['forms.json', 'undeletable.json', 'today.json']
-        else f"{upload_path_folders[0]}/{upload_path_folders[-2]}/{upload_path_folders[-1]}"
-    )
     with (open(local_path, "rb") as f):
         r = requests.put(upload_url, data=f)
 

@@ -38,8 +38,9 @@ class MainController(EventDispatcher):
         self.demo_mode = model.settings['Demo Mode']
 
     def on_demo_mode(self, instance, value):
-        if not value:
+        if not value and self.login_controller:
             self.login_controller.refresh_auth()
+        self.model.demo_mode = value
 
     def start_up(self):
         self.load_controllers()

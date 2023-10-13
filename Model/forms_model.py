@@ -36,7 +36,9 @@ class FormsModel:
         self.main_model.current_site_id = site_id
 
     def upload_file(self, file_name):
-        upload(path=file_name, id_token=self.main_model.id_token,
+        upload(path=self.main_model.get_directory(file_name),
+               local_path=self.main_model.get_directory(file_name),
+               id_token=self.main_model.id_token,
                url=self.main_model.secure_api_url, access_token=self.main_model.access_token)
         return secure_request(id_token=self.main_model.id_token, url=self.main_model.secure_api_url,
                               data={'upload': 'today.json', 'database': 'none', 'function_name': 'sql_create',
@@ -54,7 +56,7 @@ class FormsModel:
             return None
 
     def download_form(self, file_name):
-        if file_name in listdir('database/forms'):
+        if file_name in listdir(self.main_model.get_directory('database/forms')):
             return
         dl_list = {f'database/{self.main_model.current_site}/forms/{file_name}': f'database/forms/{file_name}'}
         download(id_token=self.main_model.id_token, access_token=self.main_model.access_token,
@@ -96,7 +98,8 @@ class FormsModel:
         if signature_type in self.main_model.form_view_fields:
             for s in list(self.main_model.form_view_fields[signature_type]):
                 if s not in selections:
-                    remove(f"database/{self.main_model.form_view_fields[signature_type][s]}")
+                    remove(self.main_model.get_directory(
+                        f"database/{self.main_model.form_view_fields[signature_type][s]}"))
                     self.main_model.form_view_fields[signature_type].pop(s)
 
     def add_form_option(self, popup: Union['TextFieldPopup', 'MultiSelectPopup']):
@@ -266,17 +269,19 @@ class FormsModel:
         form_instance = form_class()
         form_instance.separator = self.main_model.form_view_fields[separator]
         form_instance.fields = self.main_model.form_view_fields
-        form_instance.signature_path = f"database/{signature}"
+        form_instance.forms_path = self.main_model.get_directory("database/forms")
+        form_instance.signature_path = self.main_model.get_directory(f"database/forms/{signature}")
         form_instance.make_file()
         form_instance.print()
         try:
             if not self.main_model.demo_mode:
                 upload(path=f"database/{self.main_model.current_site_id}/forms/{form_instance.file_name}.pdf",
+                       local_path=self.main_model.get_directory(f"database/forms/{form_instance.file_name}.pdf"),
                        id_token=self.main_model.id_token,
                        url=self.main_model.secure_api_url, access_token=self.main_model.access_token)
                 self.remove_form_from_db(file_name=form_instance.file_name, form=form, separator=separator)
             else:
-                file_name = f"database/forms/{form_instance.file_name}.pdf"
+                file_name = self.main_model.get_directory(f"database/forms/{form_instance.file_name}.pdf")
                 self.main_model.phone.open_pdf(file_name)
         except Exception as e:
             self.save_incomplete_form(separator, 'this input is not used')
@@ -293,10 +298,17 @@ class FormsModel:
                 self.remove_from_device(demo_mode=self.main_model.demo_mode)
 
     def remove_files(self, form_instance):
-        self.main_model.files_to_be_deleted.append(f"database/forms/{form_instance.file_name}.pdf")
-        self.main_model.files_to_be_deleted.append(form_instance.signature_path)
-        for signature in form_instance.fields.get('signatures', ''):
-            self.main_model.files_to_be_deleted.append(f"database/{form_instance.fields['signatures'].get(signature, '')}")
+        to_be_deleted = [
+            self.main_model.get_directory(f"database/forms/{form_instance.file_name}.pdf"),
+            form_instance.signature_path,
+        ]
+        to_be_deleted.extend(
+            self.main_model.get_directory(f"database/forms/{form_instance.fields['signatures'].get(signature, '')}")
+            for signature in form_instance.fields.get('signatures', '')
+        )
+        settings = dict(self.main_model.settings)
+        settings['To Be Deleted'] = to_be_deleted
+        self.main_model.save_db_file('settings', settings)
 
     def get_equipment_id(self):
         if 'unit_num' not in self.main_model.form_view_fields:

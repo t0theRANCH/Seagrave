@@ -1,12 +1,9 @@
-import time
 from os.path import join, dirname
 
 from kivy.clock import Clock
 from kivy.lang import Builder
-from kivy.metrics import dp
 from kivy.properties import ObjectProperty, StringProperty
 from kivymd.uix.button.button import MDFloatingBottomButton, MDFloatingRootButton
-
 from kivymd.uix.screen import MDScreen
 from kivymd.uix.taptargetview import MDTapTargetView
 
@@ -58,7 +55,6 @@ class MainScreen(MDScreen):
             widget_position="right_bottom",
             cancelable=True
         )
-
 
     def tap_target(self):
         if self.tap_target_view.state == "close":

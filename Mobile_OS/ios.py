@@ -2,17 +2,19 @@ from os import getcwd
 
 from kivymd.uix.snackbar import Snackbar
 from pyobjus import autoclass, objc_str
+from pyobjus.dylib_manager import load_framework, INCLUDE
 
 from kivy.event import EventDispatcher
 from kivy.properties import ObjectProperty
 
+from Mobile_OS.MyDocumentPickerDelegate import MyDocumentPickerDelegate
 from Mobile_OS.obj_c_classes import (
-    Keychain,
+    KeychainBridge,
     UIApplication,
     NSURL,
+    NSString,
+    UTType,
     UIDocumentPickerViewController,
-    UIViewController,
-    UIDocumentPickerMode
 )
 
 from typing import TYPE_CHECKING
@@ -26,6 +28,8 @@ class IOS(EventDispatcher):
 
     def __init__(self, **kwargs):
         super(IOS, self).__init__(**kwargs)
+        load_framework(INCLUDE.Foundation)
+        load_framework(INCLUDE.UIKit)
         self.instance_item = None
         self.selected_file = None
         self.user = ''
@@ -36,80 +40,81 @@ class IOS(EventDispatcher):
         return ui_application.sharedApplication()
 
     def get_user(self):
-        keychain = Keychain()
-        attributes = {
-            "kSecClass": keychain.kSecClassGenericPassword,
-            "kSecAttrService": 'com.sbs',
-            "kSecAttrLabel": 'username_seagrave',
-            "kSecReturnData": True
-        }
-        data_type, data = keychain.SecItemCopyMatching(attributes, None)
-        self.user = data.stringValue() if data else ''
-        return self.user
+        self.retrieve_from_keychain('org.kivy.seagrave.user', 'default')
 
     def get_password(self):
         if not self.user:
             return ''
-        keychain = Keychain()
-        attributes = {
-            'kSecClass': keychain.kSecClassGenericPassword,
-            'kSecAttrAccount': self.user,
-            'kSecReturnData': True,
-            'kSecAttrService': "com.sbs"
-        }
-        data_type, data = keychain.SecItemCopyMatching(attributes, None)
-        return data.stringValue() if data else ''
+        return self.retrieve_from_keychain('org.kivy.seagrave.password', 'default')
 
-    @staticmethod
-    def save_password(user, password):
-        keychain = Keychain()
-        attributes = {
-            "kSecClass": keychain.kSecClassGenericPassword,
-            "kSecAttrAccount": user,
-            "kSecValueData": password,
-            "kSecAttrService": "com.sbs",
-            "kSecAttrLabel": "username_seagrave"
-        }
-        keychain.SecItemAdd(attributes, None)
+    def delete_data(self, name):
+        self.delete_from_keychain(f'org.kivy.seagrave.{name}', 'default')
+
+    def save_password(self, user, password):
+        self.delete_from_keychain('org.kivy.seagrave.password', 'default')
+        self.delete_from_keychain('org.kivy.seagrave.user', 'default')
+        self.save_to_keychain('org.kivy.seagrave.password', 'default', password)
+        self.save_to_keychain('org.kivy.seagrave.user', 'default', user)
+
+    def save_encrypted_data(self, token, name):
+        self.save_to_keychain(f'org.kivy.seagrave.{name}', 'default', token)
+
+    def get_encrypted_data(self, name):
+        return self.retrieve_from_keychain(f'org.kivy.seagrave.{name}', 'default')
+
+    def retrieve_from_keychain(self, service, account):
+        if result := KeychainBridge.retrieveWithService_account_(
+                objc_str(service), objc_str(account)
+        ):
+            return result.UTF8String().decode('utf-8')
+        return None
+
+    def delete_from_keychain(self, service, account):
+        return KeychainBridge.deleteWithService_account_(
+            objc_str(service), objc_str(account)
+        )
+    def save_to_keychain(self, service, account, value):
+        return KeychainBridge.saveWithService_account_value_(objc_str(service), objc_str(account),
+                                                             objc_str(value))
 
     def dont_save_password(self, user):
         pass
 
     def get_directions(self, address, city):
-        shared_app = self.get_shared_app()
-        ns_url = NSURL()
-        address = f"{address.replace(' ', '+')}, +{city}+Ontario"
-        address_str = objc_str(address)
-        url = ns_url.URLWithString_(f"http://maps.apple.com/?q={address_str}")
-        shared_app.openURL_(url)
+        address = f"{address.replace(' ', '+')},+{city}+Ontario"
+        url = f"https://maps.apple.com/?q={address}"
+        self.open_url(url)
 
     def open_pdf(self, uri_path):
+        self.open_url(uri_path)
+
+    def open_url(self, url):
         shared_app = self.get_shared_app()
-        ns_url = NSURL()
-        url = ns_url.URLWithString_(uri_path)
+        url = NSURL.URLWithString_(objc_str(url))
         shared_app.openURL_(url)
 
     def open_file_picker(self, instance_item):
         self.instance_item = instance_item
-        ui_document_picker_view_controller = UIDocumentPickerViewController()
-        ui_view_controller = UIViewController()
-        ui_document_picker_mode = UIDocumentPickerMode()
-        current_vc = ui_view_controller.alloc().init()
-        document_picker = ui_document_picker_view_controller.alloc().initWithDocumentTypes_inMode_(
-            ['public.data'], ui_document_picker_mode.Import
-        )
-        document_picker.setDelegate_(current_vc)
-        current_vc.presentViewController_animated_completion_(document_picker, True, None)
-        current_vc.didPickDocumentAtURL_ = self.access_file_tree_result
+        types = [UTType.typeWithFilenameExtension_("pdf"), UTType.typeWithFilenameExtension_("txt")]
+        # Create the document picker.
+        picker = UIDocumentPickerViewController.alloc().initForOpeningContentTypes_(types)
 
-    def access_file_tree_result(self, controller, url):
-        self.selected_file = url
-        controller.dismissViewControllerAnimated_completion_(True, None)
-        self.upload_image()
+        # Setting the delegate to self so that delegate methods will be called on this instance.
+        delegate = MyDocumentPickerDelegate()
+        picker.setDelegate_(delegate)
+        delegate.instance_item = instance_item
+        delegate.phone = self
+        # Present the picker.
+        app = UIApplication.sharedApplication()
+        if app and app.windows and app.windows.count() > 0:
+            root_vc = app.windows.objectAtIndex_(0).rootViewController()
+            root_vc.presentViewController_animated_completion_(picker, True, None)
+        else:
+            print("Failed to get root view controller.")
 
     def upload_image(self):
         image_type = 'blueprints' if self.selected_file.split('.')[-1] == 'pdf' else 'pictures'
-        dest_path = f"{getcwd()}/database/{image_type}/{self.selected_file}"
+        dest_path = f"{self.main_controller.model.writeable_folder}/database/{image_type}/{self.selected_file}"
         result = self.main_controller.model.select_image_to_upload(path=dest_path, file_type=image_type,
                                                                    blueprint_type=self.instance_item.text)
         self.instance_item = None

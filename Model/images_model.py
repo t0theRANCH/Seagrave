@@ -43,33 +43,30 @@ class ImagesModel:
                  access_token=self.main_model.access_token, dl_list=dl_list)
 
     def download_blueprints(self, file_name):
-        if file_name in listdir('database/blueprints'):
+        if file_name in listdir(self.main_model.get_directory('database/blueprints')):
             print(f"Blueprint {file_name} already exists in database/blueprints")
             return
         dl_list = {f'database/{self.main_model.current_site}/blueprints/{file_name}': f'database/blueprints/{file_name}'}
         download(id_token=self.main_model.id_token, access_token=self.main_model.access_token,
                  url=self.main_model.secure_api_url, dl_list=dl_list)
 
-    @staticmethod
-    def clear_pictures():
-        pictures = list(listdir('database/pictures'))
+    def clear_pictures(self):
+        pictures = list(listdir(self.main_model.get_directory('database/pictures')))
         for picture in pictures:
             if picture != 'pictures.json':
-                remove(f'database/pictures/{picture}')
+                remove(self.main_model.get_directory(f'database/pictures/{picture}'))
 
-    @staticmethod
-    def clear_blueprints():
-        blueprints = list(listdir('database/blueprints'))
+    def clear_blueprints(self):
+        blueprints = list(listdir(self.main_model.get_directory('database/blueprints')))
         for blueprint in blueprints:
             if blueprint != 'blueprints.json':
-                remove(f'database/blueprints/{blueprint}')
+                remove(self.main_model.get_directory(f'database/blueprints/{blueprint}'))
 
-    @staticmethod
-    def clear_forms():
-        forms = list(listdir('database/forms'))
+    def clear_forms(self):
+        forms = list(listdir(self.main_model.get_directory('database/forms')))
         for form in forms:
             if form not in ['forms.json', 'completed_forms.json']:
-                remove(f'database/forms/{form}')
+                remove(self.main_model.get_directory(f'database/forms/{form}'))
 
     def add_note_to_picture(self, picture_id, note):
         pic_db_entry = self.main_model.pictures[picture_id]
@@ -101,6 +98,7 @@ class ImagesModel:
             return False
         path_folders = path.split('/')
         file_name = f"database/{self.main_model.current_site}/{path_folders[-2]}/{path_folders[-1]}"
+        local_path = self.main_model.get_directory(f"database/{path_folders[-2]}/{path_folders[-1]}")
         data = {"database": file_type,
                 "function_name": 'sql_create',
                 "AccessToken": self.main_model.access_token,
@@ -113,10 +111,10 @@ class ImagesModel:
             data['cols']['type'] = blueprint_type
         response = secure_request(id_token=self.main_model.id_token, url=self.main_model.secure_api_url,
                                   data=data)
-        self.add_new_image_to_database(response, file_type, file_name, blueprint_type)
+        self.add_new_image_to_database(response, file_type, file_name, blueprint_type, local_path)
         return True
 
-    def add_new_image_to_database(self, response, file_type, path, blueprint_type):
+    def add_new_image_to_database(self, response, file_type, path, blueprint_type, local_path):
         f_types = ['blueprints', 'pictures']
         db_f_types = [self.main_model.blueprints, self.main_model.pictures]
         db_part = db_f_types[f_types.index(file_type)]
@@ -125,7 +123,8 @@ class ImagesModel:
             db_part.put(new_id, file_name=path, site_id=self.main_model.current_site, type=blueprint_type)
         else:
             db_part.put(new_id, file_name=path, site_id=self.main_model.current_site)
-        upload(path=path, id_token=self.main_model.id_token, url=self.main_model.secure_api_url,
+        upload(path=path, local_path=local_path, id_token=self.main_model.id_token,
+               url=self.main_model.secure_api_url,
                access_token=self.main_model.access_token)
         self.main_model.file_cache[file_type][path] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         self.main_model.iterate_register(response)

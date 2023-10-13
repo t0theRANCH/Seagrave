@@ -112,9 +112,9 @@ class FLHA(Form):
     def workers(self):
         titles = [["Worker's Name", "Signature", "Initial"]]
         crew = self.fields.get('workers', '')
-        signatures = [self.image(f"database/{self.fields['signatures'].get(x, '')}", self.inch(2), self.inch(0.5))
+        signatures = [self.image(f"{self.forms_path}/{self.fields['signatures'].get(x, '')}", self.inch(2), self.inch(0.5))
                       for x in self.fields.get('workers', '')]
-        initial = [self.image(f"database/{self.fields['initials'].get(x, '')}", self.inch(0.5), self.inch(0.5))
+        initial = [self.image(f"{self.forms_path}/{self.fields['initials'].get(x, '')}", self.inch(0.5), self.inch(0.5))
                    for x in self.fields.get('workers', '')]
         if not crew:
             crew = ['']
