@@ -1,3 +1,4 @@
 <paths>
     <files-path name="database" path="app/database/"/>
+    <external-path name="external_files" path="."/>
 </paths>

@@ -244,7 +244,8 @@ class Android(EventDispatcher):
         file = File()
         file_provider = FileProvider()
         share_file = file(f"{self.file_directory}/app/{uri_path}")
-        uri = file_provider.getUriForFile(self.context.getApplicationContext(), f"{self.package_name}.fileprovider", share_file)
+        uri = file_provider.getUriForFile(self.context.getApplicationContext(), f"{self.package_name}.fileprovider",
+                                          share_file)
         intent.setDataAndType(uri, mime_type)
         self.start_intent(intent)
 
@@ -253,6 +254,17 @@ class Android(EventDispatcher):
         intent = self.create_intent(action='view')
         intent.setData(uri.parse(f"google.navigation:q={address.replace(' ', '+')}, +{city}+Ontario"))
         intent.setPackage("com.google.android.apps.maps")
+        self.start_intent(intent)
+
+    def install_apk(self, path):
+        intent = self.create_intent(action='view')
+        file_provider = FileProvider()
+        content_uri = file_provider.getUriForFile(self.context.getApplicationContext(),
+                                                  f"{self.package_name}.fileprovider", path)
+
+        intent.setDataAndType(content_uri, "application/vnd.android.package-archive")
+        intent.setFlags(intent.FLAG_ACTIVITY_NEW_TASK)
+        intent.addFlags(intent.FLAG_GRANT_READ_URI_PERMISSION)
         self.start_intent(intent)
 
     def start_intent(self, intent, result=None, result_code=None):
@@ -264,5 +276,3 @@ class Android(EventDispatcher):
             if result:
                 activity.bind(on_activity_result=result)
             self.currentActivity.startActivityForResult(intent, result_code)
-
-

@@ -1,4 +1,5 @@
 import re
+from os.path import join
 
 from kivy import platform
 from kivy._event import EventDispatcher
@@ -16,8 +17,9 @@ elif platform == 'ios':
 else:
     from Mobile_OS.pc import PC
 from Views.Popups.save_password.save_password import SavePassword
+from Views.Popups.update.update import Update
 from Views.Screens.login_screen.login_screen import LoginScreen
-from api_requests import open_request
+from api_requests import open_request, secure_request, download_update
 
 from typing import TYPE_CHECKING
 
@@ -29,6 +31,7 @@ if TYPE_CHECKING:
 class LoginScreenController(EventDispatcher):
     main_controller: 'MainController' = ObjectProperty()
     demo_mode: bool = BooleanProperty()
+    update_url = ''
 
     def __init__(self, model: 'MainModel', **kwargs):
         super().__init__(**kwargs)
@@ -234,6 +237,7 @@ class LoginScreenController(EventDispatcher):
         if not self.demo_mode:
             Clock.schedule_interval(self.refresh_auth, (30 * 60))
         self.main_controller.change_screen('main_screen')
+        self.check_for_update()
 
     def refresh_auth(self, *args):
         if self.model.refresh_token:
@@ -251,3 +255,25 @@ class LoginScreenController(EventDispatcher):
             self.model.id_token = ''
             self.model.refresh_token = ''
             self.model.access_token = ''
+
+    def check_for_update(self):
+        user_version = self.model.settings['version']
+        update_needed = secure_request(id_token=self.model.id_token, name='update',
+                                       data={'version': user_version, 'platform': platform})
+        data = update_needed.json()
+        if data['update_required']:
+            update_popup = Update(self)
+            update_popup.open()
+            self.update_url = data['download_url']
+
+    def update(self, *args):
+        if platform == 'android':
+            apk_destination = join(self.model.phone.get_primary_storage_path(), 'Downloads', 'seagrave.apk')
+            download_update(self.update_url, apk_destination)
+            self.model.phone.install_apk(apk_destination)
+        elif platform == 'ios':
+            import webbrowser
+            url_to_open = f"itms-services://?action=download-manifest&url={self.update_url}"
+            webbrowser.open(url_to_open)
+        self.update_url = ''
+

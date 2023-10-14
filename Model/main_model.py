@@ -12,7 +12,6 @@ from kivymd.uix.label import MDLabel
 from kivymd.uix.snackbar import MDSnackbar
 
 from api_requests import secure_request, open_request
-from api_requests import upload
 from Model.forms_model import FormsModel
 from Model.images_model import ImagesModel
 from Model.sites_model import SitesModel
@@ -59,7 +58,7 @@ class MainModel(EventDispatcher):
         if platform != 'ios':
             return
         app_dir = join(environ['HOME'], 'Documents', '..')
-        bundle_path = join(app_dir, '')  # replace with bundle identifier
+        bundle_path = join(app_dir, 'org.kivy.seagrave')  # replace with bundle identifier
         self.writeable_folder = join(environ['HOME'], 'Documents')
         makedirs(join(self.writeable_folder, 'database'), exist_ok=True)
         self.database_folder = 'demo_database' if self.demo_mode else join(self.writeable_folder, self.database_folder)
@@ -87,9 +86,9 @@ class MainModel(EventDispatcher):
             )
         ).open()
 
-    def send_crash_report(self, crash_info):
+    @staticmethod
+    def send_crash_report(crash_info):
         data = {'log_type': 'crash_report', 'data': str(crash_info)}
-        print(crash_info)
         open_request(name='log', data=data)
 
     def update_settings(self, db_id: str, new_entry):
