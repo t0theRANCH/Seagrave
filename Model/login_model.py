@@ -67,10 +67,11 @@ class LoginModel:
                 else:
                     db_name = x
                 self.main_model.save_db_file(db_name, response[x])
+        download_list = {x: self.main_model.get_directory(y) for x, y in response['download_list'].items()}
         download(url=self.main_model.secure_api_url,
                  id_token=self.main_model.id_token,
                  access_token=self.main_model.access_token,
-                 dl_list=response['download_list'])
+                 dl_list=download_list)
 
     def check_cache(self):
         settings = self.main_model.settings

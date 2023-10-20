@@ -3,7 +3,6 @@ from kivy.properties import ObjectProperty, BooleanProperty
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.list import OneLineIconListItem, IconLeftWidget
 
-from image_processing import RotatedImage
 from Views.Screens.site_view.site_view import SiteView
 
 from typing import TYPE_CHECKING, Union
@@ -74,9 +73,10 @@ class SiteViewController(EventDispatcher):
                                 if self.model.blueprints[x]['site_id'] == self.model.current_site}
 
     def set_banner_image(self):
-        header_image = RotatedImage(image_path='assets/20220926_162254.jpg', site=self.view.location)
-        header_image.rotate()
-        header_image_path = header_image.image_out_path
+        if not self.model.sites.get('banner_image'):
+            header_image_path = self.model.get_directory('assets/default.jpg')
+        else:
+            header_image_path = self.model.get_directory(self.model.pictures[self.model.sites['banner_image']]['file_name'])
         self.view.ids.header_image.source = header_image_path
 
     def change_feed(self, title, deletable=False):

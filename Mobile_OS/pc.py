@@ -15,6 +15,8 @@ from kivymd.uix.snackbar import MDSnackbar
 
 from typing import TYPE_CHECKING
 
+from image_processing import RotatedImage
+
 if TYPE_CHECKING:
     from Controller.main_controller import MainController
 
@@ -71,13 +73,19 @@ class PC(EventDispatcher):
         self.popup = Popup(title='Select File', content=self.file_chooser, size_hint=(0.9, 0.9))
         self.popup.open()
 
+    def copy_image(self, image_type, name):
+        if image_type == 'pictures':
+            image = RotatedImage(name, self.main_controller.model.writeable_folder)
+            image.rotate()
+        else:
+            shutil.copy(name, self.main_controller.model.get_directory("database/blueprints"))
+
     def on_submit(self, instance, selection, *args):
         image = selection[0].split('/')[-1]
         image_type = 'blueprints' if image.split('.')[-1] == 'pdf' else 'pictures'
         dest_path = f"database/{image_type}/{image}"
         blueprint_type = self.instance_item.text if self.instance_item else None
-
-        shutil.copy(selection[0], dest_path)
+        self.copy_image(image_type, selection[0])
         result = self.main_controller.model.select_image_to_upload(path=dest_path, file_type=image_type,
                                                                    blueprint_type=blueprint_type)
         self.instance_item = None

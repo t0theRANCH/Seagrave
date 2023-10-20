@@ -1,9 +1,10 @@
 from pyobjus import autoclass
 from pyobjus.dylib_manager import load_dylib
+from os import getcwd
 
 
 def KeychainBridge():
-    load_dylib('./KeychainBridge.dylib')
+    load_dylib(f'{getcwd()}/Mobile_OS/KeychainBridge.dylib')
     return autoclass('KeychainBridge')
 
 

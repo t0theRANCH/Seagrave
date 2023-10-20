@@ -234,10 +234,10 @@ class LoginScreenController(EventDispatcher):
         self.main_controller.input_data_into_nav_drawer()
 
     def switch_to_main(self):
+        self.main_controller.change_screen('main_screen')
         if not self.demo_mode:
             Clock.schedule_interval(self.refresh_auth, (30 * 60))
-        self.main_controller.change_screen('main_screen')
-        self.check_for_update()
+            self.check_for_update()
 
     def refresh_auth(self, *args):
         if self.model.refresh_token:
@@ -258,13 +258,13 @@ class LoginScreenController(EventDispatcher):
 
     def check_for_update(self):
         user_version = self.model.settings['version']
-        update_needed = secure_request(id_token=self.model.id_token, name='update',
-                                       data={'version': user_version, 'platform': platform})
-        data = update_needed.json()
-        if data['update_required']:
+        update_needed = secure_request(id_token=self.model.id_token,
+                                       data={'version': user_version, 'platform': platform, 'function_name': 'update',
+                                             'AccessToken': self.model.access_token})
+        if not update_needed.get('error') and update_needed.get('update_required'):
             update_popup = Update(self)
             update_popup.open()
-            self.update_url = data['download_url']
+            self.update_url = update_needed['download_url']
 
     def update(self, *args):
         if platform == 'android':

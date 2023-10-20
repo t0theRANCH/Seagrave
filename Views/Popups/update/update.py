@@ -25,4 +25,4 @@ class Update(MDDialog):
         self.dismiss()
 
 
-Builder.load_file(join(dirname(__file__), "save_password.kv"))
+Builder.load_file(join(dirname(__file__), "update.kv"))

@@ -1,7 +1,8 @@
 import json
 from datetime import datetime
+import time
 from os import remove, environ, makedirs, listdir
-from os.path import join, exists
+from os.path import join, exists, dirname, getsize
 import shutil
 
 from kivy.event import EventDispatcher
@@ -57,23 +58,37 @@ class MainModel(EventDispatcher):
     def get_ios_writeable_folder(self):
         if platform != 'ios':
             return
-        app_dir = join(environ['HOME'], 'Documents', '..')
-        bundle_path = join(app_dir, 'org.kivy.seagrave')  # replace with bundle identifier
         self.writeable_folder = join(environ['HOME'], 'Documents')
-        makedirs(join(self.writeable_folder, 'database'), exist_ok=True)
         self.database_folder = 'demo_database' if self.demo_mode else join(self.writeable_folder, self.database_folder)
-        self.check_writeable_folder(bundle_path)
-        self.check_writeable_folder(bundle_path, folder='demo_database')
+        self.check_writeable_folder()
+        self.check_writeable_folder(folder='demo_database')
 
-    def check_writeable_folder(self, bundle_path, folder='database'):
-        for file in listdir(join(bundle_path, folder)):
-            if file.endswith('.json') and not exists((join(self.writeable_folder, folder, file))):
-                shutil.copy(join(bundle_path, folder, file), self.writeable_folder)
+    def check_writeable_folder(self, folder='database'):
+        makedirs(join(self.writeable_folder, folder), exist_ok=True)
+        MAX_RETRIES = 5  # Define a maximum number of retries.
+        RETRY_WAIT_TIME = 0.5  # Time in seconds to wait between retries.
+        for file in listdir(folder):
+            if file.endswith('.json'):
+                source_path = join(folder, file)
+                target_path = join(self.writeable_folder, folder, file)
+                self.copy_file(file, source_path, target_path, MAX_RETRIES, RETRY_WAIT_TIME)
             else:
-                for sub_file in listdir(join(bundle_path, folder, file)):
-                    if sub_file.endswith('.json') and not exists((join(self.writeable_folder, folder, file, sub_file))):
-                        shutil.copy(join(bundle_path, folder, file, sub_file),
-                                    join(self.writeable_folder, folder, file))
+                makedirs(join(self.writeable_folder, folder, file), exist_ok=True)
+                for sub_file in listdir(join(folder, file)):
+                    source_sub_path = join(folder, file, sub_file)
+                    target_sub_path = join(self.writeable_folder, folder, file, sub_file)
+                    self.copy_file(sub_file, source_sub_path, target_sub_path, MAX_RETRIES, RETRY_WAIT_TIME)
+
+    @staticmethod
+    def copy_file(file, source_path, target_path, max_retries=5, retry_wait_time=0.5):
+        if file.endswith('.json') and not exists(target_path):
+            retry_count = 0
+            while retry_count < max_retries:
+                shutil.copy(source_path, target_path)
+                if getsize(source_path) == getsize(target_path):
+                    break  # Break the loop when file sizes match.
+                time.sleep(retry_wait_time)  # Wait for a specified time before retrying.
+                retry_count += 1
 
     def get_directory(self, directory: str):
         return join(self.writeable_folder, directory)
@@ -85,11 +100,6 @@ class MainModel(EventDispatcher):
                 text=message_text
             )
         ).open()
-
-    @staticmethod
-    def send_crash_report(crash_info):
-        data = {'log_type': 'crash_report', 'data': str(crash_info)}
-        open_request(name='log', data=data)
 
     def update_settings(self, db_id: str, new_entry):
         rest = self.settings[db_id]
@@ -115,7 +125,7 @@ class MainModel(EventDispatcher):
         self.save_db_file('register', data)
 
     def save_db_file(self, database: str, data_dict: dict):
-        with open(self.get_directory('database', f"{database}.json"), 'w') as fp:
+        with open(self.get_directory(f"database/{database}.json"), 'w') as fp:
             json.dump(data_dict, fp)
 
     def select_delete_item(self, button: 'RVButton'):

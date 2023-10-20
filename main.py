@@ -14,6 +14,7 @@ from Controller.site_view_controller import SiteViewController
 from Controller.form_view_controller import FormViewController
 from Controller.picture_list_view_controller import PictureListViewController
 from Controller.picture_view_controller import PictureViewController
+from api_requests import open_request
 
 
 class Hnnnng(MDApp):
@@ -59,8 +60,10 @@ class Hnnnng(MDApp):
     def on_pause(self):
         return True
 
-    def send_crash_report(self, crash_report):
-        self.model.send_crash_report(crash_report)
+    @staticmethod
+    def send_crash_report(crash_report):
+        data = {'log_type': 'crash_report', 'data': str(crash_report)}
+        open_request(name='log', data=data)
 
     def on_stop(self):
         settings = dict(self.model.settings)
@@ -80,9 +83,9 @@ class Hnnnng(MDApp):
 
 
 if __name__ == '__main__':
-    app = Hnnnng()
     try:
+        app = Hnnnng()
         app.run()
     except Exception as e:
         crash_info = traceback.format_exc()
-        app.send_crash_report(crash_info)
+        Hnnnng.send_crash_report(crash_info)

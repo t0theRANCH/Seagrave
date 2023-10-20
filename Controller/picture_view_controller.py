@@ -6,6 +6,7 @@ from kivy.properties import ObjectProperty, BooleanProperty
 
 from typing import TYPE_CHECKING, Union
 
+
 if TYPE_CHECKING:
     from Controller.main_controller import MainController
     from Model.main_model import MainModel

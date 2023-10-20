@@ -33,7 +33,7 @@ class PictureListView(MDScreen):
             path_folders = v['file_name'].split('/')
             path = self.controller.model.get_directory(f"{path_folders[0]}/{path_folders[-2]}/{path_folders[-1]}")
             self.model.download_pictures()
-            tile = PictureButtonContainer(source=path, tag=v['file_name'].split('/')[-1], picture_id=v,
+            tile = PictureButtonContainer(source=path, tag=v['file_name'].split('/')[-1], picture_id=k,
                                           controller=picture_view_controller)
             self.ids.container.add_widget(tile)
             self.tiles.append(tile)
