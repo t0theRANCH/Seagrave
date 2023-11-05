@@ -1,6 +1,6 @@
 from kivy._event import EventDispatcher
 from kivy.properties import ObjectProperty, BooleanProperty
-from kivy.uix.screenmanager import SwapTransition, SlideTransition
+from kivymd.uix.transition import MDSwapTransition, MDSlideTransition
 
 from Views.Screens.root_screen.root_screen import RootScreen
 
@@ -36,6 +36,8 @@ class MainController(EventDispatcher):
         self.screen_manager = self.view.ids.screen_manager
         self.nav_drawer = self.view.ids.nav
         self.demo_mode = model.settings['Demo Mode']
+        self.slide_transition = MDSlideTransition()
+        self.swap_transition = MDSwapTransition()
 
     def on_demo_mode(self, instance, value):
         if not value and self.login_controller:
@@ -64,11 +66,11 @@ class MainController(EventDispatcher):
             s.demo_mode = self.demo_mode
             self.screen_manager.add_widget(s.view)
 
-    def change_screen(self, screen_name: str, slide: bool = False, direction: str = 'left'):
+    def change_screen(self, screen_name: str, slide: bool = False):
         if slide:
-            self.screen_manager.transition = SlideTransition(direction=direction)
+            self.screen_manager.transition = self.slide_transition
         else:
-            self.screen_manager.transition = SwapTransition()
+            self.screen_manager.transition = self.swap_transition
         self.screen_manager.current = screen_name
 
     def input_data_into_nav_drawer(self):

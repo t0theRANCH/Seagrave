@@ -1,9 +1,10 @@
-from datetime import datetime
 from os.path import join, dirname
 
 from kivy.lang import Builder
 
 from kivymd.uix.boxlayout import MDBoxLayout
+
+from Views.Popups.multi_select_popup.multi_select_popup import MultiSelectPopup, MultiSelectPopupContent
 
 from typing import TYPE_CHECKING
 
@@ -16,21 +17,16 @@ class TimeClockContent(MDBoxLayout):
         super().__init__(**kwargs)
         self.controller = controller
         self.time_clock_data = time_clock_data
-        self.current_day = self.get_current_day()
+        self.current_day = self.controller.get_current_day()
         self.status = self.get_status()
         self.total_hours = self.get_total_hours()
         self.set_punch_button_text()
         self.set_total_hours_text()
 
-    @staticmethod
-    def get_current_day():
-        return datetime.now().strftime('%A')
-
-    def scrim_on(self):
-        self.controller.main_controller.view.scrim_on()
-
-    def scrim_off(self):
-        self.controller.main_controller.view.scrim_off()
+    def scrim_on(self, message='', function=None):
+        self.controller.main_controller.view.scrim_on(message=message)
+        if function:
+            self.controller.main_controller.view.async_task(function)
 
     def get_status(self):
         if self.current_day in self.time_clock_data and self.time_clock_data[self.current_day]['clock_in']:
@@ -42,12 +38,12 @@ class TimeClockContent(MDBoxLayout):
         for day, data in dict(self.time_clock_data).items():
             if not data['clock_out'] and self.current_day != day:
                 continue
-            punch_in = datetime.strptime(data['clock_in'], '%Y-%m-%d %H:%M:%S')
+            punch_in = self.controller.format_date(data['clock_in'])
             if data['clock_out']:
                 punch_out_time = data['clock_out']
             else:
-                punch_out_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            punch_out = datetime.strptime(punch_out_time, '%Y-%m-%d %H:%M:%S')
+                punch_out_time = self.controller.get_current_datetime()
+            punch_out = self.controller.format_date(punch_out_time)
             hours = punch_out - punch_in
             total_hours += (hours.seconds // 3600)
         return total_hours
@@ -62,14 +58,29 @@ class TimeClockContent(MDBoxLayout):
         self.status = 'out' if self.status == 'in' else 'in'
 
     def punch_clock(self):
-        self.scrim_on()
-        self.controller.punch_clock(current_datetime=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                                    current_day=self.get_current_day(),
+        self.scrim_on(message=f"Punching {self.status}", function=self.punch_clock_request)
+
+    def punch_clock_request(self):
+        self.controller.punch_clock(current_datetime=self.controller.get_current_datetime(),
+                                    current_day=self.controller.get_current_day(),
                                     action=self.status
                                     )
         self.set_status()
         self.set_punch_button_text()
-        self.scrim_off()
+
+    def punch_in_other(self):
+        dialog = MultiSelectPopup(title='Punch In Other', model=self.controller.model, controller=self.controller,
+                                  db=None, ind=None, selections=self.controller.is_punched_out(),
+                                  type='custom', content_cls=MultiSelectPopupContent(equipment=False, punch_clock=True,
+                                                                                     field_ids=None))
+        dialog.open()
+
+    def punch_out_other(self):
+        dialog = MultiSelectPopup(title='Punch Out Other', model=self.controller.model, controller=self.controller,
+                                  db=None, ind=None, selections=self.controller.is_punched_in(),
+                                  type='custom', content_cls=MultiSelectPopupContent(equipment=False, punch_clock=True,
+                                                                                     field_ids=None))
+        dialog.open()
 
 
 Builder.load_file(join(dirname(__file__), "time_clock_content.kv"))

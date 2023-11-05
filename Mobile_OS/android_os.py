@@ -1,7 +1,4 @@
 import json
-import os
-import shutil
-from os import getcwd
 from jnius import autoclass, cast
 from android import activity
 from android.storage import primary_external_storage_path
@@ -32,8 +29,6 @@ from Mobile_OS.java_classes import (
 
 from typing import TYPE_CHECKING
 
-from image_processing import RotatedImage
-
 if TYPE_CHECKING:
     from Controller.main_controller import MainController
 
@@ -49,6 +44,7 @@ class Android(EventDispatcher):
 
     def __init__(self, **kwargs):
         super(Android, self).__init__(**kwargs)
+        self.intent = None
         self.PythonActivity = None
         self.get_activity()
         self.currentActivity = None
@@ -227,23 +223,21 @@ class Android(EventDispatcher):
             file_input_stream.close()
             file_output_stream.close()
 
-    def copy_image(self, image_type, name):
-        if image_type == 'pictures':
-            image = RotatedImage(name, self.main_controller.model.writeable_folder)
-            image.rotate()
-        else:
-            shutil.copy(name, self.main_controller.model.get_directory("database/blueprints"))
-
     @run_on_ui_thread
     def access_file_tree_result(self, request_code, result_code, intent):
-        name = self.get_file_name_from_uri(intent.data)
+        self.intent = intent
+        self.main_controller.view.scrim_on(message='Uploading File')
+        self.main_controller.view.async_task(self.copy_and_upload_file)
+
+    def copy_and_upload_file(self):
+        name = self.get_file_name_from_uri(self.intent.data)
         image_type = 'blueprints' if name.split('.')[-1] == 'pdf' else 'pictures'
         dest_path = f"database/{image_type}/{name}"
-        self.write_file_content(uri=intent.data, path=dest_path)
-        self.copy_image(image_type, dest_path)
+        self.write_file_content(uri=self.intent.data, path=dest_path)
         result = self.main_controller.model.select_image_to_upload(path=dest_path, file_type=image_type,
                                                                    blueprint_type=self.instance_item.text)
         self.instance_item = None
+        self.intent = None
         if not result:
             Snackbar(text='Blueprints must be a PDF')
         activity.unbind(on_activity_result=self.access_file_tree_result)

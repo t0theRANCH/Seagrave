@@ -1,0 +1,6 @@
+framework module PDFModalViewController {
+  umbrella header "PDFModalViewController.h"
+
+  export *
+  module * { export * }
+}

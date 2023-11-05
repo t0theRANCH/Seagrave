@@ -56,7 +56,10 @@ class TextFieldPopup(MDDialog):
         self.content_cls.confirm_delete_field(value)
 
     def submit(self, obj):
-        self.controller.main_controller.view.scrim_on()
+        self.controller.main_controller.view.scrim_on("Submitting Field")
+        self.controller.main_controller.view.async_task(self.submit_request)
+
+    def submit_request(self):
         self.set_item()
         if not self.selected:
             Snackbar(text='Entry cannot be empty').open()
@@ -74,8 +77,7 @@ class TextFieldPopup(MDDialog):
                 if r.id.split(' - ')[-1] in self.model.form_view_fields['plan']:
                     r.select()
                     r.add_button_text(self.selected)
-        self.controller.main_controller.view.scrim_off()
-        self.dismiss()
+        Clock.schedule_once(self.dismiss, 0.5)
 
     def add(self):
         if not self.db:

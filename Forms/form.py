@@ -151,7 +151,7 @@ class Form(ABC):
         return Paragraph(f"<i>{item}</i>", style)
 
     def remove_file(self):
-        remove(join(self.forms_path, f"{self.file_name}.pdf"))
+        #remove(join(self.forms_path, f"{self.file_name}.pdf"))
         remove(self.signature_path)
         for signature in self.fields.get('signatures', ''):
             remove(join(self.forms_path, f"{self.fields['signatures'].get(signature, '')}"))

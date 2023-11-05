@@ -277,13 +277,10 @@ class FormViewController(EventDispatcher):
             self.remove_widgets()
 
     def submit_form(self, *args):
-        self.main_controller.view.scrim_on()
         self.close_speed_dial()
         done = self.parse_field_check_response(submit=True)
         if not done:
-            self.main_controller.view.scrim_off()
             return
-
         self.pops.extend(
             self.check_for_empty_fields(fields={s.id: s.text for s in self.model.single},
                                         widget_list=self.model.single))
@@ -298,11 +295,9 @@ class FormViewController(EventDispatcher):
                 if not s.filled:
                     self.pops.append(s.text)
         if self.pops:
-            self.main_controller.view.scrim_off()
             self.view.open_error_popup()
             return
         if all(x not in self.form for x in ['Add Site', 'Add Equipment']):
-            self.main_controller.view.scrim_off()
             self.view.open_final_signature_popup()
             return
         self.fill_form(signature=None)
@@ -327,7 +322,6 @@ class FormViewController(EventDispatcher):
                 s.select()
 
     def fill_form(self, signature):
-        self.main_controller.view.scrim_on()
         if self.view.type == 'forms':
             self.model.process_form(signature, separator=self.separator, form=self.form)
         else:
@@ -336,7 +330,6 @@ class FormViewController(EventDispatcher):
                 self.main_controller.view.scrim_off()
                 return
             self.model.process_db_request(form_type=self.view.type)
-        self.main_controller.view.scrim_off()
         self.remove_widgets()
 
     def remove_widgets(self, *args):

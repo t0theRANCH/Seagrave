@@ -25,9 +25,7 @@ class FormContent(MDBoxLayout):
     def list_new_forms(self):
         items = [OneLineIconListItem(IconLeftWidget(icon='note-plus'), text=f, on_release=self.start_new_form)
                  for f in self.new_form_data]
-        self.popup = MDDialog(title='Fill Out New Form', items=items, type='simple')
-        self.popup.size_hint_x = 1
-        self.popup.open()
+        self.show_dialog('Fill Out New Form', items)
 
     def list_incomplete_forms(self):
         if items := [ThreeLineIconListItem(IconLeftWidget(icon='note-edit'),
@@ -36,9 +34,7 @@ class FormContent(MDBoxLayout):
                                            tertiary_text=v['separation'],
                                            id=k, on_release=self.finish_incomplete_form)
                      for k, v in self.incomplete_form_data.items()]:
-            self.popup = MDDialog(title='Finish Incomplete Form', items=items, type='simple')
-            self.popup.size_hint_x = 1
-            self.popup.open()
+            self.show_dialog('Finish Incomplete Form', items)
             return
         toast(text='There are no incomplete forms for this site')
 
@@ -50,11 +46,14 @@ class FormContent(MDBoxLayout):
                                            id=v['file_name'],
                                            on_release=self.view_form)
                      for k, v in self.complete_form_data.items()]:
-            self.popup = MDDialog(title='View Completed Form', items=items, type='simple')
-            self.popup.size_hint_x = 1
-            self.popup.open()
+            self.show_dialog('View Completed Form', items)
             return
         toast(text='There are no completed forms for this site')
+
+    def show_dialog(self, title, items):
+        self.popup = MDDialog(title=title, items=items, type='simple')
+        self.popup.size_hint_x = 1
+        self.popup.open()
 
     def start_new_form(self, instance_item: IconLeftWidget):
         form_id = str(instance_item.text).lower().replace(' ', '_')

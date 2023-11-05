@@ -101,6 +101,11 @@ class MainModel(EventDispatcher):
             )
         ).open()
 
+    def update_file_cache(self, db, new_entry):
+        rest = self.file_cache[db]
+        rest.update(new_entry)
+        self.file_cache[db] = rest
+
     def update_settings(self, db_id: str, new_entry):
         rest = self.settings[db_id]
         rest.update(new_entry)
@@ -208,17 +213,19 @@ class MainModel(EventDispatcher):
     def update_sites(self, db_id: str, new_entry: dict, column: str = None):
         self.sites_model.update_sites(db_id, new_entry, column)
 
-    def update_time_clock(self, db_id: str, new_entry: dict, column: str = None):
-        self.sites_model.update_time_clock(db_id, new_entry)
+    def update_time_clock(self, new_entry: dict):
+        self.sites_model.update_time_clock(new_entry)
 
     def delete_site(self, action):
         self.sites_model.delete_site(action)
 
-    def punch_clock(self, current_datetime, current_day, action):
-        self.sites_model.punch_clock(current_datetime, current_day, action)
+    def punch_clock(self, current_datetime, current_day, action, user=None, sql_id=None):
+        self.sites_model.punch_clock(current_datetime, current_day, action, user, sql_id)
 
-    def get_hours(self):
-        return self.sites_model.get_hours()
+    def get_hours(self, users=None):
+        if not users:
+            users = [self.user['given_name']]
+        return self.sites_model.get_hours(users)
 
     # Equipment
 
@@ -239,7 +246,9 @@ class MainModel(EventDispatcher):
     def download_form(self, button_id):
         self.forms_model.download_form(button_id)
         if button_id not in self.file_cache['forms']:
-            self.file_cache['forms'][button_id] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            form_entry = self.file_cache['forms']
+            form_entry[str(button_id)] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            self.update_file_cache('forms', form_entry)
 
     def update_completed_forms(self, db_id: str, new_entry: dict, column: str = None):
         self.forms_model.update_completed_forms(db_id, new_entry, column)
@@ -301,12 +310,16 @@ class MainModel(EventDispatcher):
         self.images_model.download_pictures()
         for picture in self.sites[self.current_site]['pictures']:
             if picture not in self.file_cache['pictures']:
-                self.file_cache['pictures'][picture] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                pic_entry = self.file_cache['pictures']
+                pic_entry[str(picture)] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                self.update_file_cache('pictures', pic_entry)
 
     def download_blueprints(self, file_name):
         self.images_model.download_blueprints(file_name)
         if file_name not in self.file_cache['blueprints']:
-            self.file_cache['blueprints'][file_name] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            bp_entry = self.file_cache['blueprints']
+            bp_entry[str(file_name)] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            self.update_file_cache('blueprints', bp_entry)
 
     def add_note_to_picture(self, picture_id, note):
         self.images_model.add_note_to_picture(picture_id, note)

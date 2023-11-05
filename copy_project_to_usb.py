@@ -2,6 +2,13 @@ import os
 import shutil
 
 
+def reset_database():
+    if os.path.exists(f"{dest}/database"):
+        shutil.copytree('demo_database', f'{dest}/database', dirs_exist_ok=True)
+    else:
+        shutil.copytree('demo_database', f'{dest}/database')
+
+
 def clear_directory(directory):
     for item in os.listdir(directory):
         item_path = os.path.join(directory, item)
@@ -34,3 +41,4 @@ if __name__ == '__main__':
     dest = '/media/tyson/Install mac/Seagrave'
     clear_directory(dest)
     copy_to_usb(dest)
+    reset_database()

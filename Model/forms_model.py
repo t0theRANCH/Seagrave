@@ -58,7 +58,7 @@ class FormsModel:
     def download_form(self, file_name):
         if file_name in listdir(self.main_model.get_directory('database/forms')):
             return
-        dl_list = {f'database/{self.main_model.current_site}/forms/{file_name}': f'database/forms/{file_name}'}
+        dl_list = {f'database/{self.main_model.current_site}/forms/{file_name}': self.main_model.get_directory(f'database/forms/{file_name}')}
         download(id_token=self.main_model.id_token, access_token=self.main_model.access_token,
                  url=self.main_model.secure_api_url, dl_list=dl_list)
 
@@ -275,11 +275,7 @@ class FormsModel:
         form_instance.print()
         try:
             if not self.main_model.demo_mode:
-                upload(path=f"database/{self.main_model.current_site_id}/forms/{form_instance.file_name}.pdf",
-                       local_path=self.main_model.get_directory(f"database/forms/{form_instance.file_name}.pdf"),
-                       id_token=self.main_model.id_token,
-                       url=self.main_model.secure_api_url, access_token=self.main_model.access_token)
-                self.remove_form_from_db(file_name=form_instance.file_name, form=form, separator=separator)
+                self.upload_form(form_instance, form, separator)
             else:
                 file_name = self.main_model.get_directory(f"database/forms/{form_instance.file_name}.pdf")
                 self.main_model.phone.open_pdf(file_name)
@@ -296,6 +292,19 @@ class FormsModel:
             else:
                 self.remove_files(form_instance)
                 self.remove_from_device(demo_mode=self.main_model.demo_mode)
+
+    def upload_form(self, form_instance, form, separator):
+        local_path = self.main_model.get_directory(f"database/forms/{form_instance.file_name}.pdf")
+        upload_path = f"database/{self.main_model.current_site_id}/forms/{form_instance.file_name}.pdf"
+        to_be_uploaded = self.main_model.settings['To Be Uploaded']
+        to_be_uploaded['forms'].append({'device_path': local_path,
+                                        'upload_path': upload_path})
+        self.main_model.update_settings('To Be Uploaded', to_be_uploaded)
+        upload(path=upload_path,
+               local_path=local_path,
+               id_token=self.main_model.id_token,
+               url=self.main_model.secure_api_url, access_token=self.main_model.access_token)
+        self.remove_form_from_db(file_name=form_instance.file_name, form=form, separator=separator)
 
     def remove_files(self, form_instance):
         to_be_deleted = [
@@ -342,6 +351,10 @@ class FormsModel:
                 'function_name': 'sql_create', 'AccessToken': self.main_model.access_token
                 }
         response = secure_request(data=data, id_token=self.main_model.id_token, url=self.main_model.secure_api_url)
+        to_be_uploaded = self.main_model.settings['To Be Uploaded']
+        to_be_uploaded['forms'].remove({'device_path': self.main_model.get_directory(f"database/forms/{file_name}.pdf"),
+                                        'upload_path': f"database/{self.main_model.current_site_id}/forms/{file_name}.pdf"})
+        self.main_model.update_settings('To Be Uploaded', to_be_uploaded)
         self.record_completed_form(response=response, fields=fields)
 
     def record_completed_form(self, response, fields):

@@ -36,7 +36,7 @@ class ImagesModel:
 
     def download_pictures(self):
         site_id = self.main_model.current_site
-        dl_list = {x['file_name']: f"database/pictures/{x['file_name'].split('/')[-1]}"
+        dl_list = {x['file_name']: self.main_model.get_directory(f"database/pictures/{x['file_name'].split('/')[-1]}")
                    for x in dict(self.main_model.pictures).values()
                    if x['site_id'] == site_id}
         download(url=self.main_model.secure_api_url, id_token=self.main_model.id_token,
@@ -44,9 +44,9 @@ class ImagesModel:
 
     def download_blueprints(self, file_name):
         if file_name in listdir(self.main_model.get_directory('database/blueprints')):
-            print(f"Blueprint {file_name} already exists in database/blueprints")
             return
-        dl_list = {f'database/{self.main_model.current_site}/blueprints/{file_name}': f'database/blueprints/{file_name}'}
+        dl_list = {f'database/{self.main_model.current_site}/blueprints/{file_name}': self.main_model.get_directory(
+            f'database/blueprints/{file_name}')}
         download(id_token=self.main_model.id_token, access_token=self.main_model.access_token,
                  url=self.main_model.secure_api_url, dl_list=dl_list)
 
@@ -92,7 +92,7 @@ class ImagesModel:
     def select_image_to_upload(self, path, file_type, blueprint_type):
         extension = path.split('.')[-1]
         file_types = {'blueprints': {'possible_file_extensions': ['pdf']},
-                      'pictures': {'possible_file_extensions': ['jpg', 'png']}}
+                      'pictures': {'possible_file_extensions': ['jpg', 'jpeg', 'png']}}
         if not all((self.check_extension(x, file_type, extension, y['possible_file_extensions'])
                     for x, y in file_types.items())):
             return False
@@ -111,6 +111,9 @@ class ImagesModel:
             data['cols']['type'] = blueprint_type
         response = secure_request(id_token=self.main_model.id_token, url=self.main_model.secure_api_url,
                                   data=data)
+        to_be_uploaded = self.main_model.settings['To Be Uploaded']
+        to_be_uploaded[file_type].append({'device_path': local_path, 'upload_path': file_name})
+        self.main_model.update_settings('To Be Uploaded', to_be_uploaded)
         self.add_new_image_to_database(response, file_type, file_name, blueprint_type, local_path)
         return True
 
@@ -128,4 +131,6 @@ class ImagesModel:
                access_token=self.main_model.access_token)
         self.main_model.file_cache[file_type][path] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         self.main_model.iterate_register(response)
-
+        to_be_uploaded = self.main_model.settings['To Be Uploaded']
+        to_be_uploaded[file_type].remove({'device_path': local_path, 'upload_path': path})
+        self.main_model.update_settings('To Be Uploaded', to_be_uploaded)

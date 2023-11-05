@@ -35,6 +35,8 @@ class LoginScreenController(EventDispatcher):
 
     def __init__(self, model: 'MainModel', **kwargs):
         super().__init__(**kwargs)
+        self.new_version = None
+        self.code = None
         self.model = model
         self.view = LoginScreen(name='login', controller=self, model=self.model)
 
@@ -57,11 +59,10 @@ class LoginScreenController(EventDispatcher):
 
         self.model.phone.main_controller = self.main_controller
 
-    def scrim_on(self):
-        self.main_controller.view.scrim_on()
-
-    def scrim_off(self):
-        self.main_controller.view.scrim_off()
+    def scrim_on(self, message='', function=None):
+        self.main_controller.view.scrim_on(message=message)
+        if function:
+            self.main_controller.view.async_task(function)
 
     def enter_user_data(self, user: str, password: str):
         self.view.login_card.ids.email.text = user
@@ -88,48 +89,53 @@ class LoginScreenController(EventDispatcher):
         self.view.register()
 
     def send_sign_up_email(self):
-        self.scrim_on()
+        self.scrim_on(message='Sending Verification Email', function=self.send_request_sign_up)
+
+    def send_request_sign_up(self):
         r = open_request(name='sign_up', data={"email": self.view.current_card.ids.email.text.capitalize(),
                                                "password": self.view.current_card.ids.password.text})
         if 'error' in r:
             self.view.current_card.ids.email.helper_text = r['body']
             self.view.current_card.ids.email.error = True
-            self.scrim_off()
             return
-        self.scrim_off()
         self.clear_errors()
-        self.view.switch_cards(self.view.confirm_code_card)
+        Clock.schedule_once(self.view.switch_cards(self.view.confirm_code_card), 0.5)
 
     def send_code(self):
-        self.scrim_on()
+        self.scrim_on(message='Sending Verification Code', function=self.send_request_for_verification_code)
+
+    def send_request_for_verification_code(self):
         r = open_request(name='sign_up_resend', data={"email": self.view.sign_up_card.ids.email.text})
         if 'error' in r:
             self.display_error_snackbar(r['body'])
-            self.scrim_off()
             return
-        self.scrim_off()
         toast("Verification code sent!")
 
     def send_confirmation_code(self, code):
-        self.scrim_on()
-        r = open_request(name='sign_up_confirm', data={"code": code, "email": self.view.sign_up_card.ids.email.text})
+        self.code = code
+        self.scrim_on(message='Verifying Code', function=self.send_request_verification_code)
+
+    def send_request_verification_code(self):
+        r = open_request(name='sign_up_confirm',
+                         data={"code": self.code, "email": self.view.sign_up_card.ids.email.text})
         if 'error' in r:
             self.display_error_snackbar(r['body'])
-            self.scrim_off()
+            self.code = None
             return
-        self.scrim_off()
         toast('Your email has been verified, please log in')
+        self.code = None
         self.main_controller.change_screen('login')
 
     def send_password_confirmation_code(self):
-        self.scrim_on()
+        self.scrim_on(message='Resetting Password', function=self.send_request_for_password_confirmation_code)
+        self.main_controller.change_screen('login')
+
+    def send_request_for_password_confirmation_code(self):
         data = {"code": self.view.confirm_password_code_card.code,
                 "email": self.view.reset_password_card.ids.email.text,
                 "password": self.view.current_card.ids.password.text}
         r = open_request(name='forgot_password_confirm', data=data)
         self.main_controller.login_controller.display_error_snackbar(r['body'])
-        self.scrim_off()
-        self.main_controller.change_screen('login')
 
     def forgot_password(self):
         if self.demo_mode:
@@ -142,7 +148,12 @@ class LoginScreenController(EventDispatcher):
             self.populate_main_screen()
             self.switch_to_main()
             return
-        self.scrim_on()
+        self.scrim_on(message='Logging In', function=self.log_in_request)
+        self.populate_main_screen()
+        self.switch_to_main()
+        self.save_password_prompt()
+
+    def log_in_request(self):
         if self.email_field_check() and self.password_field_check():
             self.clear_errors()
             u = self.view.current_card.ids.email.text
@@ -154,7 +165,6 @@ class LoginScreenController(EventDispatcher):
             self.view.current_card.ids.password.helper_text = 'Password must have at lease one uppercase, number, and symbol, ' \
                                                               'and be over 7 characters'
             self.view.current_card.ids.password.error = True
-        self.scrim_off()
 
     def authentication(self, r):
         self.model.access_token = r['AuthenticationResult']['AccessToken']
@@ -163,7 +173,6 @@ class LoginScreenController(EventDispatcher):
         if not self.model.access_token:
             self.display_error_snackbar('Error logging in, please try again')
             return
-        self.save_password_prompt()
         self.model.db_handler()
         if not self.model.access_token:
             self.display_error_snackbar('Error logging in, please try again')
@@ -172,8 +181,7 @@ class LoginScreenController(EventDispatcher):
         self.model.clear_pictures()
         self.model.clear_blueprints()
         self.model.clear_forms()
-        self.populate_main_screen()
-        self.switch_to_main()
+
 
     def clear_errors(self):
         self.view.login_card.ids.email.helper_text = ''
@@ -182,7 +190,10 @@ class LoginScreenController(EventDispatcher):
         self.view.login_card.ids.password.error = False
 
     def save_password_prompt(self):
-        if self.model.phone and not self.model.phone.get_user():
+        if self.model.phone \
+                and not self.model.phone.get_user() \
+                and self.view.login_card.ids.save_password != self.model.phone.get_password() \
+                and self.model.settings['Save Password']:
             save_password = SavePassword(self)
             save_password.open()
 
@@ -250,6 +261,7 @@ class LoginScreenController(EventDispatcher):
                     self.model.access_token = response['data']['access_token']
                     self.model.id_token = response['data']['id_token']
                     self.model.db_handler()
+                    self.model.get_hours()
         else:
             self.main_controller.change_screen('login')
             self.model.id_token = ''
@@ -265,8 +277,17 @@ class LoginScreenController(EventDispatcher):
             update_popup = Update(self)
             update_popup.open()
             self.update_url = update_needed['download_url']
+            self.new_version = update_needed['new_version']
 
     def update(self, *args):
+        self.scrim_on(message='Downloading Update', function=self.download_update)
+        settings = dict(self.model.settings)
+        settings['version'] = self.new_version
+        self.model.save_db_file('settings', settings)
+        self.update_url = ''
+        self.new_version = ''
+
+    def download_update(self):
         if platform == 'android':
             apk_destination = join(self.model.phone.get_primary_storage_path(), 'Downloads', 'seagrave.apk')
             download_update(self.update_url, apk_destination)
@@ -275,5 +296,3 @@ class LoginScreenController(EventDispatcher):
             import webbrowser
             url_to_open = f"itms-services://?action=download-manifest&url={self.update_url}"
             webbrowser.open(url_to_open)
-        self.update_url = ''
-

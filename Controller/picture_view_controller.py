@@ -70,5 +70,6 @@ class PictureViewController(EventDispatcher):
         self.view.open_set_as_banner_image_popup()
 
     def go_back(self, obj):
-        self.main_controller.screen_manager.current_heroes = []
-        self.main_controller.change_screen('picture_list_view', slide=True, direction='right')
+        self.close_speed_dial()
+        self.main_controller.screen_manager.current_heroes = [self.view.ids.hero_to.tag]
+        self.main_controller.change_screen('picture_list_view', slide=True)

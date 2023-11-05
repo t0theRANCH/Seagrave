@@ -4,7 +4,6 @@ from kivymd.uix.dialog import MDDialog
 from kivymd.uix.boxlayout import MDBoxLayout
 from os.path import dirname, join
 import os
-import json
 
 from kivymd.uix.list import OneLineListItem
 
@@ -39,11 +38,11 @@ class DebugContent(MDBoxLayout):
                 self.ids.debug_list.add_widget(OneLineListItem(text=list_item, on_release=self.display_content))
         elif self.ids.content_label.text == 'Files':
             if instance.text.lower() == 'main':
-                self.display_files(os.getcwd())
+                self.display_files('')
             elif instance.text.lower() == 'database':
-                self.display_files(os.path.join(os.getcwd(), 'database'))
+                self.display_files('database')
             else:
-                self.display_files(os.path.join(os.getcwd(), 'database', instance.text.lower()))
+                self.display_files(os.path.join('database', instance.text.lower()))
         elif self.ids.content_label.text == 'Json_Database':
             if instance.text in ['blueprints', 'forms', 'pictures', 'completed_forms']:
                 if 'form' in instance.text:
@@ -52,12 +51,12 @@ class DebugContent(MDBoxLayout):
                     path = os.path.join('database', instance.text, f"{instance.text}.json")
             else:
                 path = os.path.join('database', f"{instance.text}.json")
-            self.model.phone.open_pdf(path, mime_type='application/json')
+            self.model.phone.open_pdf(self.model.get_directory(path), mime_type='application/json')
         else:
             print('exceptions')
 
     def display_files(self, directory):
-        for file in os.listdir(directory):
+        for file in os.listdir(self.model.get_directory(directory)):
             self.ids.debug_list.add_widget(OneLineListItem(text=file))
         self.ids.debug_list.add_widget(OneLineListItem(text='Back', on_release=self.display_content))
 

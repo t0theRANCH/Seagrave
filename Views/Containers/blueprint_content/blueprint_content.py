@@ -7,6 +7,9 @@ from kivymd.uix.dialog import MDDialog
 from kivymd.uix.list import TwoLineListItem, OneLineIconListItem, IconLeftWidget
 
 from typing import TYPE_CHECKING
+
+from api_requests import open_request
+
 if TYPE_CHECKING:
     from Controller.site_view_controller import SiteViewController
 
@@ -29,7 +32,7 @@ class BlueprintContent(MDBoxLayout):
     def view_blueprints(self, instance_item: TwoLineListItem):
         if blueprint_to_open := next(
             (
-                self.blueprint_data[b]['name']
+                self.blueprint_data[b]['file_name']
                 for b in self.blueprint_data
                 if self.blueprint_data[b]['type'] == instance_item.text
             ),
@@ -49,9 +52,7 @@ class BlueprintContent(MDBoxLayout):
         items = [OneLineIconListItem(IconLeftWidget(icon='warehouse'), text=self.blueprint_data[b]['type'],
                                      on_release=self.view_blueprints)
                  for b in self.blueprint_data]
-        self.popup = MDDialog(title='View Blueprints', items=items, type='simple')
-        self.popup.size_hint_x = 1
-        self.popup.open()
+        self.open_dialog('View Blueprints', items)
 
     def add_new_blueprints(self):
         if self.controller.main_controller.demo_mode:
@@ -59,7 +60,10 @@ class BlueprintContent(MDBoxLayout):
             return
         items = [OneLineIconListItem(IconLeftWidget(icon='warehouse'), text=b, on_release=self.open_file_picker)
                  for b in self.blueprint_types]
-        self.popup = MDDialog(title='Add New Blueprints', items=items, type='simple')
+        self.open_dialog('Add New Blueprints', items)
+
+    def open_dialog(self, title, items):
+        self.popup = MDDialog(title=title, items=items, type='simple')
         self.popup.size_hint_x = 1
         self.popup.open()
 

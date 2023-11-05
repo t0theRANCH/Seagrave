@@ -9,7 +9,7 @@ from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.button import MDFlatButton, MDRaisedButton
 from kivymd.uix.dialog import MDDialog
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Union
 
 from kivymd.uix.list import TwoLineAvatarIconListItem, OneLineIconListItem, IconLeftWidget
 from kivymd.uix.snackbar import Snackbar
@@ -17,13 +17,14 @@ from kivymd.uix.snackbar import Snackbar
 if TYPE_CHECKING:
     from Model.main_model import MainModel
     from Controller.form_view_controller import FormViewController
+    from Controller.site_view_controller import SiteViewController
     from kivymd.uix.selection.selection import SelectionItem
 
 
 class MultiSelectPopup(MDDialog):
     signatures = BooleanProperty(False)
 
-    def __init__(self, title, model: 'MainModel', controller: 'FormViewController', ind, db,
+    def __init__(self, title, model: 'MainModel', controller: Union['FormViewController', 'SiteViewController'], ind, db,
                  selections=None, selected=None, **kwargs):
         self.buttons = [MDFlatButton(text='Cancel', on_press=self.dismiss),
                         MDRaisedButton(text='Submit', on_press=self.submit_button)]
@@ -54,6 +55,8 @@ class MultiSelectPopup(MDDialog):
 
     def submit_button(self, obj):
         self.content_cls.submit_button()
+        if self.content_cls.punch_clock:
+            return
         for m in self.model.multi:
             if m.title == self.title and not self.content_cls.equipment:
                 m.add_button_text(self.selected)
@@ -86,10 +89,11 @@ class SegmentedControlRow(MDBoxLayout):
 class MultiSelectPopupContent(MDBoxLayout):
     popup = ObjectProperty(None)
 
-    def __init__(self, equipment=False, selections=None, field_ids=None, **kwargs):
+    def __init__(self, equipment=False, selections=None, field_ids=None, punch_clock=False, **kwargs):
         super().__init__(**kwargs)
         self.fields = None
         self.equipment = equipment
+        self.punch_clock = punch_clock
         if self.equipment:
             self.field_ids = field_ids
             self.selections = {} if selections is None else dict(selections)
@@ -103,6 +107,8 @@ class MultiSelectPopupContent(MDBoxLayout):
         self.hazard_popup = None
 
     def show_tutorial(self):
+        if self.punch_clock:
+            return
         add_new = self.ids.add_new
         if not self.popup.model.settings['Tutorials'] or not self.popup.model.settings['Tutorial']['multi_select_popup']:
             add_new.helper_text = ''
@@ -113,12 +119,17 @@ class MultiSelectPopupContent(MDBoxLayout):
 
     def on_popup(self, instance, value):
         if self.equipment:
-            self.ids.top_content.remove_widget(self.ids.add_new)
-            self.ids.top_content.remove_widget(self.ids.add_button)
+            self.remove_add_button()
             # self.ids.top_content.add_widget(CheckBoxRow(selection_list=self))
             segmented_control = SegmentedControlRow(selection_list=self)
             segmented_control.ids.segmented_control.ids.segment_panel.width = value.width * 0.45
             self.ids.top_content.add_widget(segmented_control)
+        if self.punch_clock:
+            self.remove_add_button()
+
+    def remove_add_button(self):
+        self.ids.top_content.remove_widget(self.ids.add_new)
+        self.ids.top_content.remove_widget(self.ids.add_button)
 
     def on_checkbox_active(self, *args):
         self.ids.selection_list.overlay_color = self.selection_colors[self.result]
@@ -296,11 +307,16 @@ class MultiSelectPopupContent(MDBoxLayout):
         widget.selections = options
 
     def submit_button(self):
-        self.popup.controller.main_controller.view.scrim_on()
-        self.popup.selections = self.selections
-        self.popup.controller.save_fields(popup=self.popup, number='multi', equipment=self.equipment)
-        self.popup.controller.main_controller.view.scrim_off()
+        self.popup.controller.main_controller.view.scrim_on(message='Submitting Field')
+        self.popup.controller.main_controller.view.async_task(self.submit_request)
         self.popup.dismiss()
+
+    def submit_request(self):
+        self.popup.selections = self.selections
+        if not self.popup:
+            self.popup.controller.save_fields(popup=self.popup, number='multi', equipment=self.equipment)
+        else:
+            self.popup.controller.punch_other(popup=self.popup)
 
 
 class SelectableListItem(TwoLineAvatarIconListItem):
@@ -313,7 +329,7 @@ class SelectableListItem(TwoLineAvatarIconListItem):
         self.id = ''
 
     def on_popup(self, instance, value):
-        if self.popup.model.is_undeletable(title=self.popup.title, text=self.text):
+        if self.popup.model.is_undeletable(title=self.popup.title, text=self.text) or self.popup.content_cls.punch_clock:
             self.undeletable = True
 
 

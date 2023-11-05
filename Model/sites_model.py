@@ -1,3 +1,4 @@
+from datetime import datetime
 from os import remove
 
 from api_requests import secure_request
@@ -44,15 +45,20 @@ class SitesModel:
         for key, value in new_entry.items():
             self.main_model.time_clock[key] = value
 
-    def punch_clock(self, current_datetime, current_day, action):
-        data = self.format_request(action, current_datetime, current_day)
-        response = secure_request(id_token=self.main_model.id_token, data=data, url=self.main_model.secure_api_url)
-        self.get_hours()
+    def punch_clock(self, current_datetime, current_day, action, user, sql_id):
+        if not user:
+            user = self.main_model.user['given_name']
+            sql_id = self.main_model.time_clock[current_day]['id']
 
-    def format_request(self, action, current_datetime, current_day):
+        data = self.format_request(action, current_datetime, current_day, user, sql_id)
+        response = secure_request(id_token=self.main_model.id_token, data=data, url=self.main_model.secure_api_url)
+        if not sql_id:
+            self.get_hours([user])
+
+    def format_request(self, action, current_datetime, current_day, user, sql_id):
         if action == 'in':
             d = {'function_name': 'sql_create',
-                 'cols': {'employee': self.main_model.user['given_name'],
+                 'cols': {'employee': user,
                           'clock_in': current_datetime,
                           'status': 'in'}
                  }
@@ -60,15 +66,39 @@ class SitesModel:
             d = {'function_name': 'sql_update',
                  'cols': {'clock_out': current_datetime,
                           'status': 'out',
-                          'employee': self.main_model.user['given_name'],
-                          'id': self.main_model.time_clock[current_day]['id']}
+                          'employee': user,
+                          'id': sql_id}
                  }
         return {
                    'AccessToken': self.main_model.access_token,
                    'database': 'time_clock',
                } | d
 
-    def get_hours(self):
-        data = {'function_name': 'get_hours', 'AccessToken': self.main_model.access_token}
+    def get_hours(self, users):
+        data = {'function_name': 'get_hours', 'AccessToken': self.main_model.access_token, 'users': users}
         time_card = secure_request(id_token=self.main_model.id_token, data=data, url=self.main_model.secure_api_url)
-        self.update_time_clock(new_entry=time_card)
+        if len(users) >= 2 or self.main_model.user['given_name'] not in users:
+            return time_card
+        if self.main_model.user['given_name'] in time_card:
+            if time_card := self.adjust_time_card(
+                time_card[self.main_model.user['given_name']]
+            ):
+                self.update_time_clock(new_entry=time_card)
+            else:
+                self.main_model.time_clock.clear()
+
+
+    @staticmethod
+    def adjust_time_card(time_card):
+        return {
+            datetime.strptime(day['clock_in'], '%Y-%m-%d %H:%M:%S').strftime(
+                '%A'
+            ): {
+                'clock_in': day['clock_in'],
+                'clock_out': day['clock_out'],
+                'id': day['id'],
+            }
+            for day in time_card
+        }
+
+

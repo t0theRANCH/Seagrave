@@ -10,3 +10,12 @@
         on_release: root.punch_clock()
     OneLineListItem:
         id: total_hours
+    OneLineListItem:
+        id: punch_in_other
+        on_release: root.punch_in_other()
+        text: "Punch In Another Employee"
+    OneLineListItem:
+        id: punch_out_other
+        on_release: root.punch_out_other()
+        text: "Punch Out Another Employee"
+

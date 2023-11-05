@@ -1,1 +1,25 @@
 <Scrim>:
+    BoxLayout:
+        orientation: 'vertical'
+        size_hint: None, None
+        width: self.minimum_width
+        height: self.minimum_height
+        pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+
+        Label:
+            text: root.message
+            size_hint_y: None
+            height: self.texture_size[1]
+            padding: [10,10]
+            halign: 'center'
+            valign: 'middle'
+
+        MDSpinner:
+            id: spinner
+            size_hint: None, None
+            size: "48dp", "48dp"
+            pos_hint: {'center_x': 0.5}
+            active: root.is_visible
+
+
+

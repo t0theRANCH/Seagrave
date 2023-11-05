@@ -1,13 +1,1 @@
-{
-  "2": {
-    "type": "Genie Telehandler",
-    "site_id": "3",
-    "pictures": [],
-    "forms": [],
-    "owned": 1,
-    "unit_num": 69,
-    "mileage": 9001,
-    "last_service": 8750,
-    "last_inspection": "2023-07-21"
-  }
-}
+{"2": {"type": "Genie Telehandler", "site_id": "3", "pictures": [], "forms": [], "owned": 1, "unit_num": 69, "mileage": 9001, "last_service": 8750, "last_inspection": "2023-07-21"}}

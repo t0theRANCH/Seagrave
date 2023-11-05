@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from kivy._event import EventDispatcher
 from kivy.properties import ObjectProperty, BooleanProperty
 from kivymd.uix.dialog import MDDialog
@@ -7,9 +9,12 @@ from Views.Screens.site_view.site_view import SiteView
 
 from typing import TYPE_CHECKING, Union
 
+from image_processing import RotatedImage
+
 if TYPE_CHECKING:
     from Controller.main_controller import MainController
     from Model.main_model import MainModel
+    from Views.Popups.multi_select_popup.multi_select_popup import MultiSelectPopup
 
 
 class SiteViewController(EventDispatcher):
@@ -73,10 +78,14 @@ class SiteViewController(EventDispatcher):
                                 if self.model.blueprints[x]['site_id'] == self.model.current_site}
 
     def set_banner_image(self):
-        if not self.model.sites.get('banner_image'):
-            header_image_path = self.model.get_directory('assets/default.jpg')
+        if not self.model.sites[self.model.current_site].get('banner_image'):
+            header_image_path = 'assets/default.jpg'
         else:
-            header_image_path = self.model.get_directory(self.model.pictures[self.model.sites['banner_image']]['file_name'])
+            header_image = self.model.get_directory(
+                self.model.pictures[self.model.sites[self.model.current_site]['banner_image']]['file_name'])
+            corrected_image = RotatedImage(header_image, self.model.writeable_folder, self.model.current_site)
+            corrected_image.rotate()
+            header_image_path = corrected_image.image_out_path
         self.view.ids.header_image.source = header_image_path
 
     def change_feed(self, title, deletable=False):
@@ -107,6 +116,66 @@ class SiteViewController(EventDispatcher):
             self.main_controller.demo_mode_prompt()
             return
         self.model.punch_clock(current_datetime=current_datetime, current_day=current_day, action=action)
+
+    def punch_other(self, popup: 'MultiSelectPopup'):
+        if self.demo_mode:
+            self.main_controller.demo_mode_prompt()
+            return
+        action = 'in' if popup.title == 'Punch In Other' else 'out'
+        ids = self.get_ids() if action == 'out' else {}
+        for employee in popup.selections:
+            if ids:
+                self.model.punch_clock(current_datetime=self.get_current_datetime(), current_day=self.get_current_day(),
+                                       action=action, user=employee, sql_id=ids[employee])
+            else:
+                self.model.punch_clock(current_datetime=self.get_current_datetime(), current_day=self.get_current_day(),
+                                       action=action, user=employee)
+
+    def get_time_cards(self):
+        time_cards = self.model.get_hours(users=self.model.forms['Safety Talk Report Form']['crew'])
+        todays_time_cards = {}
+        for employee, time_card in time_cards.items():
+            if todays_card := self.find_current_day_card(time_card):
+                todays_time_cards[employee] = todays_card
+        return todays_time_cards
+
+    def is_punched_in(self):
+        todays_time_cards = self.get_time_cards()
+        return [
+            employee
+            for employee, time_card in todays_time_cards.items()
+            if time_card['clock_in'] and not time_card['clock_out']
+        ]
+
+    def get_ids(self):
+        todays_time_cards = self.get_time_cards()
+        return {
+            employee: time_card['id']
+            for employee, time_card in todays_time_cards.items()
+        }
+
+    def find_current_day_card(self, time_card):
+        current_day = self.get_current_day()
+        for day in time_card:
+            date_obj = datetime.strptime(day['clock_in'], '%Y-%m-%d %H:%M:%S')
+            if current_day == date_obj.strftime('%A'):
+                return day
+
+    def is_punched_out(self):
+        punched_in = self.is_punched_in()
+        return [x for x in self.model.forms["Safety Talk Report Form"]['crew'] if x not in punched_in]
+
+    @staticmethod
+    def get_current_day():
+        return datetime.now().strftime('%A')
+
+    @staticmethod
+    def get_current_datetime():
+        return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    @staticmethod
+    def format_date(date):
+        return datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
 
     def get_directions(self, address, city):
         if phone := self.model.phone:
