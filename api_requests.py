@@ -44,7 +44,7 @@ def open_request(name, data, url=api_url, auth=None):
                           data=json.dumps(data), headers={'token': auth})
     else:
         r = requests.post(f"{url}/{stage}/{name}",
-                      data=json.dumps(data))
+                          data=json.dumps(data))
     return r.json()
 
 
@@ -74,7 +74,7 @@ def upload(path, local_path, id_token, url, access_token):
 @connection
 def upload_file(data, id_token, url, local_path):
     if not (
-        upload_url := secure_request(data=data, id_token=id_token, url=url)
+            upload_url := secure_request(data=data, id_token=id_token, url=url)
     ):
         return
     with (open(local_path, "rb") as f):

@@ -9,13 +9,15 @@ from kivymd.uix.button import MDFlatButton, MDRaisedButton
 from kivymd.uix.dialog import MDDialog
 
 from typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
     from Model.main_model import MainModel
     from Controller.form_view_controller import FormViewController
 
 
 class SignaturePopup(MDDialog):
-    def __init__(self, model: 'MainModel', controller: 'FormViewController', sign_type='sign', signature=None, **kwargs):
+    def __init__(self, model: 'MainModel', controller: 'FormViewController', sign_type='sign', signature=None,
+                 **kwargs):
         self.buttons = [MDFlatButton(text='Cancel', on_press=self.dismiss),
                         MDRaisedButton(text='Done', on_press=self.save_screenshot)]
         self.auto_dismiss = False
@@ -59,16 +61,15 @@ class SignatureField(StencilView):
     def save_screenshot(self):
         root = self.parent.parent.parent.parent
         file_prefix = f"{root.controller.form}_{root.model.form_view_fields[root.controller.separator]}"
-        full_path_prefix = root.model.get_directory(f"database/{file_prefix}")
+        full_path_prefix = root.model.get_directory(f"database/forms/{file_prefix}")
         if not self.signature_field:
-            self.export_to_png(f"{full_path_prefix}/{full_path_prefix}_screenshot.png")
+            self.export_to_png(f"{full_path_prefix}_screenshot.png")
             root.controller.fill_form(f"{file_prefix}_screenshot.png")
-
         else:
             self.export_to_png(f"{full_path_prefix}_{self.signature_field}_{root.sign_type}.png")
             root.filled = True
             root.controller.fill_signatures(signature=f"{file_prefix}_{self.signature_field}_{root.sign_type}.png",
-                                   name=self.signature_field, signature_field=True)
+                                            name=self.signature_field, signature_field=True)
         root.dismiss()
 
 

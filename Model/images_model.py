@@ -36,11 +36,18 @@ class ImagesModel:
 
     def download_pictures(self):
         site_id = self.main_model.current_site
-        dl_list = {x['file_name']: self.main_model.get_directory(f"database/pictures/{x['file_name'].split('/')[-1]}")
-                   for x in dict(self.main_model.pictures).values()
-                   if x['site_id'] == site_id}
-        download(url=self.main_model.secure_api_url, id_token=self.main_model.id_token,
-                 access_token=self.main_model.access_token, dl_list=dl_list)
+        if dl_list := {
+            x['file_name']: self.main_model.get_directory(
+                f"database/pictures/{x['file_name'].split('/')[-1]}"
+            )
+            for ind, x in dict(self.main_model.pictures).items()
+            if x['site_id'] == site_id
+            and ind not in listdir(self.main_model.get_directory('database/pictures'))
+        }:
+            download(url=self.main_model.secure_api_url, id_token=self.main_model.id_token,
+                     access_token=self.main_model.access_token, dl_list=dl_list)
+        else:
+            return
 
     def download_blueprints(self, file_name):
         if file_name in listdir(self.main_model.get_directory('database/blueprints')):

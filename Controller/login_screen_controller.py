@@ -64,6 +64,9 @@ class LoginScreenController(EventDispatcher):
         if function:
             self.main_controller.view.async_task(function)
 
+    def scrim_off(self):
+        self.main_controller.view.scrim_off()
+
     def enter_user_data(self, user: str, password: str):
         self.view.login_card.ids.email.text = user
         self.view.login_card.ids.password.text = password
@@ -148,10 +151,9 @@ class LoginScreenController(EventDispatcher):
             self.populate_main_screen()
             self.switch_to_main()
             return
-        self.scrim_on(message='Logging In', function=self.log_in_request)
-        self.populate_main_screen()
-        self.switch_to_main()
-        self.save_password_prompt()
+        self.scrim_on(message='Logging In')
+        self.log_in_request()
+        self.scrim_off()
 
     def log_in_request(self):
         if self.email_field_check() and self.password_field_check():
@@ -161,6 +163,9 @@ class LoginScreenController(EventDispatcher):
             r = open_request(name='authenticate', data={"email": u.capitalize(), "password": s})
             if 'AuthenticationResult' in r:
                 self.authentication(r)
+                self.populate_main_screen()
+                self.switch_to_main()
+                self.save_password_prompt()
         else:
             self.view.current_card.ids.password.helper_text = 'Password must have at lease one uppercase, number, and symbol, ' \
                                                               'and be over 7 characters'
@@ -178,10 +183,9 @@ class LoginScreenController(EventDispatcher):
             self.display_error_snackbar('Error logging in, please try again')
             return
         self.model.get_hours()
-        self.model.clear_pictures()
+        """self.model.clear_pictures()
         self.model.clear_blueprints()
-        self.model.clear_forms()
-
+        self.model.clear_forms()"""
 
     def clear_errors(self):
         self.view.login_card.ids.email.helper_text = ''
@@ -239,8 +243,12 @@ class LoginScreenController(EventDispatcher):
 
     def populate_main_screen(self):
         user = self.model.user
-        if user['given_name'] not in ['max', 'Max', 'tyson', 'Tyson', 'justin', 'Justin']:
-            self.main_controller.site_view_controller.remove_delete_button()
+        if user['given_name'] not in self.model.management + self.model.admin:
+            self.main_controller.remove_nav_button('danger_zone')
+        else:
+            self.main_controller.site_view_controller.view_hours = True
+        if user['given_name'] not in self.model.admin:
+            self.main_controller.remove_nav_button('debug')
         self.main_controller.main_screen_controller.input_data_into_view()
         self.main_controller.input_data_into_nav_drawer()
 

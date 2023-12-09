@@ -59,48 +59,49 @@ class FLHA(Form):
                  ('VALIGN', (0, 0), (-1, 0), 'MIDDLE')]
         self.table(titles + chart, style=style)
 
+    def yes_or_no(self, arg0, arg1):
+        check = self.yes_no(self.fields.get(arg0, ''))
+        table = [[arg1, "Yes", check[0], "No", check[1]]]
+        self.table(table, cols='yes/no', grid_format='box', spacer=False)
+
     def ppe_inspected(self):
         items = ''
         if self.fields.get('items_inspected', ''):
             items = ", ".join(self.fields.get('items_inspected', ''))
-        ppe_inspected_check = self.yes_no(self.fields.get('ppe_inspected', ''))
-        ppe = [["PPE Inspected: ", "Yes", ppe_inspected_check[0], "No", ppe_inspected_check[1]]]
-        self.table(ppe, cols='yes/no', grid_format='box', spacer=False)
+        self.yes_or_no('ppe_inspected', "PPE Inspected: ")
         self.table([["Items Inspected:", f"{items}"]], grid_format='box')
 
     def tool_inspection(self):
-        tools_inspected = self.yes_no(self.fields.get('tools_inspected', ''))
-        table = [["Has a pre-use inspection of tools/equipment been completed?",
-                  "Yes", tools_inspected[0], "No", tools_inspected[1]]]
-        self.table(table, cols='yes/no', grid_format='box', spacer=False)
+        self.yes_or_no(
+            'tools_inspected',
+            "Has a pre-use inspection of tools/equipment been completed?",
+        )
 
     def warning_ribbon(self):
-        warning_ribbon = self.yes_no(self.fields.get('warning_ribbon', ''))
-        table = [["Warning ribbon needed?", "Yes", warning_ribbon[0], "No", warning_ribbon[1]]]
-        self.table(table, cols='yes/no', grid_format='box', spacer=False)
+        self.yes_or_no(
+            'warning_ribbon', "Warning ribbon needed?"
+        )
 
     def working_alone(self):
-        alone = self.yes_no(self.fields.get('working_alone', ''))
-        table = [
-            ["Is the worker working alone?", "Yes", alone[0], "No", alone[1]]]
-        self.table(table, cols='yes/no', grid_format='box', spacer=False)
+        self.yes_or_no(
+            'working_alone', "Is the worker working alone?"
+        )
         self.table([[f"If yes, explain: {self.fields.get('explanation', '')}"]], grid_format='box')
 
     def permits(self):
-        permits = self.yes_no(self.fields.get('permit_closed', ''))
-        table = [["Are all Permit(s) closed out?", "Yes", permits[0], "No", permits[1]]]
-        self.table(table, cols='yes/no', grid_format='box', spacer=False)
+        self.yes_or_no(
+            'permit_closed', "Are all Permit(s) closed out?"
+        )
 
     def area_cleaned(self):
-        area = self.yes_no(self.fields.get('area_cleaned', ''))
-        table = [["Was the area cleaned up at end of job/shift?", "Yes", area[0], "No", area[1]]]
-        self.table(table, cols='yes/no', grid_format='box', spacer=False)
+        self.yes_or_no(
+            'area_cleaned', "Was the area cleaned up at end of job/shift?"
+        )
 
     def hazards_remaining(self):
-        hazards_remaining = self.yes_no(self.fields.get('hazards_remaining', ''))
-        table = [["Are there Hazards remaining?",
-                  "Yes", hazards_remaining[0], "No", hazards_remaining[1]]]
-        self.table(table, cols='yes/no', grid_format='box', spacer=False)
+        self.yes_or_no(
+            'hazards_remaining', "Are there Hazards remaining?"
+        )
         self.table([["(If Yes, explain):", self.fields.get('hazard_explanation', '')]], grid_format='box')
 
     def injuries(self):
@@ -112,8 +113,9 @@ class FLHA(Form):
     def workers(self):
         titles = [["Worker's Name", "Signature", "Initial"]]
         crew = self.fields.get('workers', '')
-        signatures = [self.image(f"{self.forms_path}/{self.fields['signatures'].get(x, '')}", self.inch(2), self.inch(0.5))
-                      for x in self.fields.get('workers', '')]
+        signatures = [
+            self.image(f"{self.forms_path}/{self.fields['signatures'].get(x, '')}", self.inch(2), self.inch(0.5))
+            for x in self.fields.get('workers', '')]
         initial = [self.image(f"{self.forms_path}/{self.fields['initials'].get(x, '')}", self.inch(0.5), self.inch(0.5))
                    for x in self.fields.get('workers', '')]
         if not crew:

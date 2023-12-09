@@ -95,7 +95,7 @@ class TextFieldPopupContent(MDBoxLayout):
         self.popup = popup
         self.pre_select = [{"text": f"{p}", "viewclass": "ListItem", "height": dp(56), 'popup_content': self,
                             "on_release": lambda x=f"{p}": self.call_back(x)} for p in pre_select]
-        self.menu = MDDropdownMenu(items=self.pre_select, caller=self.ids.dropdown.arrow, width_mult=6)
+        self.menu = MDDropdownMenu(items=self.pre_select, caller=self.ids.dropdown.arrow, width_mult=6, hor_growth='right')
         self.ids.dropdown.menu = self.menu
         self.tap_target_view = None
 

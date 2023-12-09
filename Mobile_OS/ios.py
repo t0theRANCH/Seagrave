@@ -76,7 +76,11 @@ class IOS(EventDispatcher):
         if result := self.KeychainBridge.retrieveWithService_account_(
                 objc_str(service), objc_str(account)
         ):
-            return result.UTF8String()
+            result = result.UTF8String()
+            # for some reason, the ios-sim returns a bytes object, but the actual phone returns a str object that you can't use isinstance on
+            if 'bytes' in str(type(result)):
+                result = result.decode('utf-8')
+            return result
         return ''
 
     def delete_from_keychain(self, service, account):
@@ -176,7 +180,7 @@ class IOS(EventDispatcher):
         shutil.copy(self.selected_file,
                     self.main_controller.model.get_directory(
                         f"database/{image_type}/{self.selected_file_name}"))
-                        
+
     def access_scoped_resource(self):
         if self.selected_file_name in listdir(self.main_controller.model.get_directory('database/blueprints')):
             # This should only be temporary until I implement a popup to ask if they want to overwrite the file
@@ -205,5 +209,3 @@ class IOS(EventDispatcher):
         # 4. Stop accessing the security-scoped resource
         source_url.stopAccessingSecurityScopedResource()
         self.selected_file_name = None
-
-    

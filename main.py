@@ -78,13 +78,13 @@ class Hnnnng(MDApp):
         for file in self.model.settings['To Be Deleted']:
             remove(file)
         settings['To Be Deleted'] = []
-        for category in settings['To Be Uploaded']:
+        """for category in settings['To Be Uploaded']:
             for file in settings['To Be Uploaded'][category]:
                 upload(path=file['upload_path'], local_path=file['device_path'], id_token=self.model.id_token,
                        url=self.model.secure_api_url,
                        access_token=self.model.access_token)
                 settings['To Be Uploaded'][category].remove(
-                    {'device_path': file['device_path'], 'upload_path': file['upload_path']})
+                    {'device_path': file['device_path'], 'upload_path': file['upload_path']})"""
         settings['cleanup'] = True
 
         self.model.save_db_file('settings', settings)

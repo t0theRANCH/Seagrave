@@ -22,7 +22,7 @@ class PictureViewController(EventDispatcher):
         self.model = model
         self.view = PictureView(name='picture_view', controller=self, model=self.model)
         self.speed_dial_data = {"Set as Banner Image": ["image-edit", "on_release", self.set_as_banner_image],
-                                "Add a note": ["note-plus", "on_release", self.add_note],
+                                #"Add a note": ["note-plus", "on_release", self.add_note],
                                 "Back": ["arrow-left-circle", "on_release", self.go_back]
                                 }
         self.picture_id = None
@@ -33,6 +33,7 @@ class PictureViewController(EventDispatcher):
     def switch_screen(self, tag, picture_id):
         self.view.ids.hero_to.tag = tag
         self.view.picture_id = picture_id
+        self.picture_id = picture_id
         self.main_controller.change_screen("picture_view", slide=True)
 
     def on_orientation(self):
@@ -71,5 +72,6 @@ class PictureViewController(EventDispatcher):
 
     def go_back(self, obj):
         self.close_speed_dial()
+        self.picture_id = None
         self.main_controller.screen_manager.current_heroes = [self.view.ids.hero_to.tag]
         self.main_controller.change_screen('picture_list_view', slide=True)

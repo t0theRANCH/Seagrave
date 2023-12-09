@@ -29,10 +29,10 @@ class PictureListView(MDScreen):
 
     def populate_grid(self):
         picture_view_controller = self.controller.main_controller.picture_view_controller
+        self.model.download_pictures()
         for k, v in self.pictures.items():
             path_folders = v['file_name'].split('/')
             path = self.controller.model.get_directory(f"{path_folders[0]}/{path_folders[-2]}/{path_folders[-1]}")
-            self.model.download_pictures()
             tile = PictureButtonContainer(source=path, tag=v['file_name'].split('/')[-1], picture_id=k,
                                           controller=picture_view_controller)
             self.ids.container.add_widget(tile)

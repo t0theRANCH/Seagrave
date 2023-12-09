@@ -31,18 +31,13 @@ class FormView(MDScreen):
         self.speed_dial_with_save_button = {
             "Back": ["arrow-left-circle", "on_release", self.controller.remove_widgets],
             "Save": ["content-save", "on_release", self.controller.save_form],
-            "Submit": ["send-check", "on_release", self.submit_form]
+            "Submit": ["send-check", "on_release", self.controller.submit_form]
         }
         self.speed_dial_without_save_button = {
             "Back": ["arrow-left-circle", "on_release", self.controller.remove_widgets],
-            "Submit": ["send-check", "on_release", self.submit_form]
+            "Submit": ["send-check", "on_release", self.controller.submit_form]
         }
         self.add_save_button()
-
-    def submit_form(self):
-        root_screen = self.controller.main_controller.view
-        root_screen.scrim_on(message='Submitting Form')
-        root_screen.async_task(self.controller.submit_form)
 
     def tap_target(self):
         speed_dial = None
@@ -172,6 +167,9 @@ class FormView(MDScreen):
         if selection in self.model.form_view_fields[sign_key]:
             sig.select()
         self.ids.formview.add_widget(sig)
+
+    def submit_form(self):
+        self.controller.submit_form()
 
     def open_error_popup(self):
         popup = ErrorPopup(empty_fields=self.controller.pops)

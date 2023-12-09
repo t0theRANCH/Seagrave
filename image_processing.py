@@ -22,6 +22,7 @@ class RotatedImage:
 
     def rotate(self):
         if not self.orientation or self.orientation == 1:
+            self.image_out_path = self.image_path
             return False
         for func in self.orientation_rotation_mapping[str(self.orientation)]:
             self.image_in_array = func(self.image_in_array)

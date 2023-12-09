@@ -34,6 +34,7 @@ if TYPE_CHECKING:
 class MainModel(EventDispatcher):
     phone: Union['Android', 'IOS', 'PC'] = ObjectProperty()
     form_view_fields: dict = DictProperty({})
+    time_card: dict = DictProperty({})
     current_site_id: str = StringProperty()
     current_site: str = StringProperty()
     primary_color: tuple = ()
@@ -42,6 +43,7 @@ class MainModel(EventDispatcher):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.writeable_folder = ''
+        self.demo_mode = self.settings['Demo Mode']
         self.database_folder = 'demo_database' if self.demo_mode else 'database'
         self.get_ios_writeable_folder()
         self.forms_model = FormsModel(main_model=self)
@@ -50,7 +52,6 @@ class MainModel(EventDispatcher):
         self.equipment_model = EquipmentModel(main_model=self)
         self.login_model = LoginModel(main_model=self)
         self.single, self.multi, self.checkbox, self.risk, self.signature, self.labels, self.pops = [], [], [], [], [], [], []
-        self.demo_mode = self.settings['Demo Mode']
 
     def on_demo_mode(self, instance, value):
         self.database_folder = 'demo_database' if value else join(self.writeable_folder, 'database')
@@ -405,7 +406,7 @@ class MainModel(EventDispatcher):
     @property
     def form_rows(self):
         return [{"text": str(self.forms[f]['name']), "id": str(f).lower().replace(' ', '_'), "type": 'forms'}
-                for f in self.forms if str(self.forms[f]['name']) not in ["Add Site", "Add Equipment"]]
+                for f in self.forms if str(self.forms[f]['name']) not in ["Add Site", "Add Equipment", "Time Card"]]
 
     @property
     def today_rows(self):
@@ -428,7 +429,7 @@ class MainModel(EventDispatcher):
 
     @property
     def forms(self):
-        return JsonStore(self.get_directory(f'{self.database_folder}/forms.json'))
+        return JsonStore(self.get_directory(f'{self.database_folder}/forms/forms.json'))
 
     @property
     def pictures(self):
@@ -465,3 +466,11 @@ class MainModel(EventDispatcher):
     @property
     def file_cache(self):
         return JsonStore(self.get_directory('database/file_cache.json'))
+
+    @property
+    def management(self):
+        return ['Justin', 'Max']
+
+    @property
+    def admin(self):
+        return ['Tyson']

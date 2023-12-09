@@ -60,7 +60,7 @@ class FormViewController(EventDispatcher):
             if widget.id not in self.model.form_view_fields:
                 self.model.form_view_fields[widget.id] = ''
             self.view.ids.formview.add_widget(widget)
-            if widget.divide:
+            if 'Label' not in str(type(widget)) and widget.divide:
                 self.separator = str(widget.id)
         self.form = title
         self.model.form_view_fields['date'] = str(datetime.now().strftime("%d/%m/%Y"))
@@ -278,6 +278,10 @@ class FormViewController(EventDispatcher):
 
     def submit_form(self, *args):
         self.close_speed_dial()
+        if self.form == 'Time Card':
+            self.view.type = 'forms'
+            self.fill_form(signature=None)
+            return
         done = self.parse_field_check_response(submit=True)
         if not done:
             return
@@ -323,13 +327,15 @@ class FormViewController(EventDispatcher):
 
     def fill_form(self, signature):
         if self.view.type == 'forms':
-            self.model.process_form(signature, separator=self.separator, form=self.form)
+            self.main_controller.view.scrim_on("Submitting Form")
+            self.main_controller.view.async_task(self.model.process_form, signature=signature, separator=self.separator,
+                                                 form=self.form)
         else:
             if self.demo_mode:
                 self.main_controller.demo_mode_prompt()
-                self.main_controller.view.scrim_off()
                 return
-            self.model.process_db_request(form_type=self.view.type)
+            self.main_controller.view.scrim_on("Adding Item to Database")
+            self.main_controller.view.async_task(self.model.process_db_request, form_type=self.view.type)
         self.remove_widgets()
 
     def remove_widgets(self, *args):

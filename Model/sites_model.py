@@ -48,11 +48,12 @@ class SitesModel:
     def punch_clock(self, current_datetime, current_day, action, user, sql_id):
         if not user:
             user = self.main_model.user['given_name']
-            sql_id = self.main_model.time_clock[current_day]['id']
+            if current_day in self.main_model.time_clock:
+                sql_id = self.main_model.time_clock[current_day]['id']
 
         data = self.format_request(action, current_datetime, current_day, user, sql_id)
         response = secure_request(id_token=self.main_model.id_token, data=data, url=self.main_model.secure_api_url)
-        if not sql_id:
+        if user == self.main_model.user['given_name']:
             self.get_hours([user])
 
     def format_request(self, action, current_datetime, current_day, user, sql_id):
@@ -60,7 +61,9 @@ class SitesModel:
             d = {'function_name': 'sql_create',
                  'cols': {'employee': user,
                           'clock_in': current_datetime,
-                          'status': 'in'}
+                          'status': 'in',
+                          'location': int(self.main_model.current_site)
+                          }
                  }
         else:
             d = {'function_name': 'sql_update',
@@ -86,7 +89,6 @@ class SitesModel:
                 self.update_time_clock(new_entry=time_card)
             else:
                 self.main_model.time_clock.clear()
-
 
     @staticmethod
     def adjust_time_card(time_card):

@@ -22,6 +22,11 @@ class TimeClockContent(MDBoxLayout):
         self.total_hours = self.get_total_hours()
         self.set_punch_button_text()
         self.set_total_hours_text()
+        self.remove_view_all_time_cards_button()
+
+    def remove_view_all_time_cards_button(self):
+        if not self.controller.view_hours:
+            self.remove_widget(self.ids.view_all_time_cards)
 
     def scrim_on(self, message='', function=None):
         self.controller.main_controller.view.scrim_on(message=message)
@@ -67,6 +72,8 @@ class TimeClockContent(MDBoxLayout):
                                     )
         self.set_status()
         self.set_punch_button_text()
+        self.get_total_hours()
+        self.set_total_hours_text()
 
     def punch_in_other(self):
         dialog = MultiSelectPopup(title='Punch In Other', model=self.controller.model, controller=self.controller,
@@ -82,5 +89,7 @@ class TimeClockContent(MDBoxLayout):
                                                                                      field_ids=None))
         dialog.open()
 
+    def view_all_time_cards(self):
+        self.controller.view_all_time_cards()
 
 Builder.load_file(join(dirname(__file__), "time_clock_content.kv"))

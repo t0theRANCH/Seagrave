@@ -313,7 +313,7 @@ class MultiSelectPopupContent(MDBoxLayout):
 
     def submit_request(self):
         self.popup.selections = self.selections
-        if not self.popup:
+        if not self.punch_clock:
             self.popup.controller.save_fields(popup=self.popup, number='multi', equipment=self.equipment)
         else:
             self.popup.controller.punch_other(popup=self.popup)

@@ -78,6 +78,12 @@ class MainController(EventDispatcher):
         self.nav_drawer.input_employee_name(f"{user['given_name']} {user['family_name']}")
         self.nav_drawer.input_employee_email(user['email'])
 
+    def remove_nav_button(self, button):
+        buttons = {'danger_zone': self.nav_drawer.ids.danger_zone,
+                   'debug': self.nav_drawer.ids.debug}
+        nav = self.view.ids.nav
+        nav.ids.menu_items.remove_widget(buttons.get(button))
+
     def equipment_service_popup(self, equipment_id):
         return self.model.get_single_equipment_data(equipment_id)
 

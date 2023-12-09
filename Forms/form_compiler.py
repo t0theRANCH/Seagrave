@@ -1,9 +1,12 @@
+from kivymd.uix.label import MDLabel
+
 from Forms.form_fields.form_widgets import (
     SingleOption,
     MultiOptionButton,
     CheckBoxOption,
     SingleOptionButton,
     SingleOptionDatePicker,
+    Label
 )
 
 from datetime import datetime
@@ -31,12 +34,13 @@ class CreateForm:
 
     def populate_form_list(self):
         return [self.add_site, self.add_equipment,
-                self.safety_talk_report_form, self.equipment_pre_start_checklist, self.field_level_hazard_assessment]
+                self.safety_talk_report_form, self.equipment_pre_start_checklist, self.field_level_hazard_assessment,
+                self.time_card]
 
     def is_today_form(self):
         if self.form_id in self.model.today['forms']:
             return self.form_id, self.model.today['forms'][self.form_id]['name'], \
-                   self.model.today['forms'][self.form_id]['name'].lower().replace(' ', '_')
+                self.model.today['forms'][self.form_id]['name'].lower().replace(' ', '_')
         else:
             return False, self.form_titles[self.form_ids.index(self.form_id)], self.form_id
 
@@ -83,6 +87,62 @@ class CreateForm:
         self.controller.view.type = 'equipment'
         self.remove_save_button()
         return [name, site, unit_num, mileage, last_service, last_inspection, owned]
+
+    def time_card(self):
+        self.controller.view.type = 'forms'
+        self.remove_save_button()
+        widgets = []
+        for employee, time_cards in self.model.time_card.items():
+            widgets.append(Label(text=employee, font_style='H6', halign='center'))
+            self.model.form_view_fields[f'{employee}_hours'] = {}
+            for time_card in time_cards:
+                hours_ = datetime.strptime(time_card['clock_out'], '%Y-%m-%d %H:%M:%S') - datetime.strptime(
+                    time_card['clock_in'], '%Y-%m-%d %H:%M:%S')
+                day = datetime.strptime(time_card['clock_in'], '%Y-%m-%d %H:%M:%S').strftime('%A')
+                hours_to_add = hours_.total_seconds() / 3600
+                widgets.append(MDLabel(text=f"{day} - {int(hours_to_add)} hours"))
+                self.model.form_view_fields[f'{employee}_hours'][day] = [time_card['clock_in'], time_card['clock_out']]
+                if location := time_card.get('location', ''):
+                    entry = self.model.sites[str(location)]
+                    self.model.form_view_fields[f'{employee}_{day}_location'] = f"{entry['customer']} - {entry['city']}"
+            widgets.extend(
+                (
+                    SingleOption(
+                        ind=f'travel_time_{employee}',
+                        title='Travel Time',
+                        mandatory=False,
+                        pre_select=self.model.forms[self.form_title][
+                            'travel_time'
+                        ],
+                        db=[f"{self.form_title}", "travel_time"],
+                        controller=self.controller,
+                        model=self.model
+                    ),
+                    SingleOption(
+                        ind=f'food_allowance_{employee}',
+                        title='Food Allowance',
+                        mandatory=False,
+                        pre_select=self.model.forms[self.form_title][
+                            'food_allowance'
+                        ],
+                        db=[f"{self.form_title}", "food_allowance"],
+                        controller=self.controller,
+                        model=self.model
+                    ),
+                    SingleOption(
+                        ind=f'vacation_pay_{employee}',
+                        title='Vacation Pay',
+                        mandatory=False,
+                        pre_select=self.model.forms[self.form_title][
+                            'vacation_pay'
+                        ],
+                        db=[f"{self.form_title}", "vacation_pay"],
+                        controller=self.controller,
+                        model=self.model
+                    ),
+                )
+            )
+        return widgets
 
     def remove_save_button(self):
         self.controller.view.remove_save_button()
@@ -158,14 +218,16 @@ class CreateForm:
                                                 selection_db=self.model.forms[self.form_title]["Driver's Compartment"],
                                                 controller=self.controller, model=self.model)
         body_exterior = MultiOptionButton(text="Body Exterior", ind='body_exterior', title="Body Exterior",
-                                          selection_db=self.model.forms[self.form_title]["Body Exterior"], equipment=True,
+                                          selection_db=self.model.forms[self.form_title]["Body Exterior"],
+                                          equipment=True,
                                           controller=self.controller, model=self.model)
         under_the_hood = MultiOptionButton(text="Under The Hood", ind='under_the_hood', title="Under The Hood",
                                            selection_db=self.model.forms[self.form_title]["Under The Hood"],
                                            equipment=True,
                                            controller=self.controller, model=self.model)
         undercarriage = MultiOptionButton(text="Undercarriage", ind='undercarriage', title="Undercarriage",
-                                          equipment=True, selection_db=self.model.forms[self.form_title]["Undercarriage"],
+                                          equipment=True,
+                                          selection_db=self.model.forms[self.form_title]["Undercarriage"],
                                           controller=self.controller, model=self.model)
         brake_tires_wheels = MultiOptionButton(text="Brake, Tires & Wheels", ind='brake_tires_wheels', equipment=True,
                                                title="Brake, Tires & Wheels",

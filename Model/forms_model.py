@@ -8,6 +8,7 @@ from kivymd.uix.snackbar import MDSnackbar
 from Forms.safety_talk import SafetyTalk
 from Forms.equipment_checklist import EquipmentChecklist
 from Forms.flha import FLHA
+from Forms.time_card import TimeCard
 from api_requests import secure_request, download, upload
 
 from typing import TYPE_CHECKING, Union
@@ -23,7 +24,7 @@ class FormsModel:
     def __init__(self, main_model: 'MainModel'):
         self.main_model = main_model
         forms = [x for x in self.main_model.forms if x not in ['Add Site', 'Add Equipment']]
-        form_classes = [SafetyTalk, EquipmentChecklist, FLHA]
+        form_classes = [SafetyTalk, EquipmentChecklist, FLHA, TimeCard]
         self.forms = {x[0]: x[1] for x in zip(forms, form_classes)}
 
     def get_site_id(self, location):
@@ -270,7 +271,8 @@ class FormsModel:
         form_instance.separator = self.main_model.form_view_fields[separator]
         form_instance.fields = self.main_model.form_view_fields
         form_instance.forms_path = self.main_model.get_directory("database/forms")
-        form_instance.signature_path = self.main_model.get_directory(f"database/forms/{signature}")
+        if signature:
+            form_instance.signature_path = self.main_model.get_directory(f"database/forms/{signature}")
         form_instance.make_file()
         form_instance.print()
         try:
@@ -294,8 +296,12 @@ class FormsModel:
                 self.remove_from_device(demo_mode=self.main_model.demo_mode)
 
     def upload_form(self, form_instance, form, separator):
+        if form == 'Time Card':
+            upload_path = f"database/time_cards/{form_instance.file_name}.pdf"
+            return
+        else:
+            upload_path = f"database/{self.main_model.current_site_id}/forms/{form_instance.file_name}.pdf"
         local_path = self.main_model.get_directory(f"database/forms/{form_instance.file_name}.pdf")
-        upload_path = f"database/{self.main_model.current_site_id}/forms/{form_instance.file_name}.pdf"
         to_be_uploaded = self.main_model.settings['To Be Uploaded']
         to_be_uploaded['forms'].append({'device_path': local_path,
                                         'upload_path': upload_path})

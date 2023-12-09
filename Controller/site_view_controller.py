@@ -1,4 +1,5 @@
 from datetime import datetime
+from os import listdir
 
 from kivy._event import EventDispatcher
 from kivy.properties import ObjectProperty, BooleanProperty
@@ -6,6 +7,7 @@ from kivymd.uix.dialog import MDDialog
 from kivymd.uix.list import OneLineIconListItem, IconLeftWidget
 
 from Views.Screens.site_view.site_view import SiteView
+from Views.Popups.view_time_cards.view_time_cards import ViewTimeCards, ViewTimeCardsContent
 
 from typing import TYPE_CHECKING, Union
 
@@ -26,9 +28,7 @@ class SiteViewController(EventDispatcher):
         self.model = model
         self.view = SiteView(name='site_view', controller=self, model=self.model)
         self.popup: Union[MDDialog, None] = None
-
-    def remove_delete_button(self):
-        self.view.ids.rail.remove_widget(self.view.ids.delet)
+        self.view_hours = False
 
     def switch_to_site_view(self, site_id):
         self.model.current_site = site_id
@@ -81,8 +81,12 @@ class SiteViewController(EventDispatcher):
         if not self.model.sites[self.model.current_site].get('banner_image'):
             header_image_path = 'assets/default.jpg'
         else:
-            header_image = self.model.get_directory(
-                self.model.pictures[self.model.sites[self.model.current_site]['banner_image']]['file_name'])
+            folders = self.model.pictures[self.model.sites[self.model.current_site]['banner_image']]['file_name'].split('/')
+            folder = f"{folders[0]}/{folders[-2]}/"
+            file_name = folders[-1]
+            if file_name not in listdir(self.model.get_directory(folder)):
+                self.model.download_pictures()
+            header_image = self.model.get_directory(f"{folder}{file_name}")
             corrected_image = RotatedImage(header_image, self.model.writeable_folder, self.model.current_site)
             corrected_image.rotate()
             header_image_path = corrected_image.image_out_path
@@ -138,6 +142,20 @@ class SiteViewController(EventDispatcher):
             if todays_card := self.find_current_day_card(time_card):
                 todays_time_cards[employee] = todays_card
         return todays_time_cards
+
+    def view_all_time_cards(self):
+        #time_cards = self.model.get_hours(users=self.model.forms['Safety Talk Report Form']['crew'])
+        from utils.generate_punch_clock_data import generate
+        time_cards = generate()
+        self.popup = ViewTimeCards(title='Time Cards', model=self.model, controller=self,
+                                   content_cls=ViewTimeCardsContent(time_cards=time_cards))
+        self.popup.open()
+        self.popup.content_cls.show_employee(0)
+
+    def refresh_time_cards(self):
+        self.popup.dismiss()
+        self.popup = None
+        self.view_all_time_cards()
 
     def is_punched_in(self):
         todays_time_cards = self.get_time_cards()

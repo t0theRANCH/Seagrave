@@ -8,7 +8,7 @@ from reportlab.lib.enums import TA_CENTER, TA_LEFT
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import inch
-from reportlab.platypus import SimpleDocTemplate, Paragraph, TableStyle, Table, Spacer, Image
+from reportlab.platypus import SimpleDocTemplate, Paragraph, TableStyle, Table, Spacer, Image, PageBreak
 
 from Forms.interactivecheckbox import InteractiveCheckBox
 from Forms.header import Header
@@ -44,9 +44,12 @@ class Form(ABC):
         canvas.saveState()
         canvas.restoreState()
 
-    def make_file(self):
-        self.file_name = f"{self.name.lower().replace(' ', '_').replace('/', '_')}_{self.fields.get('location', '')}_" \
+    def make_file(self, file_name=None):
+        if not file_name:
+            self.file_name = f"{self.name.lower().replace(' ', '_').replace('/', '_')}_{self.fields.get('location', '')}_" \
                          f"{self.date_time.replace(' ', '-').replace(':', '_')}_{self.separator}"
+        else:
+            self.file_name = file_name
         self.pdf = SimpleDocTemplate(join(self.forms_path, f"{self.file_name}.pdf"), pagesize=letter)
         self.width = letter[0] - self.pdf.leftMargin * 2
 
@@ -60,6 +63,9 @@ class Form(ABC):
         heading = Paragraph(text, self.heading_style)
         self.flowables.append(heading)
         self.flowables.append(Spacer(1, 12))
+
+    def new_page(self):
+        self.flowables.append(PageBreak())
 
     def table(self, data, grid_format='grid', cols=None, spacer=True, style=None):
         inner_lines = {'grid': ('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
@@ -132,6 +138,9 @@ class Form(ABC):
     def level_lists(list_to_level_1, list_to_level_2):
         list_to_level_1 = list(list_to_level_1)
         list_to_level_2 = list(list_to_level_2)
+        for list_to_level in [list_to_level_1, list_to_level_2]:
+            if not list_to_level:
+                list_to_level.append('')
         if difference := abs(len(list_to_level_1) - len(list_to_level_2)):
             min(list_to_level_1, list_to_level_2, key=len).extend([''] * difference)
         return list_to_level_1, list_to_level_2
@@ -152,7 +161,8 @@ class Form(ABC):
 
     def remove_file(self):
         #remove(join(self.forms_path, f"{self.file_name}.pdf"))
-        remove(self.signature_path)
+        if self.signature_path:
+            remove(self.signature_path)
         for signature in self.fields.get('signatures', ''):
             remove(join(self.forms_path, f"{self.fields['signatures'].get(signature, '')}"))
 

@@ -4,6 +4,7 @@ from kivy.lang import Builder
 from kivy.properties import ObjectProperty, StringProperty, BooleanProperty, ListProperty, DictProperty
 from kivy.metrics import dp
 from kivy.uix.gridlayout import GridLayout
+from kivymd.uix.label import MDLabel
 from kivymd.uix.list import BaseListItem
 from kivymd.uix.menu import MDDropdownMenu
 from kivymd.uix.pickers import MDTimePicker, MDDatePicker
@@ -19,6 +20,16 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from Views.Screens.form_view.form_view import FormView
+
+
+class Label(MDLabel):
+    ind: str = StringProperty()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.height = dp(256)
+        self.mandatory = False
+        self.filled = True
 
 
 class SingleOption(FormWidget):
